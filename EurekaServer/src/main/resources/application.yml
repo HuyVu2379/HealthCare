@@ -1,0 +1,9 @@
+server:
+  port: 8761  # Chạy trên cổng 8761
+
+eureka:
+  client:
+    register-with-eureka: false  # Eureka Server không tự đăng ký chính nó
+    fetch-registry: false        # Không lấy danh sách service vì nó là server
+  server:
+    wait-time-in-ms-when-sync-empty: 0
