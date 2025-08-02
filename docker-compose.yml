@@ -1,5 +1,5 @@
 version: '3.8'
-
+name: healthcare-microservices
 services:
   # Service Registry (Eureka)
   eureka-server:
@@ -42,7 +42,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - user-service-data:/var/lib/postgresql/data
     networks:
@@ -61,7 +61,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
-      - "5433:5432"
+      - "5434:5432"
     volumes:
       - health-record-service-data:/var/lib/postgresql/data
     networks:
@@ -80,7 +80,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
-      - "5434:5432"
+      - "5435:5432"
     volumes:
       - notification-service-data:/var/lib/postgresql/data
     networks:
@@ -99,7 +99,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
-      - "5435:5432"
+      - "5436:5432"
     volumes:
       - scheduling-service-data:/var/lib/postgresql/data
     networks:

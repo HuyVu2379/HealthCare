@@ -3,27 +3,22 @@ package fit.iuh.student.userservice.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @MappedSuperclass
-@EntityListeners({AuditingEntityListener.class})
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 public class BaseEntity {
+
+    @CreatedDate
     @Column(updatable = false)
-    LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
-    LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
 }

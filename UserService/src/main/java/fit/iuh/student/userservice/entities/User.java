@@ -4,21 +4,19 @@ import fit.iuh.student.userservice.enums.Gender;
 import fit.iuh.student.userservice.enums.Role;
 import fit.iuh.student.userservice.enums.Status;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "users")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User extends BaseEntity {
-    
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "user_id")

@@ -10,17 +10,13 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@Table(name = "patients")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "patients")
+@PrimaryKeyJoinColumn(name = "user_id")
 public class Patient extends User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "patient_id")
-    private Integer patientId;
-
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<MedicalHistory> medicalHistories;
 }

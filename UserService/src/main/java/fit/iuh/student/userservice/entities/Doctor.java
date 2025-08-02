@@ -9,17 +9,13 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@Table(name = "doctors")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "doctors")
+@PrimaryKeyJoinColumn(name = "user_id")
 public class Doctor extends User{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "doctor_id")
-    private Integer doctorId;
-    
     @Column(name = "specialty")
     private String specialty;
     
