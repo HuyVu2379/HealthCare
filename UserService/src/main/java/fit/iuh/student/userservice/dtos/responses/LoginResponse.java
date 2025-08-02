@@ -1,22 +1,19 @@
-package fit.iuh.student.userservice.dtos.requests;
+package fit.iuh.student.userservice.dtos.responses;
 
-import fit.iuh.student.userservice.enums.Gender;
 import fit.iuh.student.userservice.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
-/**
- * DTO for user registration request
- */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
+public class LoginResponse {
+    private String accessToken;
+    private String refreshToken;
     private String email;
-    private String password;
+    private String userId;
+    private Role role;
 }

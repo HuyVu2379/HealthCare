@@ -40,3 +40,6 @@ replay_pid*
 # OS specific files
 .DS_Store
 Thumbs.db
+
+# Application configuration files
+UserService/src/main/resources/application.yml

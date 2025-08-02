@@ -33,6 +33,17 @@ services:
       timeout: 10s
       retries: 3
 
+  redis:
+    image: redis:alpine
+    container_name: redis
+    command: redis-server --requirepass 12345678
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - microservice-network
+
   # PostgreSQL Databases
   user-service-db:
     image: postgres:14-alpine
@@ -119,3 +130,4 @@ volumes:
   health-record-service-data:
   notification-service-data:
   scheduling-service-data:
+  redis-data:

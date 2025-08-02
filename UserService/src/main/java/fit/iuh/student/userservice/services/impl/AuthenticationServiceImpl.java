@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fit.iuh.student.userservice.dtos.requests.AuthenticationRequest;
 import fit.iuh.student.userservice.dtos.requests.RegisterRequest;
 import fit.iuh.student.userservice.dtos.responses.AuthenticationResponse;
+import fit.iuh.student.userservice.dtos.responses.LoginResponse;
+import fit.iuh.student.userservice.entities.Patient;
 import fit.iuh.student.userservice.entities.User;
+import fit.iuh.student.userservice.enums.Role;
 import fit.iuh.student.userservice.enums.Status;
 import fit.iuh.student.userservice.exceptions.errors.DuplicateUserException;
 import fit.iuh.student.userservice.exceptions.errors.UnauthorizedException;
@@ -54,14 +57,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         // Create new user
-        User user = new User();
+        Patient user = new Patient();
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setFullname(request.getFullName());
-        user.setGender(request.getGender());
-        user.setDob(request.getDateOfBirth());
-        user.setPhone(request.getPhoneNumber());
-        user.setRole(request.getRole());
+        user.setRole(Role.PATIENT);
         user.setStatus(Status.ACTIVE);
 
         // Save user
@@ -70,6 +69,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         // Generate JWT token
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("role", user.getRole().name());
+        extraClaims.put("userId", user.getUserId());
+        extraClaims.put("email", user.getEmail());
+
         
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         String accessToken = jwtService.generateToken(extraClaims, userDetails);
@@ -105,7 +107,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         // Generate JWT token
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("role", user.getRole().name());
-        
+        extraClaims.put("userId", user.getUserId());
+        extraClaims.put("email", user.getEmail());
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         String accessToken = jwtService.generateToken(extraClaims, userDetails);
         String refreshToken = jwtService.generateRefreshToken(userDetails);
@@ -161,6 +164,25 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Invalid refresh token");
             new ObjectMapper().writeValue(response.getOutputStream(), error);
+        }
+    }
+
+    @Override
+    public LoginResponse login(AuthenticationRequest request) {
+        try {
+            AuthenticationResponse authResponse = authenticate(request);
+            User user = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new UnauthorizedException("User not found"));
+            
+            return LoginResponse.builder()
+                    .accessToken(authResponse.getAccessToken())
+                    .refreshToken(authResponse.getRefreshToken())
+                    .userId(user.getUserId())
+                    .email(user.getEmail())
+                    .role(user.getRole())
+                    .build();
+        } catch (Exception e) {
+            throw e;
         }
     }
 }
