@@ -6,7 +6,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +18,11 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
 
     @Value("${jwt.secretKey}")
@@ -28,6 +34,10 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.refresh-token.expiration}")
     private long refreshExpiration;
 
+    private final RedisTemplate<String, String> redisTemplate;
+
+    private static final String BLACKLIST_PREFIX = "blacklist:token:";
+    private static final Logger log = LoggerFactory.getLogger(JwtServiceImpl.class);
     @Override
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -55,6 +65,30 @@ public class JwtServiceImpl implements JwtService {
             UserDetails userDetails
     ) {
         return buildToken(new HashMap<>(), userDetails, refreshExpiration);
+    }
+
+    public void blacklistToken(String token) {
+        try {
+            // Lấy expiration time của token
+            Date expiration = this.extractExpiration(token);
+            long ttl = expiration.getTime() - System.currentTimeMillis();
+
+            if (ttl > 0) {
+                // Lưu vào Redis với TTL = thời gian còn lại của token
+                redisTemplate.opsForValue().set(
+                        BLACKLIST_PREFIX + token,
+                        "blacklisted",
+                        ttl,
+                        TimeUnit.MILLISECONDS
+                );
+            }
+        } catch (Exception e) {
+            log.error("Error blacklisting token: ", e);
+        }
+    }
+
+    public boolean isBlacklisted(String token){
+        return redisTemplate.hasKey(BLACKLIST_PREFIX + token);
     }
 
     private String buildToken(

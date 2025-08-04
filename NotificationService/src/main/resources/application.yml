@@ -60,7 +60,7 @@ spring:
     activate:
       on-profile: docker
   datasource:
-    url: jdbc:postgresql://notification-service-db:5432/notificationservicedb
+    url: jdbc:postgresql://postgres-db:5432/notificationservicedb
     username: postgres
     password: postgres
   rabbitmq:

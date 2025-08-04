@@ -12,7 +12,7 @@ services:
     networks:
       - microservice-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8761/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -20,7 +20,7 @@ services:
 
   # RabbitMQ for messaging
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3-management-alpine
     container_name: rabbitmq
     ports:
       - "5672:5672"
@@ -28,91 +28,40 @@ services:
     networks:
       - microservice-network
     healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
     container_name: redis
-    command: redis-server --requirepass 12345678
+    command: redis-server --requirepass 12345678 --save 60 1 --loglevel warning
     ports:
       - "6380:6379"
     volumes:
       - redis-data:/data
     networks:
       - microservice-network
-
-  # PostgreSQL Databases
-  user-service-db:
-    image: postgres:14-alpine
-    container_name: user-service-db
-    environment:
-      - POSTGRES_DB=userservicedb
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - "5433:5432"
-    volumes:
-      - user-service-data:/var/lib/postgresql/data
-    networks:
-      - microservice-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  health-record-service-db:
-    image: postgres:14-alpine
-    container_name: health-record-service-db
+  # Consolidated PostgreSQL Database
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: postgres-db
     environment:
-      - POSTGRES_DB=healthrecordservicedb
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - POSTGRES_MULTIPLE_DATABASES=userservicedb,healthrecordservicedb,notificationservicedb,schedulingservicedb
     ports:
-      - "5434:5432"
+      - "5432:5432"
     volumes:
-      - health-record-service-data:/var/lib/postgresql/data
-    networks:
-      - microservice-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  notification-service-db:
-    image: postgres:14-alpine
-    container_name: notification-service-db
-    environment:
-      - POSTGRES_DB=notificationservicedb
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - "5435:5432"
-    volumes:
-      - notification-service-data:/var/lib/postgresql/data
-    networks:
-      - microservice-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  scheduling-service-db:
-    image: postgres:14-alpine
-    container_name: scheduling-service-db
-    environment:
-      - POSTGRES_DB=schedulingservicedb
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - "5436:5432"
-    volumes:
-      - scheduling-service-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-multiple-databases.sh:/docker-entrypoint-initdb.d/init-multiple-databases.sh
     networks:
       - microservice-network
     healthcheck:
@@ -126,8 +75,5 @@ networks:
     driver: bridge
 
 volumes:
-  user-service-data:
-  health-record-service-data:
-  notification-service-data:
-  scheduling-service-data:
+  postgres-data:
   redis-data:

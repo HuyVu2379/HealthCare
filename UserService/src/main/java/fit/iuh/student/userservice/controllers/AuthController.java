@@ -2,7 +2,9 @@ package fit.iuh.student.userservice.controllers;
 
 import fit.iuh.student.userservice.dtos.requests.AuthenticationRequest;
 import fit.iuh.student.userservice.dtos.requests.RegisterRequest;
+import fit.iuh.student.userservice.dtos.requests.ResetPasswordRequest;
 import fit.iuh.student.userservice.dtos.responses.*;
+import fit.iuh.student.userservice.exceptions.errors.UnauthorizedException;
 import fit.iuh.student.userservice.exceptions.errors.UserNotFoundException;
 import fit.iuh.student.userservice.services.AuthenticationService;
 import fit.iuh.student.userservice.services.EmailService;
@@ -10,17 +12,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.QueryParam;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private final AuthenticationService authenticationService;
     private final EmailService emailService;
 
@@ -39,11 +43,20 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-token")
-    public void refreshToken(
+    public ResponseEntity<MessageResponse<AuthenticationResponse>> refreshToken(
             HttpServletRequest request,
             HttpServletResponse response
-    ) throws IOException {
-        authenticationService.refreshToken(request, response);
+    ) throws Exception {
+        try {
+            AuthenticationResponse authenticationResponse = authenticationService.refreshToken(request, response);
+            if (authenticationResponse != null) {
+                return SuccessEntityResponse.ok("Token refreshed successfully", authenticationResponse);
+            } else {
+                throw new UnauthorizedException("Failed to refresh token. Please log in again.");
+            }
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     @GetMapping("/send-otp-register/{email}")
@@ -84,6 +97,24 @@ public class AuthController {
             return SuccessEntityResponse.ok("OTP sent successfully", response);
         } else {
             throw new UserNotFoundException("User not found with email: " + email);
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<MessageResponse<Boolean>> resetPassword(
+            @RequestBody ResetPasswordRequest resetPasswordRequest
+    ) {
+        boolean isReset = authenticationService.resetPassword(resetPasswordRequest);
+        if (isReset) {
+            return SuccessEntityResponse.ok("Password reset successfully", true);
+        } else {
+            MessageResponse<Boolean> response = new MessageResponse<>(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Failed to reset password",
+                    false,
+                    false
+            );
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
 }
