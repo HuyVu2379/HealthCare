@@ -11,18 +11,26 @@ spring:
           uri: lb://UserService
           predicates:
             - Path=/api/v1/users/**, /api/v1/auth/**
+          filters:
+            - AuthenticationFilter
         - id: health-record-service
           uri: lb://HealthRecordService
           predicates:
             - Path=/api/v1/records/**
+          filters:
+            - AuthenticationFilter
         - id: notification-service
           uri: lb://NotificationService
           predicates:
             - Path=/api/v1/notifications/**
+          filters:
+            - AuthenticationFilter
         - id: scheduling-service
           uri: lb://SchedulingService
           predicates:
             - Path=/api/v1/schedules/**
+          filters:
+            - AuthenticationFilter
   profiles:
     active: docker
 
