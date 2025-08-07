@@ -3,6 +3,7 @@ package fit.iuh.student.userservice.services.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fit.iuh.student.userservice.dtos.requests.AuthenticationRequest;
 import fit.iuh.student.userservice.dtos.requests.RegisterRequest;
+import fit.iuh.student.userservice.dtos.requests.ResetPasswordRequest;
 import fit.iuh.student.userservice.dtos.responses.AuthenticationResponse;
 import fit.iuh.student.userservice.dtos.responses.LoginResponse;
 import fit.iuh.student.userservice.entities.Patient;
@@ -17,6 +18,8 @@ import fit.iuh.student.userservice.services.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,6 +32,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Implementation of AuthenticationService
@@ -42,10 +46,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
-    
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
     @Value("${jwt.expiration}")
     private long jwtExpiration;
-    
+
     @Value("${jwt.prefix}")
     private String tokenPrefix;
 
@@ -72,7 +76,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         extraClaims.put("userId", user.getUserId());
         extraClaims.put("email", user.getEmail());
 
-        
+
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         String accessToken = jwtService.generateToken(extraClaims, userDetails);
         String refreshToken = jwtService.generateRefreshToken(userDetails);
@@ -82,7 +86,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType(tokenPrefix)
-                .expiresIn(jwtExpiration / 1000) // Convert to seconds
+                .expiresIn(jwtExpiration / 1000)
                 .build();
     }
 
@@ -118,52 +122,52 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType(tokenPrefix)
-                .expiresIn(jwtExpiration / 1000) // Convert to seconds
+                .expiresIn(jwtExpiration / 1000)
                 .build();
     }
 
     @Override
-    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public AuthenticationResponse refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         final String refreshToken;
         final String userEmail;
-
+        // Kiểm tra header Authorization
         if (authHeader == null || !authHeader.startsWith(tokenPrefix + " ")) {
-            return;
+            return null;
         }
-
         refreshToken = authHeader.substring(tokenPrefix.length() + 1);
-        
         try {
             userEmail = jwtService.extractUsername(refreshToken);
-            
             if (userEmail != null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
-                
                 if (jwtService.isTokenValid(refreshToken, userDetails)) {
                     User user = userRepository.findByEmail(userEmail)
                             .orElseThrow(() -> new UnauthorizedException("User not found"));
-                    
+
                     Map<String, Object> extraClaims = new HashMap<>();
                     extraClaims.put("role", user.getRole().name());
-                    
+                    extraClaims.put("userId", user.getUserId());
+                    extraClaims.put("email", user.getEmail());
+                    // Generate access token mới
                     String accessToken = jwtService.generateToken(extraClaims, userDetails);
-                    
+                    // Add refresh token to blacklist
+                    jwtService.blacklistToken(refreshToken);
+                    // Generate new refresh-token
+                    String newRefreshToken = jwtService.generateRefreshToken(userDetails);
                     AuthenticationResponse authResponse = AuthenticationResponse.builder()
                             .accessToken(accessToken)
-                            .refreshToken(refreshToken)
+                            .refreshToken(newRefreshToken)
                             .tokenType(tokenPrefix)
-                            .expiresIn(jwtExpiration / 1000) // Convert to seconds
+                            .expiresIn(jwtExpiration / 1000)
                             .build();
-                    
-                    new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+
+                    return authResponse;
                 }
             }
+            return null;
         } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Invalid refresh token");
-            new ObjectMapper().writeValue(response.getOutputStream(), error);
+            log.error("Error refreshing token: ", e);
+            return null;
         }
     }
 
@@ -173,7 +177,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             AuthenticationResponse authResponse = authenticate(request);
             User user = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new UnauthorizedException("User not found"));
-            
+
             return LoginResponse.builder()
                     .accessToken(authResponse.getAccessToken())
                     .refreshToken(authResponse.getRefreshToken())
@@ -184,5 +188,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (Exception e) {
             throw e;
         }
+    }
+
+    @Override
+    public boolean resetPassword(ResetPasswordRequest request) {
+        try {
+            Optional<User> user = userRepository.findByEmail(request.getEmail());
+            if (user.isPresent()) {
+                User existingUser = user.get();
+                existingUser.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                userRepository.save(existingUser);
+                return true;
+            }
+        } catch (Exception e) {
+            throw new UnauthorizedException("Failed to reset password for user with email: " + request.getEmail());
+        }
+        return false;
     }
 }

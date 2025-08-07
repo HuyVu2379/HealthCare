@@ -2,6 +2,7 @@ package fit.iuh.student.userservice.services;
 
 import fit.iuh.student.userservice.dtos.requests.AuthenticationRequest;
 import fit.iuh.student.userservice.dtos.requests.RegisterRequest;
+import fit.iuh.student.userservice.dtos.requests.ResetPasswordRequest;
 import fit.iuh.student.userservice.dtos.responses.AuthenticationResponse;
 import fit.iuh.student.userservice.dtos.responses.LoginResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +16,7 @@ import java.io.IOException;
 public interface AuthenticationService {
     /**
      * Register a new user
+     *
      * @param request registration request
      * @return authentication response with JWT token
      */
@@ -22,6 +24,7 @@ public interface AuthenticationService {
 
     /**
      * Authenticate a user
+     *
      * @param request authentication request
      * @return authentication response with JWT token
      */
@@ -29,18 +32,25 @@ public interface AuthenticationService {
 
     /**
      * Refresh JWT token
-     * @param request HTTP request
+     *
+     * @param request  HTTP request
      * @param response HTTP response
      * @throws IOException if an I/O error occurs
      */
-    void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
+    AuthenticationResponse refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
 
     /**
      * Login
+     *
      * @param request HTTP request
-     * @param response HTTP response
+     * @return LoginResponse containing user details and JWT token
      */
     LoginResponse login(AuthenticationRequest request);
 
-
+    /**
+     * Reset password for user
+     * @param request reset password request containing email and new password
+     * @return true if successful, false otherwise
+     */
+    boolean resetPassword(ResetPasswordRequest request);
 }

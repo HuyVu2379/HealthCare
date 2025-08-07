@@ -45,4 +45,8 @@ public interface JwtService {
      * @return refresh token
      */
     String generateRefreshToken(UserDetails userDetails);
+
+    void blacklistToken(String token);
+
+    boolean isBlacklisted(String token);
 }

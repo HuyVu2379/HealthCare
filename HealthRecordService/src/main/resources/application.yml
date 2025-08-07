@@ -63,7 +63,7 @@ spring:
     activate:
       on-profile: docker
   datasource:
-    url: jdbc:postgresql://health-record-service-db:5432/healthrecordservicedb
+    url: jdbc:postgresql://postgres-db:5432/healthrecordservicedb
     username: postgres
     password: postgres
   rabbitmq:
