@@ -1,5 +1,7 @@
 package fit.iuh.student.userservice.controllers;
 
+import fit.iuh.student.userservice.dtos.responses.MessageResponse;
+import fit.iuh.student.userservice.dtos.responses.SuccessEntityResponse;
 import fit.iuh.student.userservice.dtos.responses.UploadFile;
 import fit.iuh.student.userservice.services.UploadService;
 import lombok.RequiredArgsConstructor;
@@ -18,17 +20,17 @@ public class UploadController {
     private final UploadService uploadService;
     
     @PostMapping(value = "/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Map<String, Object>> uploadFile(@RequestPart("file") FilePart filePart,
-                                                         @RequestParam(value = "folder", defaultValue = "HealthCare") String folder) {
-        Map<String, Object> result = uploadService.uploadFile(filePart, folder);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<MessageResponse<UploadFile>> uploadFile(@RequestPart("file") FilePart filePart,
+                                                      @RequestParam(value = "folder", defaultValue = "HealthCare") String folder) {
+        UploadFile result = uploadService.uploadFile(filePart, folder);
+        return SuccessEntityResponse.ok("File uploaded successfully", result);
     }
     
     @PostMapping(value = "/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UploadFile> uploadMultipleFiles(@RequestPart("file") FilePart filePart,
+    public ResponseEntity<MessageResponse<UploadFile>> uploadMultipleFiles(@RequestPart("file") FilePart filePart,
                                                          @RequestParam(value = "folder", defaultValue = "HealthCare") String folder) {
         UploadFile result = uploadService.uploadMultipleFiles(filePart, folder);
-        return ResponseEntity.ok(result);
+        return SuccessEntityResponse.ok("Files uploaded successfully", result);
     }
     
     @DeleteMapping("/file")

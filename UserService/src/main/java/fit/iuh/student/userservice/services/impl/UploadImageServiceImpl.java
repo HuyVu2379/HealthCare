@@ -28,7 +28,7 @@ public class UploadImageServiceImpl implements UploadService {
     private final Cloudinary cloudinary;
     
     @Override
-    public Map<String, Object> uploadFile(FilePart filePart, String folder) {
+    public UploadFile uploadFile(FilePart filePart, String folder) {
         try {
             Path tempFile = Files.createTempFile("upload-", filePart.filename());
             DataBufferUtils.write(filePart.content(), tempFile, StandardOpenOption.WRITE)
@@ -43,10 +43,15 @@ public class UploadImageServiceImpl implements UploadService {
             // Delete the temporary file
             Files.delete(tempFile);
             
-            return result;
+            // Extract the URL from the result
+            String imageUrl = (String) result.get("url");
+            
+            return UploadFile.builder()
+                    .imageUrls(List.of(imageUrl))
+                    .build();
         } catch (IOException e) {
             log.error("Error uploading file: {}", e.getMessage(), e);
-            return Map.of("error", e.getMessage());
+            return UploadFile.builder().imageUrls(List.of()).build();
         }
     }
 

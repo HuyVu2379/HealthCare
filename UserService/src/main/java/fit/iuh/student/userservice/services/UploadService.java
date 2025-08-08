@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface UploadService {
-    Map<String, Object> uploadFile(FilePart filePart, String folder);
+    UploadFile uploadFile(FilePart filePart, String folder);
     UploadFile uploadMultipleFiles(FilePart fileParts, String folder);
     Map<String, Object> deleteFile(String publicId);
     Map<String, Object> deleteMultipleFiles(List<String> publicIds);
