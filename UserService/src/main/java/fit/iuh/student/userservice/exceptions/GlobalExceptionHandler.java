@@ -1,21 +1,65 @@
 package fit.iuh.student.userservice.exceptions;
 
 import fit.iuh.student.userservice.dtos.responses.ErrorResponse;
+import fit.iuh.student.userservice.exceptions.errors.FileDeleteException;
+import fit.iuh.student.userservice.exceptions.errors.FileUploadException;
 import fit.iuh.student.userservice.exceptions.errors.UnauthorizedException;
 import fit.iuh.student.userservice.exceptions.errors.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<ErrorResponse> handleFileUploadException(FileUploadException ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse();
+        error.setMessage("Upload File Failed: " + ex.getMessage());
+        error.setStatus(HttpStatus.BAD_REQUEST.value());
+        error.setTimestamp(System.currentTimeMillis());
+        error.setPath(request.getRequestURI());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(FileDeleteException.class)
+    public ResponseEntity<ErrorResponse> handleFileDeleteException(FileDeleteException ex,HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse();
+        error.setMessage("Delete File Failed: " + ex.getMessage());
+        error.setStatus(HttpStatus.BAD_REQUEST.value());
+        error.setTimestamp(System.currentTimeMillis());
+        error.setPath(request.getRequestURI());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse();
+        error.setMessage("File size exceeds the maximum limit of 10MB");
+        error.setStatus(HttpStatus.PAYLOAD_TOO_LARGE.value());
+        error.setTimestamp(System.currentTimeMillis());
+        error.setPath(request.getRequestURI());
+        return new ResponseEntity<>(error, HttpStatus.PAYLOAD_TOO_LARGE);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse();
+        error.setMessage("Error is:" + ex.getMessage());
+        error.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        error.setTimestamp(System.currentTimeMillis());
+        error.setPath(request.getRequestURI());
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex, HttpServletRequest request) {
         ErrorResponse error = new ErrorResponse();
@@ -39,16 +83,6 @@ public class GlobalExceptionHandler {
         error.setDetails(errors);
         error.setPath(request.getRequestURI());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex, HttpServletRequest request) {
-        ErrorResponse error = new ErrorResponse();
-        error.setMessage("Error is:" + ex.getMessage());
-        error.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        error.setTimestamp(System.currentTimeMillis());
-        error.setPath(request.getRequestURI());
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(UnauthorizedException.class)

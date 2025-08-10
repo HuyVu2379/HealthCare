@@ -9,4 +9,5 @@ import java.util.List;
 @Builder
 public class UploadFile {
     private List<String> imageUrls;
+    private List<String> publicIds;
 }

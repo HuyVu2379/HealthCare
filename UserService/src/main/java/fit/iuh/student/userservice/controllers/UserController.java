@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController()
 @RequestMapping("/api/v1/users")
@@ -31,7 +32,7 @@ public class UserController {
     }
     @PutMapping(value = "/update-avatar/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MessageResponse<String>> updateAvatar(
-            @RequestPart FilePart file,
+            @RequestPart MultipartFile file,
             @PathVariable String id
     ) {
         String imageUrl = userService.updateUserAvatar(id, file);

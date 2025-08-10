@@ -1,49 +1,93 @@
 package fit.iuh.student.userservice.controllers;
 
-import fit.iuh.student.userservice.dtos.responses.MessageResponse;
-import fit.iuh.student.userservice.dtos.responses.SuccessEntityResponse;
 import fit.iuh.student.userservice.dtos.responses.UploadFile;
 import fit.iuh.student.userservice.services.UploadService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/upload")
 @RequiredArgsConstructor
+@Slf4j
 public class UploadController {
+    
     private final UploadService uploadService;
-    
-    @PostMapping(value = "/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<MessageResponse<UploadFile>> uploadFile(@RequestPart("file") FilePart filePart,
-                                                      @RequestParam(value = "folder", defaultValue = "HealthCare") String folder) {
-        UploadFile result = uploadService.uploadFile(filePart, folder);
-        return SuccessEntityResponse.ok("File uploaded successfully", result);
-    }
-    
-    @PostMapping(value = "/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<MessageResponse<UploadFile>> uploadMultipleFiles(@RequestPart("file") FilePart filePart,
-                                                         @RequestParam(value = "folder", defaultValue = "HealthCare") String folder) {
-        UploadFile result = uploadService.uploadMultipleFiles(filePart, folder);
-        return SuccessEntityResponse.ok("Files uploaded successfully", result);
-    }
-    
-    @DeleteMapping("/file")
-    public ResponseEntity<Map<String, Object>> deleteFile(@RequestParam("url") String url) {
-        String publicId = uploadService.extractPublicIdFromUrl(url);
-        Map<String, Object> result = uploadService.deleteFile(publicId);
+
+    /**
+     * Upload single file
+     */
+    @PostMapping(value = "/single", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UploadFile> uploadSingleFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "folder", defaultValue = "HealthCare") String folder) {
+        
+        log.info("Uploading single file: {} to folder: {}", file.getOriginalFilename(), folder);
+        
+        UploadFile result = uploadService.uploadFile(file, folder);
+        
         return ResponseEntity.ok(result);
     }
-    
-    @DeleteMapping("/files")
-    public ResponseEntity<Map<String, Object>> deleteMultipleFiles(@RequestBody List<String> urls) {
-        List<String> publicIds = uploadService.extractPublicIdsFromUrls(urls);
-        Map<String, Object> result = uploadService.deleteMultipleFiles(publicIds);
+
+    /**
+     * Upload multiple files
+     */
+    @PostMapping(value = "/multiple", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UploadFile> uploadMultipleFiles(
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam(value = "folder", defaultValue = "HealthCare") String folder) {
+        
+        log.info("Uploading {} files to folder: {}", files.size(), folder);
+        
+        UploadFile result = uploadService.uploadFiles(files, folder);
+        
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Delete file by public ID
+     */
+    @DeleteMapping("/{publicId}")
+    public ResponseEntity<String> deleteFile(@PathVariable String publicId) {
+        log.info("Deleting file with public ID: {}", publicId);
+        
+        uploadService.deleteFile(publicId);
+        
+        return ResponseEntity.ok("File deleted successfully");
+    }
+
+    /**
+     * Upload avatar specifically
+     */
+    @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UploadFile> uploadAvatar(
+            @RequestParam("file") MultipartFile file) {
+        
+        log.info("Uploading avatar: {}", file.getOriginalFilename());
+        
+        UploadFile result = uploadService.uploadFile(file, "avatars");
+        
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Upload document specifically
+     */
+    @PostMapping(value = "/document", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UploadFile> uploadDocument(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "category", defaultValue = "general") String category) {
+        
+        log.info("Uploading document: {} to category: {}", file.getOriginalFilename(), category);
+        
+        String folder = "documents/" + category;
+        UploadFile result = uploadService.uploadFile(file, folder);
+        
         return ResponseEntity.ok(result);
     }
 }
