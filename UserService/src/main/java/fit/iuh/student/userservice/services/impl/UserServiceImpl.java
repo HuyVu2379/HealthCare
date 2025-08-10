@@ -12,6 +12,7 @@ import fit.iuh.student.userservice.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +42,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String updateUserAvatar(String userId, FilePart file) {
+    public String updateUserAvatar(String userId, MultipartFile file) {
         try{
             User user = userRepository.findById(userId).orElse(null);
             if(user == null){

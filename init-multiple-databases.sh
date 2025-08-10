@@ -27,6 +27,6 @@ if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
             echo "Database '$db' already exists. Skipping creation."
         fi
     done
-    
+
     echo "Multiple databases created"
 fi
