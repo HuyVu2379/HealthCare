@@ -10,7 +10,7 @@ spring:
         - id: user-service
           uri: lb://UserService
           predicates:
-            - Path=/api/v1/users/**, /api/v1/auth/**
+            - Path=/api/v1/users/**, /api/v1/auth/**, /api/v1/upload/**
           filters:
             - AuthenticationFilter
         - id: health-record-service
@@ -33,7 +33,13 @@ spring:
             - AuthenticationFilter
   profiles:
     active: docker
-
+jwt:
+  secretKey: ${JWT_SECRET_KEY:defaultSecretKeyForDevelopment12345678901234567890}
+  expiration: ${JWT_EXPIRATION:86400000}  # 24 hours in milliseconds
+  header: Authorization
+  prefix: Bearer
+  refresh-token:
+    expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # 7 days in milliseconds
 # Eureka Client Configuration
 eureka:
   client:

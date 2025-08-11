@@ -48,3 +48,5 @@ UserService/src/main/resources/application.yml
 # Doc files
 *.md
 .vscode/settings.json
+
+GatewayService/src/main/resources/application.yml

@@ -1,17 +1,14 @@
 package fit.iuh.student.userservice.dtos.responses;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Map;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
+@Data
+@Builder
 public class ErrorResponse {
     private int status;
     private String message;
