@@ -44,3 +44,7 @@ Thumbs.db
 # Application configuration files
 UserService/src/main/resources/application.yml
 /ai-chat-service/src/main/resources/application.yml
+
+# Doc files
+*.md
+.vscode/settings.json
