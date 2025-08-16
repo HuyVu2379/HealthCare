@@ -17,9 +17,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class Appointment extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "appointment_id")
-    private Integer appointmentId;
+    private String appointmentId;
     
     @Column(name = "patient_id", nullable = false)
     private Integer patientId;

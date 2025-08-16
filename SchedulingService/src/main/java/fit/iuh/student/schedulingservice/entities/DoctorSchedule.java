@@ -19,21 +19,26 @@ import java.util.List;
 public class DoctorSchedule extends BaseEntity {
     @Id
     @Column(name = "schedule_id")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String scheduleId;
     private String doctorId;
     private WeekDay weekDay;
     private Date workDate;
     private boolean isAvailable;
-    
-    @OneToMany(mappedBy = "doctorSchedule", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "doctor_schedule_time_slots",
+            joinColumns = @JoinColumn(name = "schedule_id"),
+            inverseJoinColumns = @JoinColumn(name = "slot_id")
+    )
     private List<TimeSlot> timeSlots = new ArrayList<>();
-    
-    // Helper method to add a time slot
+
+    // Helper methods
     public void addTimeSlot(TimeSlot timeSlot) {
         timeSlots.add(timeSlot);
     }
-    
-    // Helper method to remove a time slot
+
     public void removeTimeSlot(TimeSlot timeSlot) {
         timeSlots.remove(timeSlot);
     }

@@ -28,7 +28,7 @@ spring:
         - id: scheduling-service
           uri: lb://SchedulingService
           predicates:
-            - Path=/api/v1/schedules/**
+            - Path=/api/v1/schedules/**, /api/v1/time-slots/**
           filters:
             - AuthenticationFilter
   profiles:

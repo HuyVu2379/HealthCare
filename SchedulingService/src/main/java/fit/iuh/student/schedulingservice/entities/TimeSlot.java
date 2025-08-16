@@ -5,8 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.sql.Timestamp;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "time_slots")
@@ -20,13 +19,6 @@ public class TimeSlot extends BaseEntity {
     @Column(name = "slot_id")
     private Integer slotId;
 
-    private Timestamp startTime;
-    private Timestamp endTime;
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "schedule_id")
-//    private DoctorSchedule doctorSchedule;
-//
-//    @OneToOne(mappedBy = "timeSlot", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    private Appointment appointment;
+    private LocalTime startTime;
+    private LocalTime endTime;
 }
