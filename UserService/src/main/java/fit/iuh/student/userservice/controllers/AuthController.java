@@ -6,6 +6,7 @@ import fit.iuh.student.userservice.dtos.requests.ResetPasswordRequest;
 import fit.iuh.student.userservice.dtos.responses.*;
 import fit.iuh.student.userservice.exceptions.errors.UnauthorizedException;
 import fit.iuh.student.userservice.exceptions.errors.UserNotFoundException;
+import fit.iuh.student.userservice.publisher.payload.UserEventPayload;
 import fit.iuh.student.userservice.services.AuthenticationService;
 import fit.iuh.student.userservice.services.EmailService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -92,7 +93,8 @@ public class AuthController {
     public ResponseEntity<MessageResponse<Boolean>> sendOtpRegister(
             @PathVariable String email
     ){
-        emailService.sendOTPEmail(email,"Xác minh tài khoản");
+        UserEventPayload payload = new UserEventPayload(email,"Xác minh tài khoản");
+        emailService.sendOTPEmail(payload);
         return SuccessEntityResponse.ok("OTP sent successfully", true);
     }
     /*
@@ -121,7 +123,8 @@ public class AuthController {
     public ResponseEntity<MessageResponse<Object>> sendOtpResetPassword(
             @PathVariable String email
     ) {
-        ResetPasswordResponse response = emailService.sendOTPResetPassword(email, "Xác minh reset mật khẩu");
+        UserEventPayload payload = new UserEventPayload(email,"Xác minh mật khẩu");
+        ResetPasswordResponse response = emailService.sendOTPResetPassword(payload);
         if (response != null && response.getStatusCode() == HttpStatus.OK.value()) {
             return SuccessEntityResponse.ok("OTP sent successfully", response);
         } else {

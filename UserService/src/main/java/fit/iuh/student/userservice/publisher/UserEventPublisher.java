@@ -16,41 +16,27 @@ public class UserEventPublisher {
 
     /**
      * Publishes an OTP registration event to the notification service
-     * @param email The recipient's email address
-     * @param subject The email subject
+     * @param payload
      */
-    public void publishOtpRegistrationEvent(String email, String subject) {
+    public void publishOtpRegistrationEvent(UserEventPayload payload) {
         try {
-            UserEventPayload payload = UserEventPayload.builder()
-                    .eventType(UserEvent.OTP_REGISTER)
-                    .email(email)
-                    .subject(subject)
-                    .build();
-            
             rabbitTemplate.convertAndSend(USER_NOTIFICATION_QUEUE, payload);
-            log.info("Published OTP registration event for email: {}", email);
+            log.info("Published OTP registration event for email: {}", payload.getEmail());
         } catch (Exception e) {
-            log.error("Failed to publish OTP registration event for email: {}", email, e);
+            log.error("Failed to publish OTP registration event for email: {}", payload.getEmail(), e);
         }
     }
 
     /**
      * Publishes an OTP password reset event to the notification service
-     * @param email The recipient's email address
-     * @param subject The email subject
+     * @param payload
      */
-    public void publishOtpResetPasswordEvent(String email, String subject) {
+    public void publishOtpResetPasswordEvent(UserEventPayload payload) {
         try {
-            UserEventPayload payload = UserEventPayload.builder()
-                    .eventType(UserEvent.OTP_RESET_PASSWORD)
-                    .email(email)
-                    .subject(subject)
-                    .build();
-            
             rabbitTemplate.convertAndSend(USER_NOTIFICATION_QUEUE, payload);
-            log.info("Published OTP reset password event for email: {}", email);
+            log.info("Published OTP reset password event for email: {}", payload.getEmail());
         } catch (Exception e) {
-            log.error("Failed to publish OTP reset password event for email: {}", email, e);
+            log.error("Failed to publish OTP reset password event for email: {}", payload.getEmail(), e);
         }
     }
 }

@@ -11,6 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserEventPayload {
+    public UserEventPayload(String email, String subject) {
+        this.email = email;
+        this.subject = subject;
+    }
     private String receiptId;
     private UserEvent eventType;
     private String email;

@@ -3,6 +3,8 @@ package fit.iuh.student.userservice.services.impl;
 import fit.iuh.student.userservice.dtos.responses.ResetPasswordResponse;
 import fit.iuh.student.userservice.entities.User;
 import fit.iuh.student.userservice.publisher.UserEventPublisher;
+import fit.iuh.student.userservice.publisher.events.UserEvent;
+import fit.iuh.student.userservice.publisher.payload.UserEventPayload;
 import fit.iuh.student.userservice.repositories.UserRepository;
 import fit.iuh.student.userservice.services.EmailService;
 import jakarta.mail.MessagingException;
@@ -26,21 +28,24 @@ public class EmailServiceImpl implements EmailService {
         this.userEventPublisher = userEventPublisher;
     }
     @Override
-    public void sendOTPEmail(String to, String subject) {
+    public void sendOTPEmail(UserEventPayload payload) {
         try{
-            String existingOtp = redisTemplate.opsForValue().get(to);
+            Optional<User> user = userRepository.findByEmail(payload.getEmail());
+            String existingOtp = redisTemplate.opsForValue().get(payload.getEmail());
             if (existingOtp != null) {
-                redisTemplate.delete(to);
+                redisTemplate.delete(payload.getEmail());
             }
             // Tạo OTP ngẫu nhiên
             int otp = (int) (Math.random() * 900000) + 100000;
-
             // Lưu vào Redis với thời gian sống là 5 phút
-            redisTemplate.opsForValue().set(to, String.valueOf(otp), 5 * 60L, TimeUnit.SECONDS);
-            userEventPublisher.publishOtpRegistrationEvent(to, subject);
+            redisTemplate.opsForValue().set(payload.getEmail(), String.valueOf(otp), 5 * 60L, TimeUnit.SECONDS);
+            payload.setOtp(String.valueOf(otp));
+            user.ifPresent(value -> payload.setReceiptId(value.getUserId()));
+            payload.setEventType(UserEvent.OTP_REGISTER);
+            userEventPublisher.publishOtpRegistrationEvent(payload);
         }
         catch (Exception e){
-            logger.error("Failed to send email to: {}", to, e);
+            logger.error("Failed to send email to: {}", payload.getEmail(), e);
         }
     }
     public boolean validateOTP(String email, String otp) {
@@ -53,24 +58,26 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public ResetPasswordResponse sendOTPResetPassword(String to, String subject) {
+    public ResetPasswordResponse sendOTPResetPassword(UserEventPayload payload) {
         try{
-            Optional<User> user = userRepository.findByEmail(to);
+            Optional<User> user = userRepository.findByEmail(payload.getEmail());
             if (user.isEmpty()) {
-                return new ResetPasswordResponse(HttpStatus.NOT_FOUND.value(), "Email not exist !", to);
+                return new ResetPasswordResponse(HttpStatus.NOT_FOUND.value(), "Email not exist !", payload.getEmail());
             }
             // Tạo OTP ngẫu nhiên
             int otp = (int) (Math.random() * 900000) + 100000;
 
             // Lưu vào Redis với thời gian sống là 5 phút
-            redisTemplate.opsForValue().set(to+"-reset-pwd", String.valueOf(otp), 5 * 60L, TimeUnit.SECONDS);
-
+            redisTemplate.opsForValue().set(payload.getEmail()+"-reset-pwd", String.valueOf(otp), 5 * 60L, TimeUnit.SECONDS);
+            payload.setOtp(String.valueOf(otp));
+            payload.setReceiptId(user.get().getUserId());
+            payload.setEventType(UserEvent.OTP_RESET_PASSWORD);
             // Gửi sự kiện OTP reset password
-            userEventPublisher.publishOtpResetPasswordEvent(to, subject);
+            userEventPublisher.publishOtpResetPasswordEvent(payload);
         }
         catch (Exception e){
-            logger.error("Failed to send email to: {}", to, e);
+            logger.error("Failed to send email to: {}", payload.getEmail(), e);
         }
-        return new ResetPasswordResponse(HttpStatus.OK.value(), "Send email reset password successfully !", to);
+        return new ResetPasswordResponse(HttpStatus.OK.value(), "Send email reset password successfully !", payload.getEmail());
     }
 }

@@ -4,14 +4,18 @@ import fit.iuh.student.notificationservice.consumer.payload.UserEventPayload;
 import fit.iuh.student.notificationservice.services.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class UserEventConsumer {
     private final EmailService emailService;
+    private static final Logger logger = LoggerFactory.getLogger(UserEventConsumer.class);
     @RabbitListener(queues = "USER_NOTIFICATION_QUEUE")
     public void handleUserEvent(UserEventPayload payload){
         try{
@@ -28,8 +32,8 @@ public class UserEventConsumer {
                     log.warn("Unknown event type: {}", payload.getEventType());
             }
         }catch (Exception e){
-            log.error("Error handling user event: {}", e.getMessage(), e);
-            throw e;
+            logger.error("Error processing event: {} for email: {}",
+                    payload.getEventType(), payload.getEmail(), e);
         }
     }
 }
