@@ -53,4 +53,10 @@ public interface AuthenticationService {
      * @return true if successful, false otherwise
      */
     boolean resetPassword(ResetPasswordRequest request);
+
+    AuthenticationResponse registerDoctor(RegisterRequest request);
+
+    AuthenticationResponse registerAdmin(RegisterRequest request);
+
+    <T> T getMe(HttpServletRequest request, Class<T> clazz);
 }

@@ -25,6 +25,8 @@ public class Doctor extends User{
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
 
-    @Column(name = "certifications")
+    @ElementCollection
+    @CollectionTable(name = "doctor_certifications", joinColumns = @JoinColumn(name = "doctor_id"))
+    @Column(name = "certification")
     private List<String> certifications;
 }

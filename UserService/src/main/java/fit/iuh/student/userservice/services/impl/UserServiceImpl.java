@@ -10,7 +10,6 @@ import fit.iuh.student.userservice.repositories.UserRepository;
 import fit.iuh.student.userservice.services.UploadService;
 import fit.iuh.student.userservice.services.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,7 +24,7 @@ public class UserServiceImpl implements UserService {
         try{
             User user = userRepository.findById(updateUserRequest.getUserId()).orElse(null);
             if(user != null){
-                user.setFullname(updateUserRequest.getFullname());
+                user.setFullname(updateUserRequest.getFullName());
                 user.setGender(updateUserRequest.getGender());
                 user.setDob(updateUserRequest.getDob());
                 user.setPhone(updateUserRequest.getPhone());

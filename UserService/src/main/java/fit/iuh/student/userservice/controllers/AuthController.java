@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -35,11 +36,39 @@ public class AuthController {
         return SuccessEntityResponse.ok("Registration successful", authenticationService.register(request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/register-doctor")
+    public ResponseEntity<MessageResponse<AuthenticationResponse>> registerDoctor(
+            @RequestBody RegisterRequest request
+    ) {
+        return SuccessEntityResponse.ok("Registration doctor successful", authenticationService.registerDoctor(request));
+    }
+
+    @PostMapping("/register-admin")
+    public ResponseEntity<MessageResponse<AuthenticationResponse>> registerAdmin(
+            @RequestBody RegisterRequest request
+    ) {
+        return SuccessEntityResponse.ok("Registration doctor successful", authenticationService.registerAdmin(request));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<MessageResponse<LoginResponse>> authenticate(
             @RequestBody AuthenticationRequest request
     ) {
         return SuccessEntityResponse.ok("Login successful", authenticationService.login(request));
+    }
+
+    @GetMapping("/getMe")
+    public ResponseEntity<MessageResponse<Object>> getMe(HttpServletRequest request) {
+        try {
+            Object result = authenticationService.getMe(request, Object.class);
+            if (result == null) {
+               throw new UnauthorizedException("Unauthorized access. Please log in again.");
+            }
+            return SuccessEntityResponse.ok("User details retrieved successfully", result);
+        } catch (Exception e) {
+           throw e;
+        }
     }
 
     @PostMapping("/refresh-token")
