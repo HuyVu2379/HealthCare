@@ -2,10 +2,7 @@ package fit.iuh.student.notificationservice.entities;
 
 import fit.iuh.student.notificationservice.enums.NotificationType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "notifications")
@@ -13,6 +10,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Notification extends BaseEntity {
     @Id
     @Column(name = "notification_id")
@@ -27,7 +25,4 @@ public class Notification extends BaseEntity {
     
     @Column(name = "message", nullable = false)
     private String message;
-    
-    @Column(name = "is_read", nullable = false)
-    private boolean isRead = false;
 }
