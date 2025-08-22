@@ -5,19 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MedicalHistoryRequest {
+public class UpdatePatientRequest {
     private String userId;
-
-    private String doctorId;
-
-    private String serviceName;
-
-    private LocalDate diagnosisDate;
-
-    private String notes;
+    private Integer height;
+    private double weight;
+    private String bloodType;
 }

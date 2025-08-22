@@ -19,6 +19,7 @@ import java.time.LocalDate;
 public class MedicalHistory extends BaseEntity {
     public MedicalHistory(Patient patient,Doctor doctor, String serviceName, LocalDate diagnosisDate, String notes){
         this.patient = patient;
+        this.doctor = doctor;
         this.serviceName = serviceName;
         this.diagnosisDate = diagnosisDate;
         this.notes = notes;

@@ -1,8 +1,12 @@
 package fit.iuh.student.userservice.services.impl;
 
 import fit.iuh.student.userservice.dtos.requests.MedicalHistoryRequest;
+import fit.iuh.student.userservice.dtos.requests.UpdatePatientRequest;
+import fit.iuh.student.userservice.dtos.responses.UpdatePatientResponse;
+import fit.iuh.student.userservice.entities.Doctor;
 import fit.iuh.student.userservice.entities.MedicalHistory;
 import fit.iuh.student.userservice.entities.Patient;
+import fit.iuh.student.userservice.repositories.DoctorRepository;
 import fit.iuh.student.userservice.repositories.MedicalHistoryRepository;
 import fit.iuh.student.userservice.repositories.PatientRepository;
 import fit.iuh.student.userservice.services.PatientService;
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Service;
 public class PatientServiceImpl implements PatientService {
     private final MedicalHistoryRepository medicalHistoryRepository;
     private final PatientRepository patientRepository;
+    private final DoctorRepository doctorRepository;
     @Override
     public Page<MedicalHistory> getMedicalHistoriesByPatientId(String patientId, int page, int size, String sortBy, String sortDir) {
         try{
@@ -40,8 +45,33 @@ public class PatientServiceImpl implements PatientService {
     public MedicalHistory updateMedicalHistories(MedicalHistoryRequest request) {
         try{
             Patient patient = patientRepository.findById(request.getUserId()).orElse(null);
-            MedicalHistory medicalHistory = new MedicalHistory(patient,request.getCondition(),request.getDiagnosisDate(),request.getNotes());
+            Doctor doctor = doctorRepository.findById((request.getDoctorId())).orElse(null);
+            MedicalHistory medicalHistory = new MedicalHistory(patient,doctor, request.getServiceName(), request.getDiagnosisDate(),request.getNotes());
             return medicalHistoryRepository.save(medicalHistory);
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public UpdatePatientResponse updatePatient(UpdatePatientRequest request) {
+        try{
+            Patient patient = patientRepository.findById(request.getUserId()).orElse(null);
+            if (patient == null) {
+                return null; // or throw an exception
+            }
+            patient.setHeight(request.getHeight());
+            patient.setWeight(request.getWeight());
+            patient.setBloodType(request.getBloodType());
+            patient.setBmi(patient.calculateBMI());
+            patientRepository.save(patient);
+            return UpdatePatientResponse.builder()
+                    .userId(patient.getUserId())
+                    .height(patient.getHeight())
+                    .weight(patient.getWeight())
+                    .bmi(patient.getBmi())
+                    .bloodType(patient.getBloodType())
+                    .build();
         }catch (Exception e){
             throw e;
         }

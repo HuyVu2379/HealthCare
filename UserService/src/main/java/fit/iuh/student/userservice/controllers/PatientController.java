@@ -1,8 +1,10 @@
 package fit.iuh.student.userservice.controllers;
 
 import fit.iuh.student.userservice.dtos.requests.MedicalHistoryRequest;
+import fit.iuh.student.userservice.dtos.requests.UpdatePatientRequest;
 import fit.iuh.student.userservice.dtos.responses.MessageResponse;
 import fit.iuh.student.userservice.dtos.responses.SuccessEntityResponse;
+import fit.iuh.student.userservice.dtos.responses.UpdatePatientResponse;
 import fit.iuh.student.userservice.entities.MedicalHistory;
 import fit.iuh.student.userservice.services.PatientService;
 import lombok.RequiredArgsConstructor;
@@ -31,5 +33,12 @@ public class PatientController {
             @RequestBody MedicalHistoryRequest medicalHistory
     ){
         return SuccessEntityResponse.ok("update medical history for patient success!",patientService.updateMedicalHistories(medicalHistory));
+    }
+
+    @PutMapping("/updatePatient")
+    public ResponseEntity<MessageResponse<UpdatePatientResponse>> updatePatient(
+            @RequestBody UpdatePatientRequest request
+            ){
+        return SuccessEntityResponse.ok("update patient success!",patientService.updatePatient(request));
     }
 }
