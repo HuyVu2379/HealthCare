@@ -19,7 +19,7 @@ public class UserResponse {
 
     private String email;
 
-    private String fullname;
+    private String fullName;
 
     private Gender gender;
 

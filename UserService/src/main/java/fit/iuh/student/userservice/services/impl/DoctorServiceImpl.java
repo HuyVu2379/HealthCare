@@ -5,12 +5,16 @@ import fit.iuh.student.userservice.dtos.requests.UpdateDoctorRequest;
 import fit.iuh.student.userservice.dtos.responses.DoctorResponse;
 import fit.iuh.student.userservice.dtos.responses.UpdateDoctorCertificationResponse;
 import fit.iuh.student.userservice.dtos.responses.UpdateDoctorResponse;
+import fit.iuh.student.userservice.entities.Doctor;
 import fit.iuh.student.userservice.mappers.UserMapper;
 import fit.iuh.student.userservice.repositories.DoctorRepository;
 import fit.iuh.student.userservice.repositories.custom.CustomDoctorRepository;
 import fit.iuh.student.userservice.services.DoctorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
@@ -41,5 +45,12 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public DoctorResponse getDoctorById(String doctorId) {
         return userMapper.toDoctorResponse(doctorRepository.findById(doctorId).get());
+    }
+
+    @Override
+    public List<DoctorResponse> getDoctorByIds(List<String> doctorIds) {
+        return doctorRepository.findAllById(doctorIds).stream()
+                .map(userMapper::toDoctorResponse)
+                .toList();
     }
 }

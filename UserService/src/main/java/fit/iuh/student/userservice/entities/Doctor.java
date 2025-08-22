@@ -1,11 +1,13 @@
 package fit.iuh.student.userservice.entities;
 
+import fit.iuh.student.userservice.utils.StringListConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -25,8 +27,21 @@ public class Doctor extends User{
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
 
-    @ElementCollection
-    @CollectionTable(name = "doctor_certifications", joinColumns = @JoinColumn(name = "doctor_id"))
-    @Column(name = "certification")
+    @Column(name = "examination_fee")
+    private Integer examinationFee;
+
+    @Column(name = "clinic_address")
+    private String clinicAddress;
+
+    @Column(name = "rating")
+    private Double rating = 0.0;
+
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "medical_histories")
+    private List<MedicalHistory> medicalHistories;
+
+    // Lưu certifications dưới dạng JSON trong một cột
+    @Column(name = "certifications", columnDefinition = "TEXT")
+    @Convert(converter = StringListConverter.class)
     private List<String> certifications;
 }

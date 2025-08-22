@@ -29,7 +29,7 @@ public class TimeSlotServiceImpl implements TimeSlotService {
 
         // Convert DTOs to entities
         List<TimeSlot> timeSlots = request.getTimeSlots().stream()
-                .map(timeSlotMapper::convertToEntity)
+                .map(timeSlotMapper::toEntity)
                 .collect(Collectors.toList());
 
         // Bulk save
@@ -90,7 +90,7 @@ public class TimeSlotServiceImpl implements TimeSlotService {
     }
 
     private TimeSlotRequest.TimeSlotDto convertToDto(TimeSlot timeSlot) {
-        return timeSlotMapper.convertToDto(timeSlot);
+        return timeSlotMapper.toDto(timeSlot);
     }
 
 

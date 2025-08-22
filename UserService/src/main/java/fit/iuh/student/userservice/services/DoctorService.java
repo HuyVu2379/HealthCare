@@ -12,4 +12,5 @@ public interface DoctorService {
     UpdateDoctorResponse updateDoctor(UpdateDoctorRequest updateDoctorRequest);
     UpdateDoctorCertificationResponse updateDoctorCertification(UpdateDoctorCertificationRequest request, String doctorId);
     DoctorResponse getDoctorById(String doctorId);
+    List<DoctorResponse> getDoctorByIds(List<String> doctorIds);
 }

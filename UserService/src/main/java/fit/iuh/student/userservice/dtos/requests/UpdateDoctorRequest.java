@@ -13,5 +13,7 @@ public class UpdateDoctorRequest {
     private String userId;
     private String specialty;
     private Integer experienceYears;
+    private Integer examinationFee;
+    private String clinicAddress;
     private String bio;
 }

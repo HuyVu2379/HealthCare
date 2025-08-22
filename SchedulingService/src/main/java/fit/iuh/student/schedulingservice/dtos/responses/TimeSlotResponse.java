@@ -1,11 +1,12 @@
 package fit.iuh.student.schedulingservice.dtos.responses;
 
-import fit.iuh.student.schedulingservice.dtos.requests.TimeSlotRequest;
+import fit.iuh.student.schedulingservice.dtos.requests.TimeSlotRequest.TimeSlotDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Data
@@ -13,7 +14,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TimeSlotResponse {
+    private Integer slotId;
+    private LocalTime startTime;
+    private LocalTime endTime;
     private String message;
-    private int totalImported;
-    private List<TimeSlotRequest.TimeSlotDto> timeSlots;
+    private Integer totalImported;
+    private List<TimeSlotDto> timeSlots;
 }

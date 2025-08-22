@@ -28,6 +28,8 @@ public class CustomDoctorRepositoryImpl implements CustomDoctorRepository {
         doctor.setSpecialty(request.getSpecialty());
         doctor.setExperienceYears(request.getExperienceYears());
         doctor.setBio(request.getBio());
+        doctor.setExaminationFee(request.getExaminationFee());
+        doctor.setClinicAddress(request.getClinicAddress());
 
         entityManager.merge(doctor);
 
@@ -37,7 +39,9 @@ public class CustomDoctorRepositoryImpl implements CustomDoctorRepository {
                 .bio(doctor.getBio())
                 .dob(doctor.getDob())
                 .email(doctor.getEmail())
-                .fullname(doctor.getFullname())
+                .fullName(doctor.getFullname())
+                .examinationFee(doctor.getExaminationFee())
+                .clinicAddress(doctor.getClinicAddress())
                 .gender(doctor.getGender())
                 .phone(doctor.getPhone())
                 .specialty(doctor.getSpecialty())

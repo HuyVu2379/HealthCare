@@ -7,7 +7,6 @@ import fit.iuh.student.schedulingservice.dtos.responses.TimeSlotResponse;
 import fit.iuh.student.schedulingservice.services.TimeSlotService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

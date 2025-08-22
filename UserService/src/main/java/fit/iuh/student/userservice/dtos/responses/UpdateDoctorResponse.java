@@ -18,11 +18,13 @@ import java.util.List;
 public class UpdateDoctorResponse {
     private String userId;
     private String email;
-    private String fullname;
+    private String fullName;
     private Gender gender;
     private LocalDate dob;
     private String phone;
     private String address;
+    private Integer examinationFee;
+    private String clinicAddress;
     private String avatarUrl;
     private Role role;
 

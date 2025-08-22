@@ -17,9 +17,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MedicalHistory extends BaseEntity {
-    public MedicalHistory(Patient patient, String condition, LocalDate diagnosisDate, String notes){
+    public MedicalHistory(Patient patient,Doctor doctor, String serviceName, LocalDate diagnosisDate, String notes){
         this.patient = patient;
-        this.condition = condition;
+        this.serviceName = serviceName;
         this.diagnosisDate = diagnosisDate;
         this.notes = notes;
     }
@@ -33,11 +33,14 @@ public class MedicalHistory extends BaseEntity {
     @JsonIgnore
     private Patient patient;
 
-    @Column(name = "condition", nullable = false)
-    private String condition;
-    
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Doctor doctor;
+
+    @Column(name = "service_name", nullable = false)
+    private String serviceName;
+
     @Column(name = "diagnosis_date", nullable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate diagnosisDate;
     
     @Column(name = "notes", columnDefinition = "TEXT")

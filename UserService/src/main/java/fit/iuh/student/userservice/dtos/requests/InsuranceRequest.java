@@ -5,17 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.sql.Date;
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MedicalHistoryRequest {
-    private String userId;
-
-    private String condition;
-
-    private LocalDate diagnosisDate;
-
-    private String notes;
+public class InsuranceRequest {
+    private String insuranceId;
+    private String insuranceName;
+    private Date insuranceEndDate;
+    private String patientId;
 }

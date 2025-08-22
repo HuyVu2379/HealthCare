@@ -27,6 +27,9 @@ public class DoctorResponse {
     private Role role;
     private Status status;
     private String specialty;
+    private Integer examinationFee;
+    private String clinicAddress;
+    private double rating;
     private Integer experienceYears;
     private String bio;
     private List<String> certifications;
