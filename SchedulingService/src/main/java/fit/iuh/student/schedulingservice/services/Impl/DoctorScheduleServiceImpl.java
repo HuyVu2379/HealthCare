@@ -2,12 +2,14 @@ package fit.iuh.student.schedulingservice.services.Impl;
 
 import fit.iuh.student.schedulingservice.dtos.requests.BulkCreateScheduleRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.CreateDoctorScheduleRequest;
+import fit.iuh.student.schedulingservice.dtos.requests.UpdateDoctorSchedule;
 import fit.iuh.student.schedulingservice.dtos.responses.BulkCreateDoctorScheduleResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.DoctorScheduleResponse;
 import fit.iuh.student.schedulingservice.entities.DoctorSchedule;
 import fit.iuh.student.schedulingservice.entities.TimeSlot;
 import fit.iuh.student.schedulingservice.exceptions.errors.BadRequestException;
 import fit.iuh.student.schedulingservice.exceptions.errors.DuplicationDoctorScheduleException;
+import fit.iuh.student.schedulingservice.exceptions.errors.UserNotFoundException;
 import fit.iuh.student.schedulingservice.mappers.DoctorScheduleMapper;
 import fit.iuh.student.schedulingservice.repositories.DoctorScheduleRepository;
 import fit.iuh.student.schedulingservice.repositories.TimeSlotRepository;
@@ -133,5 +135,21 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
     @Override
     public List<String> getDoctorIdsByDate(Date date) {
         return doctorScheduleRepository.findDoctorIdsByDate(date);
+    }
+
+    @Override
+    public boolean updateDoctorSchedule(UpdateDoctorSchedule request) {
+        try{
+            DoctorSchedule doctorSchedule = doctorScheduleRepository.findById(request.getScheduleId())
+                    .orElseThrow(() -> new UserNotFoundException("Doctor schedule not found"));
+            List<TimeSlot> timeSlotList = timeSlotRepository.findAllById(request.getTimeSlotIds());
+            for (TimeSlot timeSlot : timeSlotList) {
+                doctorSchedule.removeTimeSlot(timeSlot);
+            }
+            doctorScheduleRepository.save(doctorSchedule);
+            return true;
+        }catch (Exception e){
+            throw e;
+        }
     }
 }

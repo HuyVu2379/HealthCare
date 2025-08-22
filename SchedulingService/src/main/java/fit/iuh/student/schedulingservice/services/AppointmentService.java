@@ -1,5 +1,7 @@
 package fit.iuh.student.schedulingservice.services;
 
+import fit.iuh.student.schedulingservice.dtos.requests.CreateAppointmentRequest;
+import fit.iuh.student.schedulingservice.entities.Appointment;
 import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
 
 import java.sql.Date;
@@ -15,7 +17,7 @@ public interface AppointmentService {
     void updateAppointmentStatus(
             String appointmentId, String userId, AppointmentStatus status
     );
-    void bookingAppointment();
+    Appointment bookingAppointment(CreateAppointmentRequest appointment);
     void cancelAppointment(String appointmentId, String userId);
     void getAppointmentByPatientId();
     void getAppointmentDetailById(String appointmentId);

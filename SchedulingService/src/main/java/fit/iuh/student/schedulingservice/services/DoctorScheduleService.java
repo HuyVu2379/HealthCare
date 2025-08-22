@@ -2,6 +2,7 @@ package fit.iuh.student.schedulingservice.services;
 
 import fit.iuh.student.schedulingservice.dtos.requests.BulkCreateScheduleRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.CreateDoctorScheduleRequest;
+import fit.iuh.student.schedulingservice.dtos.requests.UpdateDoctorSchedule;
 import fit.iuh.student.schedulingservice.dtos.responses.BulkCreateDoctorScheduleResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.DoctorScheduleResponse;
 
@@ -15,4 +16,5 @@ public interface DoctorScheduleService {
     DoctorScheduleResponse getDoctorScheduleByDate(String doctorId, Date date);
     // Lấy danh sách bác sĩ có lịch làm việc trong ngày
     List<String> getDoctorIdsByDate(Date date);
+    boolean updateDoctorSchedule(UpdateDoctorSchedule request);
 }

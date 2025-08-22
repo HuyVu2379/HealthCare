@@ -2,6 +2,7 @@ package fit.iuh.student.schedulingservice.controllers;
 
 import fit.iuh.student.schedulingservice.dtos.requests.BulkCreateScheduleRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.CreateDoctorScheduleRequest;
+import fit.iuh.student.schedulingservice.dtos.requests.UpdateDoctorSchedule;
 import fit.iuh.student.schedulingservice.dtos.responses.BulkCreateDoctorScheduleResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.DoctorScheduleResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.MessageResponse;
@@ -43,17 +44,9 @@ public class DoctorScheduleController {
 
     @DeleteMapping("/remove-timeSlots/{scheduleId}")
     public ResponseEntity<MessageResponse<Boolean>> updateTimeSlots(
-            @PathVariable String scheduleId,
-            @RequestParam("timeSlotIds") Integer[] timeSlotIds
-    ) {
-        DoctorSchedule doctorSchedule = doctorScheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new UserNotFoundException("Doctor schedule not found"));
-        List<TimeSlot> timeSlotList = timeSlotRepository.findAllById(List.of(timeSlotIds));
-        for (TimeSlot timeSlot : timeSlotList) {
-            doctorSchedule.removeTimeSlot(timeSlot);
-        }
-        doctorScheduleRepository.save(doctorSchedule);
-        return SuccessEntityResponse.ok("Time slots updated successfully", true);
+            @RequestBody UpdateDoctorSchedule request
+            ) {
+        return SuccessEntityResponse.ok("Time slots updated successfully", doctorScheduleService.updateDoctorSchedule(request));
     }
     @GetMapping("/getDoctorScheduleByDoctorIdAndDate")
     public ResponseEntity<MessageResponse<DoctorScheduleResponse>> getDoctorScheduleByDoctorIdAndDate(
