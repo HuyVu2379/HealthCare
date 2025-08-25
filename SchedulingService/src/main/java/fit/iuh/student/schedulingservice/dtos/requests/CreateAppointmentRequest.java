@@ -23,7 +23,6 @@ public class CreateAppointmentRequest {
     private String note;
     private int slotId;
     private AppointmentStatus status = AppointmentStatus.PENDING;
-    private Date appointmentDate;
     private ConsultationType consultationType;
     private String addressDetail;
 }

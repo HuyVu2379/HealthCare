@@ -4,6 +4,7 @@ import fit.iuh.student.schedulingservice.dtos.requests.CreateAppointmentRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.UpdateAppointmentRequest;
 import fit.iuh.student.schedulingservice.dtos.responses.AppointmentResponse;
 import fit.iuh.student.schedulingservice.entities.Appointment;
+import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
 import org.springframework.data.domain.Page;
 
 public interface AppointmentService {
@@ -18,9 +19,10 @@ public interface AppointmentService {
 //            String appointmentId, String userId, AppointmentStatus status
 //    );
     AppointmentResponse bookingAppointment(CreateAppointmentRequest appointment);
-    Page<AppointmentResponse> getAppointmentByPatientIdWithPage(String patientId, int page, int size, String sortBy, String sortDir);
+    Page<AppointmentResponse> getAppointmentByPatientIdWithPage(String patientId, int page, int size, String sortBy,String startTime,String endTime, String sortDir);
     boolean cancelAppointment(String appointmentId, String userId);
     Appointment rescheduleAppointment(UpdateAppointmentRequest request);
+    AppointmentResponse updateAppointmentStatus(String appointmentId, AppointmentStatus status);
 //    void cancelAppointment(String appointmentId, String userId);
 //    void getAppointmentByPatientId();
 //    void getAppointmentDetailById(String appointmentId);

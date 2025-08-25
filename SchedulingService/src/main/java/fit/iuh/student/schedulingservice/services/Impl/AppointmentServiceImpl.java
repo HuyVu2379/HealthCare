@@ -22,6 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
+
 @Service
 @RequiredArgsConstructor
 public class AppointmentServiceImpl implements AppointmentService {
@@ -45,7 +47,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .slotId(request.getSlotId())
                     .status(request.getStatus())
                     .timeSlot(timeSlotRepository.findById(request.getSlotId()).orElse(null))
-                    .appointmentDate(request.getAppointmentDate())
+                    .appointmentDate(doctorSchedule.getWorkDate())
                     .consultationType(request.getConsultationType())
                     .addressDetail(request.getAddressDetail())
                     .doctorSchedule(doctorScheduleRepository.findById(request.getScheduleId()).orElse(null))
@@ -84,7 +86,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Page<AppointmentResponse> getAppointmentByPatientIdWithPage(String patientId, int page, int size, String sortBy, String sortDir) {
+    public Page<AppointmentResponse> getAppointmentByPatientIdWithPage(String patientId, int page, int size, String sortBy,String startTime,String endTime, String sortDir) {
         try {
             if (sortBy == null || sortBy.isEmpty()) {
                 sortBy = "createdAt";
@@ -94,10 +96,11 @@ public class AppointmentServiceImpl implements AppointmentService {
             if (sortDir != null && sortDir.equalsIgnoreCase("DESC")) {
                 direction = Sort.Direction.DESC;
             }
-
+            Date start = Date.valueOf(startTime);
+            Date end = Date.valueOf(endTime);
             Sort sort = Sort.by(direction, sortBy);
             Pageable pageable = PageRequest.of(page, size, sort);
-            Page<Appointment> app = appointmentRepository.findAppointmentByPatientIdWithPage(patientId, pageable);
+            Page<Appointment> app = appointmentRepository.findAppointmentByPatientIdWithPage(patientId, start, end, pageable);
             
             // Check if there are any appointments before accessing the first one
             if (app.getContent().isEmpty()) {
@@ -170,5 +173,10 @@ public class AppointmentServiceImpl implements AppointmentService {
         }catch (Exception e){
             throw e;
         }
+    }
+
+    @Override
+    public AppointmentResponse updateAppointmentStatus(String appointmentId, AppointmentStatus status) {
+        return null;
     }
 }

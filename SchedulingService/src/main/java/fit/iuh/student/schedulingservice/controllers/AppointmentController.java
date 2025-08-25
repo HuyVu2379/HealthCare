@@ -37,10 +37,12 @@ public class AppointmentController {
             @RequestParam String patientId,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value ="startTime") String startTime,
+            @RequestParam(value ="endTime") String endTime,
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir
     ){
         return SuccessEntityResponse.ok("Get appointment by patient id successfully",
-                appointmentService.getAppointmentByPatientIdWithPage(patientId, page, size, sortBy, sortDir));
+                appointmentService.getAppointmentByPatientIdWithPage(patientId, page, size, sortBy, startTime, endTime, sortDir));
     }
 }
