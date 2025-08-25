@@ -1,9 +1,46 @@
 package fit.iuh.student.schedulingservice.controllers;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import fit.iuh.student.schedulingservice.dtos.requests.CreateAppointmentRequest;
+import fit.iuh.student.schedulingservice.dtos.responses.AppointmentResponse;
+import fit.iuh.student.schedulingservice.dtos.responses.MessageResponse;
+import fit.iuh.student.schedulingservice.dtos.responses.SuccessEntityResponse;
+import fit.iuh.student.schedulingservice.services.AppointmentService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/appointments")
+@RequiredArgsConstructor
 public class AppointmentController {
+    private final AppointmentService appointmentService;
+
+    @PostMapping("/booking-appointment")
+    public ResponseEntity<MessageResponse<AppointmentResponse>> bookingAppointment(
+            @RequestBody CreateAppointmentRequest request
+            ) {
+        return SuccessEntityResponse.created("Booking appointment successfully",
+                appointmentService.bookingAppointment(request));
+    }
+    @DeleteMapping("/{appointmentId}/cancel")
+    public ResponseEntity<MessageResponse<Boolean>> cancelAppointment(
+            @PathVariable String appointmentId,
+            @RequestParam String userId
+    ) {
+        return SuccessEntityResponse.ok("Cancel appointment successfully",
+                appointmentService.cancelAppointment(appointmentId, userId));
+    }
+
+    @GetMapping("/get-appointment-with-patientId")
+    public ResponseEntity<MessageResponse<Page<AppointmentResponse>>> getAppointmentByPatientId(
+            @RequestParam String patientId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir
+    ){
+        return SuccessEntityResponse.ok("Get appointment by patient id successfully",
+                appointmentService.getAppointmentByPatientIdWithPage(patientId, page, size, sortBy, sortDir));
+    }
 }

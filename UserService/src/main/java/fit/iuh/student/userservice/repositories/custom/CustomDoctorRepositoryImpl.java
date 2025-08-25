@@ -39,7 +39,7 @@ public class CustomDoctorRepositoryImpl implements CustomDoctorRepository {
                 .bio(doctor.getBio())
                 .dob(doctor.getDob())
                 .email(doctor.getEmail())
-                .fullName(doctor.getFullname())
+                .fullName(doctor.getFullName())
                 .examinationFee(doctor.getExaminationFee())
                 .clinicAddress(doctor.getClinicAddress())
                 .gender(doctor.getGender())

@@ -30,6 +30,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/refresh-token").permitAll()
                         .requestMatchers("/api/v1/users/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/doctors/getDoctorForClient/**").permitAll()
+                        .requestMatchers("/api/v1/patients/getPatientForClient/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

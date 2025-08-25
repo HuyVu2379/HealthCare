@@ -1,28 +1,27 @@
-package fit.iuh.student.schedulingservice.dtos.requests;
+package fit.iuh.student.schedulingservice.dtos.responses;
 
-import fit.iuh.student.schedulingservice.entities.TimeSlot;
+import fit.iuh.student.schedulingservice.clients.dtos.DoctorClientResponse;
+import fit.iuh.student.schedulingservice.clients.dtos.PatientClientResponse;
 import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
 import fit.iuh.student.schedulingservice.enums.ConsultationType;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateAppointmentRequest {
-    private String patientId;
-    private String scheduleId;
-    private String doctorId;
+public class AppointmentResponse {
+    private String appointmentId;
+    private DoctorClientResponse doctor;
+    private PatientClientResponse patient;
     private String symptoms;
     private String note;
-    private int slotId;
     private AppointmentStatus status = AppointmentStatus.PENDING;
+    private TimeSlotDTO timeSlot;
     private Date appointmentDate;
     private ConsultationType consultationType;
     private String addressDetail;

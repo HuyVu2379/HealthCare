@@ -28,8 +28,8 @@ public class User extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "fullname")
-    private String fullname;
+    @Column(name = "fullName")
+    private String fullName;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "gender")

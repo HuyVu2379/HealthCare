@@ -21,10 +21,13 @@ public class Appointment extends BaseEntity {
     private String appointmentId;
 
     @Column(name = "patient_id", nullable = false)
-    private Integer patientId;
+    private String patientId;
 
     @Column(name = "doctor_id", nullable = false)
-    private Integer doctorId;
+    private String doctorId;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private DoctorSchedule doctorSchedule;
 
     @Column(name = "symptoms", length = 500)
     private String symptoms;

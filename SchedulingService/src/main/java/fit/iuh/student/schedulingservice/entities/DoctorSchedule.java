@@ -43,6 +43,8 @@ public class DoctorSchedule extends BaseEntity {
     )
     private List<TimeSlot> timeSlots = new ArrayList<>();
 
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Appointment> appointments;
     // Helper methods
     public void addTimeSlot(TimeSlot timeSlot) {
         timeSlots.add(timeSlot);

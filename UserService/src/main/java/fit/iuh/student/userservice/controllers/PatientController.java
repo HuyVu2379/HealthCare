@@ -3,6 +3,7 @@ package fit.iuh.student.userservice.controllers;
 import fit.iuh.student.userservice.dtos.requests.MedicalHistoryRequest;
 import fit.iuh.student.userservice.dtos.requests.UpdatePatientRequest;
 import fit.iuh.student.userservice.dtos.responses.MessageResponse;
+import fit.iuh.student.userservice.dtos.responses.PatientClientResponse;
 import fit.iuh.student.userservice.dtos.responses.SuccessEntityResponse;
 import fit.iuh.student.userservice.dtos.responses.UpdatePatientResponse;
 import fit.iuh.student.userservice.entities.MedicalHistory;
@@ -40,5 +41,10 @@ public class PatientController {
             @RequestBody UpdatePatientRequest request
             ){
         return SuccessEntityResponse.ok("update patient success!",patientService.updatePatient(request));
+    }
+
+    @GetMapping("/getPatientForClient/{patientId}")
+    public PatientClientResponse getPatientForClient(@PathVariable String patientId){
+        return patientService.getPatientByIdForClient(patientId);
     }
 }

@@ -2,6 +2,7 @@ package fit.iuh.student.userservice.services;
 
 import fit.iuh.student.userservice.dtos.requests.UpdateDoctorCertificationRequest;
 import fit.iuh.student.userservice.dtos.requests.UpdateDoctorRequest;
+import fit.iuh.student.userservice.dtos.responses.DoctorClientResponse;
 import fit.iuh.student.userservice.dtos.responses.DoctorResponse;
 import fit.iuh.student.userservice.dtos.responses.UpdateDoctorCertificationResponse;
 import fit.iuh.student.userservice.dtos.responses.UpdateDoctorResponse;
@@ -13,4 +14,5 @@ public interface DoctorService {
     UpdateDoctorCertificationResponse updateDoctorCertification(UpdateDoctorCertificationRequest request, String doctorId);
     DoctorResponse getDoctorById(String doctorId);
     List<DoctorResponse> getDoctorByIds(List<String> doctorIds);
+    DoctorClientResponse getPatientByIdForClient(String patientId);
 }

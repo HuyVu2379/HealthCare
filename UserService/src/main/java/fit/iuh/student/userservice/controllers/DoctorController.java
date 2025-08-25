@@ -74,4 +74,11 @@ public class DoctorController {
         }
         return SuccessEntityResponse.ok("Get doctors by ids success",response);
     }
+    @GetMapping("/getDoctorForClient/{doctorId}")
+    public DoctorClientResponse getDoctorForClient(
+            @PathVariable String doctorId
+    )
+    {
+        return doctorService.getPatientByIdForClient(doctorId);
+    }
 }

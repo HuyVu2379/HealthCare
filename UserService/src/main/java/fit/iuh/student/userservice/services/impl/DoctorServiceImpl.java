@@ -2,6 +2,7 @@ package fit.iuh.student.userservice.services.impl;
 
 import fit.iuh.student.userservice.dtos.requests.UpdateDoctorCertificationRequest;
 import fit.iuh.student.userservice.dtos.requests.UpdateDoctorRequest;
+import fit.iuh.student.userservice.dtos.responses.DoctorClientResponse;
 import fit.iuh.student.userservice.dtos.responses.DoctorResponse;
 import fit.iuh.student.userservice.dtos.responses.UpdateDoctorCertificationResponse;
 import fit.iuh.student.userservice.dtos.responses.UpdateDoctorResponse;
@@ -52,5 +53,10 @@ public class DoctorServiceImpl implements DoctorService {
         return doctorRepository.findAllById(doctorIds).stream()
                 .map(userMapper::toDoctorResponse)
                 .toList();
+    }
+
+    @Override
+    public DoctorClientResponse getPatientByIdForClient(String patientId) {
+        return userMapper.toDoctorClientResponse(doctorRepository.findById(patientId).get());
     }
 }
