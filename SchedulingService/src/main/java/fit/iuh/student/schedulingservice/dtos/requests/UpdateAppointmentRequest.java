@@ -16,6 +16,5 @@ public class UpdateAppointmentRequest {
     private String oldScheduleId;
     private String newScheduleId;
     private Integer oldSlotId;
-    private Date newAppointmentDate;
     private Integer newSlotId;
 }

@@ -458,7 +458,7 @@ public class EmailServiceImpl implements EmailService {
             // Check if patient and email are not null before setting recipient
             if (payload.getPatient() != null && payload.getPatient().getEmail() != null) {
                 helper.setTo(payload.getPatient().getEmail());
-                helper.setSubject("❌ Thông báo hủy lịch khám - Mã: " + (payload.getAppointmentId() != null ? payload.getAppointmentId() : ""));
+                helper.setSubject("Thông báo hủy lịch khám - Mã: " + (payload.getAppointmentId() != null ? payload.getAppointmentId() : ""));
                 helper.setText(htmlBody, true);
                 
                 mailSender.send(message);
@@ -483,6 +483,361 @@ public class EmailServiceImpl implements EmailService {
                     String email = payload.getPatient().getEmail() != null ? 
                         payload.getPatient().getEmail() : "unknown";
                     logger.info("Cancellation email sent to: {}", email);
+                }
+            } catch (Exception ex) {
+                logger.error("Failed to save notification", ex);
+            }
+        }
+    }
+    
+    @Override
+    public void sendEmailRescheduleAppointment(AppointmentEventPayload payload) {
+        try {
+            String htmlBody = "<!DOCTYPE html>\n" +
+                    "<html lang=\"vi\">\n" +
+                    "  <head>\n" +
+                    "    <meta charset=\"UTF-8\" />\n" +
+                    "    <title>Thông báo thay đổi lịch khám</title>\n" +
+                    "    <style>\n" +
+                    "      body { font-family: Arial, sans-serif; background-color: #f6f6f6; margin: 0; padding: 0; }\n" +
+                    "      .container { max-width: 650px; margin: 40px auto; background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); }\n" +
+                    "      .header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid #eee; }\n" +
+                    "      .header h1 { color: #ff8c00; margin: 0; }\n" +
+                    "      .content { padding: 20px 0; font-size: 16px; color: #333; }\n" +
+                    "      .appointment-details { background-color: #fff8e1; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ff8c00; }\n" +
+                    "      .old-appointment { background-color: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #f44336; }\n" +
+                    "      .new-appointment { background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #4caf50; }\n" +
+                    "      .detail-row { margin: 8px 0; }\n" +
+                    "      .detail-label { font-weight: bold; display: inline-block; width: 150px; }\n" +
+                    "      .old-label { color: #f44336; }\n" +
+                    "      .new-label { color: #4caf50; }\n" +
+                    "      .highlight { background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border: 1px solid #ffeaa7; text-align: center; }\n" +
+                    "      .reschedule-badge { background-color: #ffeaa7; color: #856404; padding: 8px 15px; border-radius: 20px; font-weight: bold; display: inline-block; }\n" +
+                    "      .status-header { text-align: center; margin: 20px 0; }\n" +
+                    "      .footer { font-size: 13px; color: #777; text-align: center; margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px; }\n" +
+                    "    </style>\n" +
+                    "  </head>\n" +
+                    "  <body>\n" +
+                    "    <div class=\"container\">\n" +
+                    "      <div class=\"header\">\n" +
+                    "        <h1>Thông báo thay đổi lịch khám</h1>\n" +
+                    "        <div class=\"reschedule-badge\">Đã thay đổi</div>\n" +
+                    "      </div>\n" +
+                    "      <div class=\"content\">\n" +
+                    "        <p>Xin chào <strong>{{patientName}}</strong>,</p>\n" +
+                    "        <p>Chúng tôi xin thông báo rằng lịch khám của bạn đã được thay đổi thời gian. Dưới đây là thông tin chi tiết:</p>\n" +
+                    "        \n" +
+                    "        <div class=\"appointment-details\">\n" +
+                    "          <h3 style=\"margin-top: 0; color: #ff8c00;\">📋 Thông tin lịch khám</h3>\n" +
+                    "          <div class=\"detail-row\">\n" +
+                    "            <span class=\"detail-label\">Mã lịch khám:</span>\n" +
+                    "            <span>{{appointmentId}}</span>\n" +
+                    "          </div>\n" +
+                    "          <div class=\"detail-row\">\n" +
+                    "            <span class=\"detail-label\">Bác sĩ:</span>\n" +
+                    "            <span>{{doctorName}} - {{specialty}}</span>\n" +
+                    "          </div>\n" +
+                    "          <div class=\"detail-row\">\n" +
+                    "            <span class=\"detail-label\">Hình thức:</span>\n" +
+                    "            <span>{{consultationType}}</span>\n" +
+                    "          </div>\n" +
+                    "          <div class=\"detail-row\">\n" +
+                    "            <span class=\"detail-label\">Địa chỉ:</span>\n" +
+                    "            <span>{{clinicAddress}}</span>\n" +
+                    "          </div>\n" +
+                    "        </div>\n" +
+                    "        \n" +
+                    "        <div class=\"status-header\">\n" +
+                    "          <h3 style=\"color: #ff8c00; margin: 25px 0 15px 0;\">📅 Thay đổi thời gian</h3>\n" +
+                    "        </div>\n" +
+                    "        \n" +
+                    "        <div class=\"old-appointment\">\n" +
+                    "          <h4 style=\"margin-top: 0; color: #f44336;\">❌ Thời gian cũ</h4>\n" +
+                    "          <div class=\"detail-row\">\n" +
+                    "            <span class=\"detail-label old-label\">Ngày khám:</span>\n" +
+                    "            <span>{{oldAppointmentDate}}</span>\n" +
+                    "          </div>\n" +
+                    "          <div class=\"detail-row\">\n" +
+                    "            <span class=\"detail-label old-label\">Thời gian:</span>\n" +
+                    "            <span>{{oldTimeSlot}}</span>\n" +
+                    "          </div>\n" +
+                    "        </div>\n" +
+                    "        \n" +
+                    "        <div class=\"new-appointment\">\n" +
+                    "          <h4 style=\"margin-top: 0; color: #4caf50;\">✅ Thời gian mới</h4>\n" +
+                    "          <div class=\"detail-row\">\n" +
+                    "            <span class=\"detail-label new-label\">Ngày khám:</span>\n" +
+                    "            <span>{{appointmentDate}}</span>\n" +
+                    "          </div>\n" +
+                    "          <div class=\"detail-row\">\n" +
+                    "            <span class=\"detail-label new-label\">Thời gian:</span>\n" +
+                    "            <span>{{timeSlot}}</span>\n" +
+                    "          </div>\n" +
+                    "        </div>\n" +
+                    "        \n" +
+                    "        <div class=\"appointment-details\">\n" +
+                    "          <div class=\"detail-row\">\n" +
+                    "            <span class=\"detail-label\">Lý do thay đổi:</span>\n" +
+                    "            <span>{{rescheduleReason}}</span>\n" +
+                    "          </div>\n" +
+                    "        </div>\n" +
+                    "        \n" +
+                    "        <div class=\"highlight\">\n" +
+                    "          <strong>Vui lòng có mặt trước 15 phút so với giờ hẹn mới</strong>\n" +
+                    "        </div>\n" +
+                    "        \n" +
+                    "        <p><strong>Lưu ý quan trọng:</strong></p>\n" +
+                    "        <ul>\n" +
+                    "          <li>Mang theo CCCD/CMND và các giấy tờ y tế liên quan</li>\n" +
+                    "          <li>Nếu cần thay đổi thêm, vui lòng thông báo trước ít nhất 2 giờ</li>\n" +
+                    "          <li>Liên hệ hotline: 1900-xxxx nếu có thắc mắc</li>\n" +
+                    "        </ul>\n" +
+                    "        \n" +
+                    "        <p>Chúng tôi rất tiếc vì sự bất tiện này và cảm ơn sự thông cảm của bạn.</p>\n" +
+                    "        <p>Trân trọng,<br /><strong>Đ���i ngũ chăm sóc khách hàng</strong></p>\n" +
+                    "      </div>\n" +
+                    "      <div class=\"footer\">\n" +
+                    "        © 2025 Hệ thống chăm sóc sức khỏe Health Care. Mọi quyền được bảo lưu.\n" +
+                    "      </div>\n" +
+                    "    </div>\n" +
+                    "  </body>\n" +
+                    "</html>";
+
+            // Format consultation type
+            String consultationTypeText = payload.getConsultationType() != null ?
+                (payload.getConsultationType().toString().equals("ONLINE") ? "Khám trực tuyến" : "Khám tại phòng khám") :
+                "Không xác định";
+
+            // Format time slot (new time)
+            String timeSlotText = payload.getTimeSlot() != null ?
+                (payload.getTimeSlot().getStartTime() != null && payload.getTimeSlot().getEndTime() != null ?
+                    payload.getTimeSlot().getStartTime() + " - " + payload.getTimeSlot().getEndTime() :
+                    "Không xác định") :
+                "Không xác định";
+
+            // Format appointment date (new date)
+            String appointmentDateText = payload.getAppointmentDate() != null ?
+                payload.getAppointmentDate().toString() :
+                "Không xác định";
+
+            // Format old appointment data (assuming these would be provided in payload or could be retrieved)
+            String oldAppointmentDateText = payload.getOldAppointmentDate() != null ?
+                payload.getOldAppointmentDate().toString() :
+                "Không xác định";
+
+            String oldTimeSlotText = payload.getOldTimeSlot() != null ?
+                (payload.getOldTimeSlot().getStartTime() != null && payload.getOldTimeSlot().getEndTime() != null ?
+                    payload.getOldTimeSlot().getStartTime() + " - " + payload.getOldTimeSlot().getEndTime() :
+                    "Không xác định") :
+                "Không xác định";
+
+            // Determine reschedule reason
+            String rescheduleReason = payload.getNote() != null && !payload.getNote().trim().isEmpty()
+                    ? payload.getNote()
+                    : "Theo yêu cầu của phòng khám";
+
+            // Replace placeholders with actual values
+            htmlBody = htmlBody.replace("{{patientName}}", payload.getPatient() != null && payload.getPatient().getFullName() != null ? payload.getPatient().getFullName() : "Bệnh nhân")
+                    .replace("{{appointmentId}}", payload.getAppointmentId() != null ? payload.getAppointmentId() : "")
+                    .replace("{{doctorName}}", payload.getDoctor() != null && payload.getDoctor().getFullName() != null ? payload.getDoctor().getFullName() : "")
+                    .replace("{{specialty}}", payload.getDoctor() != null && payload.getDoctor().getSpecialty() != null ? payload.getDoctor().getSpecialty() : "")
+                    .replace("{{appointmentDate}}", appointmentDateText)
+                    .replace("{{timeSlot}}", timeSlotText)
+                    .replace("{{oldAppointmentDate}}", oldAppointmentDateText)
+                    .replace("{{oldTimeSlot}}", oldTimeSlotText)
+                    .replace("{{consultationType}}", consultationTypeText)
+                    .replace("{{clinicAddress}}", payload.getDoctor() != null && payload.getDoctor().getClinicAddress() != null ? payload.getDoctor().getClinicAddress() : "Không có")
+                    .replace("{{rescheduleReason}}", rescheduleReason);
+
+            // Check if patient and email are not null before setting recipient
+            if (payload.getPatient() != null && payload.getPatient().getEmail() != null) {
+                helper.setTo(payload.getPatient().getEmail());
+                helper.setSubject("🔄 Thông báo thay đổi lịch khám - Mã: " + (payload.getAppointmentId() != null ? payload.getAppointmentId() : ""));
+                helper.setText(htmlBody, true);
+
+                mailSender.send(message);
+            } else {
+                logger.error("Cannot send reschedule email: patient or email is null");
+            }
+        } catch (Exception e) {
+            String email = payload.getPatient() != null && payload.getPatient().getEmail() != null ?
+                payload.getPatient().getEmail() : "unknown";
+            logger.error("Failed to send reschedule email to: {}", email, e);
+        } finally {
+            try {
+                if (payload.getPatient() != null && payload.getPatient().getUserId() != null) {
+                    Notification notification = Notification.builder()
+                            .recipient_id(payload.getPatient().getUserId())
+                            .type(NotificationType.EMAIL)
+                            .message("Thông báo thay đổi lịch khám - Mã: " +
+                                (payload.getAppointmentId() != null ? payload.getAppointmentId() : ""))
+                            .build();
+                    notificationRepository.save(notification);
+
+                    String email = payload.getPatient().getEmail() != null ?
+                        payload.getPatient().getEmail() : "unknown";
+                    logger.info("Reschedule email sent to: {}", email);
+                }
+            } catch (Exception ex) {
+                logger.error("Failed to save notification", ex);
+            }
+        }
+    }
+
+    @Override
+    public void sendEmailConfirmAppointmentStatus(AppointmentEventPayload payload) {
+        // Implementation will be added in future updates
+        logger.warn("sendEmailConfirmAppointmentStatus not implemented yet");
+    }
+
+    @Override
+    public void sendEmailCompleteAppointmentStatus(AppointmentEventPayload payload) {
+        // Implementation will be added in future updates
+        logger.warn("sendEmailCompleteAppointmentStatus not implemented yet");
+    }
+
+    @Override
+    public void sendEmailRejectAppointmentStatus(AppointmentEventPayload payload) {
+        // Implementation will be added in future updates
+        logger.warn("sendEmailRejectAppointmentStatus not implemented yet");
+    }
+    
+    @Override
+    public void sendEmailRemindAppointment(AppointmentEventPayload payload) {
+        try {
+            String htmlBody = "<!DOCTYPE html>\n" +
+                    "<html lang=\"vi\">\n" +
+                    "  <head>\n" +
+                    "    <meta charset=\"UTF-8\" />\n" +
+                    "    <title>Nhắc nhở lịch khám</title>\n" +
+                    "    <style>\n" +
+                    "      body { font-family: Arial, sans-serif; background-color: #f6f6f6; margin: 0; padding: 0; }\n" +
+                    "      .container { max-width: 650px; margin: 40px auto; background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); }\n" +
+                    "      .header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid #eee; }\n" +
+                    "      .header h1 { color: #007bff; margin: 0; }\n" +
+                    "      .content { padding: 20px 0; font-size: 16px; color: #333; }\n" +
+                    "      .appointment-details { background-color: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff; }\n" +
+                    "      .detail-row { margin: 8px 0; }\n" +
+                    "      .detail-label { font-weight: bold; color: #007bff; display: inline-block; width: 150px; }\n" +
+                    "      .highlight { background-color: #e6f7ff; padding: 15px; border-radius: 5px; margin: 15px 0; text-align: center; }\n" +
+                    "      .reminder-badge { background-color: #cce5ff; color: #004085; padding: 8px 15px; border-radius: 20px; font-weight: bold; display: inline-block; }\n" +
+                    "      .footer { font-size: 13px; color: #777; text-align: center; margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px; }\n" +
+                    "    </style>\n" +
+                    "  </head>\n" +
+                    "  <body>\n" +
+                    "    <div class=\"container\">\n" +
+                    "      <div class=\"header\">\n" +
+                    "        <h1>Nhắc nhở lịch khám</h1>\n" +
+                    "        <div class=\"reminder-badge\">Sắp diễn ra</div>\n" +
+                    "      </div>\n" +
+                    "      <div class=\"content\">\n" +
+                    "        <p>Xin chào <strong>{{patientName}}</strong>,</p>\n" +
+                    "        <p>Chúng tôi xin nhắc nhở bạn về lịch khám sắp tới. Dưới đây là thông tin chi tiết:</p>\n" +
+                    "        \n" +
+                    "        <div class=\"appointment-details\">\n" +
+                    "          <h3 style=\"margin-top: 0; color: #007bff;\">📋 Thông tin lịch khám</h3>\n" +
+                    "          <div class=\"detail-row\">\n" +
+                    "            <span class=\"detail-label\">Mã lịch khám:</span>\n" +
+                    "            <span>{{appointmentId}}</span>\n" +
+                    "          </div>\n" +
+                    "          <div class=\"detail-row\">\n" +
+                    "            <span class=\"detail-label\">Bác sĩ:</span>\n" +
+                    "            <span>{{doctorName}} - {{specialty}}</span>\n" +
+                    "          </div>\n" +
+                    "          <div class=\"detail-row\">\n" +
+                    "            <span class=\"detail-label\">Ngày khám:</span>\n" +
+                    "            <span>{{appointmentDate}}</span>\n" +
+                    "          </div>\n" +
+                    "          <div class=\"detail-row\">\n" +
+                    "            <span class=\"detail-label\">Thời gian:</span>\n" +
+                    "            <span>{{timeSlot}}</span>\n" +
+                    "          </div>\n" +
+                    "          <div class=\"detail-row\">\n" +
+                    "            <span class=\"detail-label\">Hình thức:</span>\n" +
+                    "            <span>{{consultationType}}</span>\n" +
+                    "          </div>\n" +
+                    "          <div class=\"detail-row\">\n" +
+                    "            <span class=\"detail-label\">Địa chỉ:</span>\n" +
+                    "            <span>{{clinicAddress}}</span>\n" +
+                    "          </div>\n" +
+                    "        </div>\n" +
+                    "        \n" +
+                    "        <div class=\"highlight\">\n" +
+                    "          <strong>Vui lòng có mặt trước 15 phút so với giờ hẹn</strong>\n" +
+                    "        </div>\n" +
+                    "        \n" +
+                    "        <p><strong>Lưu ý quan trọng:</strong></p>\n" +
+                    "        <ul>\n" +
+                    "          <li>Mang theo CCCD/CMND và các giấy tờ y tế liên quan</li>\n" +
+                    "          <li>Nếu cần hủy lịch, vui lòng thông báo trước ít nhất 2 giờ</li>\n" +
+                    "          <li>Liên hệ hotline: 1900-xxxx nếu cần hỗ trợ</li>\n" +
+                    "        </ul>\n" +
+                    "        \n" +
+                    "        <p>Cảm ơn b��n đã tin tưởng dịch vụ của chúng tôi!</p>\n" +
+                    "        <p>Trân trọng,<br /><strong>Đội ngũ chăm sóc khách hàng</strong></p>\n" +
+                    "      </div>\n" +
+                    "      <div class=\"footer\">\n" +
+                    "        © 2025 Hệ thống chăm sóc sức khỏe Health Care. Mọi quyền được bảo lưu.\n" +
+                    "      </div>\n" +
+                    "    </div>\n" +
+                    "  </body>\n" +
+                    "</html>";
+
+            // Format consultation type
+            String consultationTypeText = payload.getConsultationType() != null ? 
+                (payload.getConsultationType().toString().equals("ONLINE") ? "Khám trực tuyến" : "Khám tại phòng khám") : 
+                "Không xác định";
+
+            // Format time slot
+            String timeSlotText = payload.getTimeSlot() != null ? 
+                (payload.getTimeSlot().getStartTime() != null && payload.getTimeSlot().getEndTime() != null ? 
+                    payload.getTimeSlot().getStartTime() + " - " + payload.getTimeSlot().getEndTime() : 
+                    "Không xác định") : 
+                "Không xác định";
+
+            // Format appointment date
+            String appointmentDateText = payload.getAppointmentDate() != null ? 
+                payload.getAppointmentDate().toString() : 
+                "Không xác định";
+
+            // Replace placeholders with actual values
+            htmlBody = htmlBody.replace("{{patientName}}", payload.getPatient() != null && payload.getPatient().getFullName() != null ? payload.getPatient().getFullName() : "Bệnh nhân")
+                    .replace("{{appointmentId}}", payload.getAppointmentId() != null ? payload.getAppointmentId() : "")
+                    .replace("{{doctorName}}", payload.getDoctor() != null && payload.getDoctor().getFullName() != null ? payload.getDoctor().getFullName() : "")
+                    .replace("{{specialty}}", payload.getDoctor() != null && payload.getDoctor().getSpecialty() != null ? payload.getDoctor().getSpecialty() : "")
+                    .replace("{{appointmentDate}}", appointmentDateText)
+                    .replace("{{timeSlot}}", timeSlotText)
+                    .replace("{{consultationType}}", consultationTypeText)
+                    .replace("{{clinicAddress}}", payload.getDoctor() != null && payload.getDoctor().getClinicAddress() != null ? payload.getDoctor().getClinicAddress() : "Không có");
+
+            // Check if patient and email are not null before setting recipient
+            if (payload.getPatient() != null && payload.getPatient().getEmail() != null) {
+                helper.setTo(payload.getPatient().getEmail());
+                helper.setSubject("⏰ Nhắc nhở lịch khám - Mã: " + (payload.getAppointmentId() != null ? payload.getAppointmentId() : ""));
+                helper.setText(htmlBody, true);
+                
+                mailSender.send(message);
+            } else {
+                logger.error("Cannot send reminder email: patient or email is null");
+            }
+        } catch (Exception e) {
+            String email = payload.getPatient() != null && payload.getPatient().getEmail() != null ? 
+                payload.getPatient().getEmail() : "unknown";
+            logger.error("Failed to send reminder email to: {}", email, e);
+        } finally {
+            try {
+                if (payload.getPatient() != null && payload.getPatient().getUserId() != null) {
+                    Notification notification = Notification.builder()
+                            .recipient_id(payload.getPatient().getUserId())
+                            .type(NotificationType.EMAIL)
+                            .message("Nhắc nhở lịch khám - Mã: " + 
+                                (payload.getAppointmentId() != null ? payload.getAppointmentId() : ""))
+                            .build();
+                    notificationRepository.save(notification);
+                    
+                    String email = payload.getPatient().getEmail() != null ? 
+                        payload.getPatient().getEmail() : "unknown";
+                    logger.info("Reminder email sent to: {}", email);
                 }
             } catch (Exception ex) {
                 logger.error("Failed to save notification", ex);

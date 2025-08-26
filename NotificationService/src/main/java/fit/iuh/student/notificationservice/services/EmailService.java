@@ -8,4 +8,9 @@ public interface EmailService {
     void sendOtpResetPasswordEmail(UserEventPayload payload);
     void sendEmailBookingAppointment(AppointmentEventPayload payload);
     void sendEmailCancelAppointment(AppointmentEventPayload payload);
+    void sendEmailRescheduleAppointment(AppointmentEventPayload payload);
+    void sendEmailConfirmAppointmentStatus(AppointmentEventPayload payload);
+    void sendEmailCompleteAppointmentStatus(AppointmentEventPayload payload);
+    void sendEmailRejectAppointmentStatus(AppointmentEventPayload payload);
+    void sendEmailRemindAppointment(AppointmentEventPayload payload);
 }
