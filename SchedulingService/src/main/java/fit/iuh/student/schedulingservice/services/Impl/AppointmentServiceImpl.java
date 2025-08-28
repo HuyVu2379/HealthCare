@@ -320,4 +320,53 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw e;
         }
     }
+
+    @Override
+    public Page<AppointmentResponse> getAppointmentWithFilterPagination(String type, String status, int page, int size, String sortBy, String sortDir) {
+        try{
+            if (sortBy == null || sortBy.isEmpty()) {
+                sortBy = "createdAt";
+            }
+
+            Sort.Direction direction = Sort.Direction.ASC; // default
+            if (sortDir != null && sortDir.equalsIgnoreCase("DESC")) {
+                direction = Sort.Direction.DESC;
+            }
+            Sort sort = Sort.by(direction, sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+            Page<Appointment> app = appointmentRepository.findAppointmentFilterWithPagination(type, status, pageable);
+            
+            // Check if there are any appointments before proceeding
+            if (app.getContent().isEmpty()) {
+                return Page.empty(pageable);
+            }
+            
+            return app.map(appointment -> {
+                // Map TimeSlot to TimeSlotDTO
+                TimeSlotDTO timeSlotDTO = null;
+                if (appointment.getTimeSlot() != null) {
+                    timeSlotDTO = TimeSlotDTO.builder()
+                            .slotId(appointment.getTimeSlot().getSlotId())
+                            .startTime(appointment.getTimeSlot().getStartTime())
+                            .endTime(appointment.getTimeSlot().getEndTime())
+                            .build();
+                }
+                
+                return AppointmentResponse.builder()
+                        .appointmentId(appointment.getAppointmentId())
+                        .doctor(userClient.getDoctorForClient(appointment.getDoctorId()))
+                        .patient(userClient.getPatientForClient(appointment.getPatientId()))
+                        .symptoms(appointment.getSymptoms())
+                        .note(appointment.getNote())
+                        .status(appointment.getStatus())
+                        .timeSlot(timeSlotDTO)
+                        .appointmentDate(appointment.getAppointmentDate())
+                        .consultationType(appointment.getConsultationType())
+                        .addressDetail(appointment.getAddressDetail())
+                        .build();
+            });
+        } catch (Exception e) {
+            throw e;
+        }
+    }
 }

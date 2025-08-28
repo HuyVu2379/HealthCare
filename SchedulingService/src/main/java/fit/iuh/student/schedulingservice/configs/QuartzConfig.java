@@ -1,4 +1,4 @@
-package fit.iuh.student.schedulingservice.config;
+package fit.iuh.student.schedulingservice.configs;
 
 import fit.iuh.student.schedulingservice.jobs.AppointmentReminderJob;
 import org.quartz.*;

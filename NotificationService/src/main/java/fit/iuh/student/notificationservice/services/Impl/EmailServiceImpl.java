@@ -1,6 +1,7 @@
 package fit.iuh.student.notificationservice.services.Impl;
 
 import fit.iuh.student.notificationservice.consumer.payload.AppointmentEventPayload;
+import fit.iuh.student.notificationservice.consumer.payload.RescheduleAppointmentResponse;
 import fit.iuh.student.notificationservice.consumer.payload.UserEventPayload;
 import fit.iuh.student.notificationservice.entities.Notification;
 import fit.iuh.student.notificationservice.enums.NotificationType;
@@ -491,7 +492,7 @@ public class EmailServiceImpl implements EmailService {
     }
     
     @Override
-    public void sendEmailRescheduleAppointment(AppointmentEventPayload payload) {
+    public void sendEmailRescheduleAppointment(RescheduleAppointmentResponse payload) {
         try {
             String htmlBody = "<!DOCTYPE html>\n" +
                     "<html lang=\"vi\">\n" +
@@ -621,13 +622,13 @@ public class EmailServiceImpl implements EmailService {
                 "Không xác định";
 
             // Format old appointment data (assuming these would be provided in payload or could be retrieved)
-            String oldAppointmentDateText = payload.getOldAppointmentDate() != null ?
-                payload.getOldAppointmentDate().toString() :
+            String oldAppointmentDateText = payload.getOldAppointment() != null ?
+                payload.getOldAppointment().getAppointmentDate().toString() :
                 "Không xác định";
 
-            String oldTimeSlotText = payload.getOldTimeSlot() != null ?
-                (payload.getOldTimeSlot().getStartTime() != null && payload.getOldTimeSlot().getEndTime() != null ?
-                    payload.getOldTimeSlot().getStartTime() + " - " + payload.getOldTimeSlot().getEndTime() :
+            String oldTimeSlotText = payload.getOldAppointment().getTimeSlot() != null ?
+                (payload.getOldAppointment().getTimeSlot().getStartTime() != null && payload.getOldAppointment().getTimeSlot().getEndTime() != null ?
+                        payload.getOldAppointment().getTimeSlot().getStartTime() + " - " + payload.getOldAppointment().getTimeSlot().getEndTime() :
                     "Không xác định") :
                 "Không xác định";
 

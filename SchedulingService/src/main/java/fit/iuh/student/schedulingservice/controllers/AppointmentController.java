@@ -4,6 +4,7 @@ import fit.iuh.student.schedulingservice.dtos.requests.CreateAppointmentRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.UpdateAppointmentRequest;
 import fit.iuh.student.schedulingservice.dtos.responses.AppointmentResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.MessageResponse;
+import fit.iuh.student.schedulingservice.dtos.responses.RescheduleAppointmentResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.SuccessEntityResponse;
 import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
 import fit.iuh.student.schedulingservice.services.AppointmentService;
@@ -48,7 +49,7 @@ public class AppointmentController {
                 appointmentService.getAppointmentByPatientIdWithPage(patientId, page, size, sortBy, startTime, endTime, sortDir));
     }
     @PutMapping("/reschedule-appointment")
-    public ResponseEntity<MessageResponse<AppointmentResponse>> rescheduleAppointment(
+    public ResponseEntity<MessageResponse<RescheduleAppointmentResponse>> rescheduleAppointment(
             @RequestBody UpdateAppointmentRequest request
     ) {
         return SuccessEntityResponse.ok("Reschedule appointment successfully",
@@ -68,5 +69,18 @@ public class AppointmentController {
     ) {
         return SuccessEntityResponse.ok("Get appointment detail successfully",
                 appointmentService.getAppointmentDetailById(appointmentId));
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<MessageResponse<Page<AppointmentResponse>>> getAppointmentFilterWithPagination(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String status,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir
+    ){
+        return SuccessEntityResponse.ok("Get appointment with filter successfully",
+                appointmentService.getAppointmentWithFilterPagination(type, status, page, size, sortBy, sortDir));
     }
 }

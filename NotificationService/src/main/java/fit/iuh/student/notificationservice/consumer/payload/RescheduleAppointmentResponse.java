@@ -29,6 +29,7 @@ public class RescheduleAppointmentResponse {
     @AllArgsConstructor
     @Builder
     @NoArgsConstructor
+    @Data
     public static class DateAppointment{
         private Date appointmentDate;
         private TimeSlotDTO timeSlot;

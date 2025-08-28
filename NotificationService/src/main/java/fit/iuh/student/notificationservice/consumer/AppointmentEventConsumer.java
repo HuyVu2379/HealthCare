@@ -50,7 +50,7 @@ public class AppointmentEventConsumer {
                 case "RESCHEDULE_APPOINTMENT":
                     payload.setEventType(AppointmentEvent.RESCHEDULE_APPOINTMENT);
                     log.info("Processing rescheduled appointment event for patient: {}", payload.getPatient().getFullName());
-                    emailService.sendEmailRescheduleAppointment(payload);
+//                    emailService.sendEmailRescheduleAppointment(payload);
                     log.info("Reschedule appointment email sent successfully for appointment: {}", payload.getAppointmentId());
                     break;
                     
