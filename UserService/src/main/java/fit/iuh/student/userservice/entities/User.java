@@ -21,15 +21,15 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "user_id")
     private String userId;
-    
+
     @Column(name = "password", nullable = false)
     private String password;
-    
+
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "fullname")
-    private String fullname;
+    @Column(name = "fullName")
+    private String fullName;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "gender")
@@ -50,7 +50,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status;

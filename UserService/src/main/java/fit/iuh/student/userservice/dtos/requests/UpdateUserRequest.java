@@ -2,18 +2,21 @@ package fit.iuh.student.userservice.dtos.requests;
 
 import fit.iuh.student.userservice.enums.Gender;
 import fit.iuh.student.userservice.enums.Role;
-import fit.iuh.student.userservice.enums.Status;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UpdateUserRequest {
     private String userId;
 
-    private String fullname;
+    private String fullName;
 
     private Gender gender;
 

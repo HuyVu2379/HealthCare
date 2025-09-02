@@ -5,7 +5,7 @@ spring:
   application:
     name: NotificationService
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5434/notificationservicedb}
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/notificationservicedb}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -22,6 +22,16 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: vuquochuy.01012003@gmail.com
+    password: hmfb jzuh zfil dhsa
+    properties:
+      mail.smtp:
+        auth: true
+        starttls.enable: true
+        ssl.trust: smtp.gmail.com
 
 
 # Eureka Client Configuration

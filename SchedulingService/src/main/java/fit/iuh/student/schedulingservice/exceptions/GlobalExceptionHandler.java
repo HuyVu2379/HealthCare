@@ -1,7 +1,10 @@
 package fit.iuh.student.schedulingservice.exceptions;
 
 import fit.iuh.student.schedulingservice.dtos.responses.ErrorResponse;
+import fit.iuh.student.schedulingservice.exceptions.errors.DuplicationDoctorScheduleException;
+import fit.iuh.student.schedulingservice.exceptions.errors.NotFoundException;
 import fit.iuh.student.schedulingservice.exceptions.errors.UnauthorizedException;
+import fit.iuh.student.schedulingservice.exceptions.errors.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,4 +63,34 @@ public class GlobalExceptionHandler {
         errorResponse.setPath(request.getRequestURI());
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse();
+        error.setMessage("Not Found: " + ex.getMessage());
+        error.setStatus(HttpStatus.NOT_FOUND.value());
+        error.setTimestamp(System.currentTimeMillis());
+        error.setPath(request.getRequestURI());
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(DuplicationDoctorScheduleException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicationDoctorSchedule(DuplicationDoctorScheduleException ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse();
+        error.setMessage(ex.getMessage());
+        error.setStatus(HttpStatus.CONFLICT.value());
+        error.setTimestamp(System.currentTimeMillis());
+        error.setPath(request.getRequestURI());
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse();
+        error.setMessage(ex.getMessage());
+        error.setStatus(HttpStatus.NOT_FOUND.value());
+        error.setTimestamp(System.currentTimeMillis());
+        error.setPath(request.getRequestURI());
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
 }

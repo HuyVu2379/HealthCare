@@ -3,15 +3,12 @@ package fit.iuh.student.userservice.controllers;
 import fit.iuh.student.userservice.dtos.requests.UpdateUserRequest;
 import fit.iuh.student.userservice.dtos.responses.MessageResponse;
 import fit.iuh.student.userservice.dtos.responses.SuccessEntityResponse;
-import fit.iuh.student.userservice.dtos.responses.UploadFile;
 import fit.iuh.student.userservice.dtos.responses.UserResponse;
 import fit.iuh.student.userservice.exceptions.errors.UserNotFoundException;
-import fit.iuh.student.userservice.services.UploadService;
 import fit.iuh.student.userservice.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

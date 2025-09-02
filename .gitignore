@@ -50,3 +50,4 @@ UserService/src/main/resources/application.yml
 .vscode/settings.json
 
 GatewayService/src/main/resources/application.yml
+NotificationService/src/main/resources/application.yml
