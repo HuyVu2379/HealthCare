@@ -81,8 +81,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // Log exception (in a real application)
-            // logger.error("JWT Authentication failed", e);
+             logger.error("JWT Authentication failed", e);
         }
         
         // Continue to next filter

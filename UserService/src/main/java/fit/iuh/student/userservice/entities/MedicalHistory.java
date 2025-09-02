@@ -2,6 +2,7 @@ package fit.iuh.student.userservice.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import fit.iuh.student.userservice.enums.StatusHealth;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,12 +18,15 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MedicalHistory extends BaseEntity {
-    public MedicalHistory(Patient patient,Doctor doctor, String serviceName, LocalDate diagnosisDate, String notes){
+    public MedicalHistory(Patient patient,Doctor doctor, String serviceName, LocalDate diagnosisDate, String notes, int stage, String diagnosis, StatusHealth statusHealth) {
         this.patient = patient;
         this.doctor = doctor;
         this.serviceName = serviceName;
         this.diagnosisDate = diagnosisDate;
         this.notes = notes;
+        this.stage = stage;
+        this.diagnosis = diagnosis;
+        this.statusHealth = statusHealth;
     }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,7 +47,17 @@ public class MedicalHistory extends BaseEntity {
     @Column(name = "diagnosis_date", nullable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate diagnosisDate;
-    
+
+    @Column(name = "diagnosis", nullable = false)
+    private String diagnosis;
+
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
+
+    @Column(name="stage")
+    private int stage;
+
+    @Column(name = "status_health", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private StatusHealth statusHealth;
 }

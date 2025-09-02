@@ -16,10 +16,12 @@ import fit.iuh.student.userservice.exceptions.errors.DuplicateUserException;
 import fit.iuh.student.userservice.exceptions.errors.UnauthorizedException;
 import fit.iuh.student.userservice.exceptions.errors.UserNotFoundException;
 import fit.iuh.student.userservice.mappers.UserMapper;
+import fit.iuh.student.userservice.publisher.payload.UserEventPayload;
 import fit.iuh.student.userservice.repositories.DoctorRepository;
 import fit.iuh.student.userservice.repositories.UserRepository;
 import fit.iuh.student.userservice.services.AuthenticationService;
 import fit.iuh.student.userservice.services.DoctorService;
+import fit.iuh.student.userservice.services.EmailService;
 import fit.iuh.student.userservice.services.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -55,6 +57,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final DoctorRepository doctorRepository;
     private final DoctorService doctorService;
     private final UserMapper userMapper;
+    private final EmailService emailService;
     private static final Logger log = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
     @Value("${jwt.expiration}")
     private long jwtExpiration;
@@ -74,8 +77,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.PATIENT);
-        user.setStatus(Status.ACTIVE);
-
+        user.setStatus(Status.INACTIVE);
+        // Send OTP email
+        try {
+            emailService.sendOTPEmail(new UserEventPayload(request.getEmail(),"Xác thực đăng ký tài khoản"));
+        } catch (Exception e) {
+            log.error("Failed to send OTP email to: {}", request.getEmail(), e);
+            throw new RuntimeException("Failed to send OTP email");
+        }
         // Save user
         userRepository.save(user);
 
@@ -97,6 +106,30 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .tokenType(tokenPrefix)
                 .expiresIn(jwtExpiration / 1000)
                 .build();
+    }
+
+    @Override
+    public boolean verifyAccount(String email, String otp) {
+        try{
+            boolean isValid = emailService.validateOTP(email,otp);
+            if (!isValid) {
+                throw new UnauthorizedException("Invalid OTP");
+            }
+            Optional<User> userOpt = userRepository.findByEmail(email);
+            if (userOpt.isEmpty()) {
+                throw new UserNotFoundException("User not found");
+            }
+            User user = userOpt.get();
+            if (user.getStatus() == Status.ACTIVE) {
+                return true; // Tài khoản đã được kích hoạt
+            }
+            user.setStatus(Status.ACTIVE);
+            userRepository.save(user);
+            return true;
+        }catch (Exception e){
+            log.error("Error verifying account for email {}: {}", email, e.getMessage());
+            throw e;
+        }
     }
 
     @Override
@@ -186,7 +219,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             AuthenticationResponse authResponse = authenticate(request);
             User user = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new UnauthorizedException("User not found"));
-
+            if(user.getStatus() != Status.ACTIVE){
+                throw new UnauthorizedException("Account is not active. Please verify your email.");
+            }
             return LoginResponse.builder()
                     .accessToken(authResponse.getAccessToken())
                     .refreshToken(authResponse.getRefreshToken())

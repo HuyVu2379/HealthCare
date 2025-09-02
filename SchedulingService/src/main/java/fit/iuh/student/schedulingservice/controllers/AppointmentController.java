@@ -2,16 +2,15 @@ package fit.iuh.student.schedulingservice.controllers;
 
 import fit.iuh.student.schedulingservice.dtos.requests.CreateAppointmentRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.UpdateAppointmentRequest;
-import fit.iuh.student.schedulingservice.dtos.responses.AppointmentResponse;
-import fit.iuh.student.schedulingservice.dtos.responses.MessageResponse;
-import fit.iuh.student.schedulingservice.dtos.responses.RescheduleAppointmentResponse;
-import fit.iuh.student.schedulingservice.dtos.responses.SuccessEntityResponse;
+import fit.iuh.student.schedulingservice.dtos.responses.*;
 import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
 import fit.iuh.student.schedulingservice.services.AppointmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/appointments")
@@ -82,5 +81,15 @@ public class AppointmentController {
     ){
         return SuccessEntityResponse.ok("Get appointment with filter successfully",
                 appointmentService.getAppointmentWithFilterPagination(type, status, page, size, sortBy, sortDir));
+    }
+
+    @GetMapping("/get-appointment-with-doctorId")
+    public ResponseEntity<MessageResponse<List<AppointmentWeekFilterResponse>>> getAppointmentByDoctorId(
+            @RequestParam String doctorId,
+            @RequestParam(value ="startTime") String startTime,
+            @RequestParam(value ="endTime") String endTime
+    ){
+        return SuccessEntityResponse.ok("Get appointment by doctor id successfully",
+                appointmentService.getAppointmentWeekFilterForDoctor(doctorId,startTime,endTime));
     }
 }

@@ -5,6 +5,7 @@ import fit.iuh.student.schedulingservice.clients.dtos.DoctorClientResponse;
 import fit.iuh.student.schedulingservice.dtos.requests.CreateAppointmentRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.UpdateAppointmentRequest;
 import fit.iuh.student.schedulingservice.dtos.responses.AppointmentResponse;
+import fit.iuh.student.schedulingservice.dtos.responses.AppointmentWeekFilterResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.RescheduleAppointmentResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.TimeSlotDTO;
 import fit.iuh.student.schedulingservice.entities.Appointment;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +38,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final DoctorScheduleRepository doctorScheduleRepository;
     private final AppointmentEventPublisher appointmentEventPublisher;
     private final TimeSlotMapper timeSlotMapper;
+
     @Override
     public AppointmentResponse bookingAppointment(CreateAppointmentRequest request) {
         try {
@@ -282,7 +285,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 appointmentEventPublisher.publishCompletedStatusAppointmentEvent(ap);
             } else if (status == AppointmentStatus.NO_SHOW) {
                 appointmentEventPublisher.publishNoShowStatusAppointmentEvent(ap);
-            } else{
+            } else {
                 appointmentEventPublisher.publishConfirmStatusAppointmentEvent(ap);
             }
             return ap;
@@ -323,7 +326,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public Page<AppointmentResponse> getAppointmentWithFilterPagination(String type, String status, int page, int size, String sortBy, String sortDir) {
-        try{
+        try {
             if (sortBy == null || sortBy.isEmpty()) {
                 sortBy = "createdAt";
             }
@@ -335,12 +338,12 @@ public class AppointmentServiceImpl implements AppointmentService {
             Sort sort = Sort.by(direction, sortBy);
             Pageable pageable = PageRequest.of(page, size, sort);
             Page<Appointment> app = appointmentRepository.findAppointmentFilterWithPagination(type, status, pageable);
-            
+
             // Check if there are any appointments before proceeding
             if (app.getContent().isEmpty()) {
                 return Page.empty(pageable);
             }
-            
+
             return app.map(appointment -> {
                 // Map TimeSlot to TimeSlotDTO
                 TimeSlotDTO timeSlotDTO = null;
@@ -351,7 +354,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                             .endTime(appointment.getTimeSlot().getEndTime())
                             .build();
                 }
-                
+
                 return AppointmentResponse.builder()
                         .appointmentId(appointment.getAppointmentId())
                         .doctor(userClient.getDoctorForClient(appointment.getDoctorId()))
@@ -366,6 +369,37 @@ public class AppointmentServiceImpl implements AppointmentService {
                         .build();
             });
         } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @Override
+    public List<AppointmentWeekFilterResponse> getAppointmentWeekFilterForDoctor(String doctorId, String weekStartDate, String weekEndDate) {
+        try {
+            Date start = Date.valueOf(weekStartDate);
+            Date end = Date.valueOf(weekEndDate);
+            List<Appointment> appointments = appointmentRepository.findAppointmentsInWeek(doctorId, start, end);
+            return appointments.stream().map(appointment -> {
+                // Map TimeSlot to TimeSlotDTO
+                TimeSlotDTO timeSlotDTO = null;
+                if (appointment.getTimeSlot() != null) {
+                    timeSlotDTO = TimeSlotDTO.builder()
+                            .slotId(appointment.getTimeSlot().getSlotId())
+                            .startTime(appointment.getTimeSlot().getStartTime())
+                            .endTime(appointment.getTimeSlot().getEndTime())
+                            .build();
+                }
+                return AppointmentWeekFilterResponse.builder()
+                        .appointmentId(appointment.getAppointmentId())
+                        .note(appointment.getNote())
+                        .status(appointment.getStatus())
+                        .timeSlot(timeSlotDTO)
+                        .patientName(userClient.getPatientForClient(appointment.getPatientId()).getFullName())
+                        .date(appointment.getAppointmentDate())
+                        .dayOfWeek(appointment.getDoctorSchedule().getWeekDay())
+                        .build();
+            }).toList();
+        } catch(Exception e){
             throw e;
         }
     }

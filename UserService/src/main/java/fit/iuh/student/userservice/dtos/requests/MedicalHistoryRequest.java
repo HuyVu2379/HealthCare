@@ -1,5 +1,6 @@
 package fit.iuh.student.userservice.dtos.requests;
 
+import fit.iuh.student.userservice.enums.StatusHealth;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,4 +21,10 @@ public class MedicalHistoryRequest {
     private LocalDate diagnosisDate;
 
     private String notes;
+
+    private String diagnosis;
+
+    private int stage;
+
+    private StatusHealth statusHealth;
 }

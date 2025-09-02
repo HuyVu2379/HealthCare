@@ -16,7 +16,7 @@ spring:
         - id: health-record-service
           uri: lb://HealthRecordService
           predicates:
-            - Path=/api/v1/records/**
+            - Path=/api/v1/records/**, /api/v1/health-metrics/**
           filters:
             - AuthenticationFilter
         - id: notification-service

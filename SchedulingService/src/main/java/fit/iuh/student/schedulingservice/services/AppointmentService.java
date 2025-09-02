@@ -3,9 +3,12 @@ package fit.iuh.student.schedulingservice.services;
 import fit.iuh.student.schedulingservice.dtos.requests.CreateAppointmentRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.UpdateAppointmentRequest;
 import fit.iuh.student.schedulingservice.dtos.responses.AppointmentResponse;
+import fit.iuh.student.schedulingservice.dtos.responses.AppointmentWeekFilterResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.RescheduleAppointmentResponse;
 import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
 import org.springframework.data.domain.Page;
+
+import java.util.List;
 
 public interface AppointmentService {
 //    void getAppointmentByDoctorIdWithPagination(
@@ -25,6 +28,7 @@ public interface AppointmentService {
     AppointmentResponse updateAppointmentStatus(String appointmentId,AppointmentStatus status);
     AppointmentResponse getAppointmentDetailById(String appointmentId);
     Page<AppointmentResponse> getAppointmentWithFilterPagination(String type, String status, int page, int size, String sortBy, String sortDir);
+    List<AppointmentWeekFilterResponse> getAppointmentWeekFilterForDoctor(String doctorId,String weekStartDate, String weekEndDate);
 //    void cancelAppointment(String appointmentId, String userId);
 //    void getAppointmentByPatientId();
 //    void getAppointmentDetailById(String appointmentId);
