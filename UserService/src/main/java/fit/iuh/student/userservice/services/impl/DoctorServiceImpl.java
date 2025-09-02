@@ -1,5 +1,6 @@
 package fit.iuh.student.userservice.services.impl;
 
+import fit.iuh.student.userservice.dtos.requests.CreateDoctorAccountRequest;
 import fit.iuh.student.userservice.dtos.requests.UpdateDoctorCertificationRequest;
 import fit.iuh.student.userservice.dtos.requests.UpdateDoctorRequest;
 import fit.iuh.student.userservice.dtos.responses.DoctorClientResponse;
@@ -58,5 +59,34 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public DoctorClientResponse getPatientByIdForClient(String patientId) {
         return userMapper.toDoctorClientResponse(doctorRepository.findById(patientId).get());
+    }
+
+    @Override
+    public DoctorResponse createAccountForDoctor(CreateDoctorAccountRequest request) {
+        try{
+            Doctor doctor = new Doctor(request.getFullName(), request.getEmail(), request.getPhone(), request.getSpecialty(), request.getPassword());
+            doctorRepository.save(doctor);
+            return DoctorResponse.builder()
+                    .userId(doctor.getUserId())
+                    .fullName(doctor.getFullName())
+                    .email(doctor.getEmail())
+                    .gender(doctor.getGender())
+                    .dob(doctor.getDob())
+                    .phone(doctor.getPhone())
+                    .address(doctor.getAddress())
+                    .avatarUrl(doctor.getAvatarUrl())
+                    .role(doctor.getRole())
+                    .status(doctor.getStatus())
+                    .specialty(doctor.getSpecialty())
+                    .experienceYears(doctor.getExperienceYears())
+                    .bio(doctor.getBio())
+                    .examinationFee(doctor.getExaminationFee())
+                    .clinicAddress(doctor.getClinicAddress())
+                    .rating(doctor.getRating())
+                    .certifications(new ArrayList<>())
+                    .build();
+        } catch (Exception e) {
+            throw e;
+        }
     }
 }

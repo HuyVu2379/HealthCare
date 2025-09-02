@@ -22,6 +22,8 @@ public interface AuthenticationService {
      */
     AuthenticationResponse register(RegisterRequest request);
 
+    boolean verifyAccount(String email, String otp);
+
     /**
      * Authenticate a user
      *

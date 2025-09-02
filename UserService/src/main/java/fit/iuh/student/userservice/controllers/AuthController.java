@@ -1,6 +1,7 @@
 package fit.iuh.student.userservice.controllers;
 
 import fit.iuh.student.userservice.dtos.requests.AuthenticationRequest;
+import fit.iuh.student.userservice.dtos.requests.CreateDoctorAccountRequest;
 import fit.iuh.student.userservice.dtos.requests.RegisterRequest;
 import fit.iuh.student.userservice.dtos.requests.ResetPasswordRequest;
 import fit.iuh.student.userservice.dtos.responses.*;
@@ -8,6 +9,7 @@ import fit.iuh.student.userservice.exceptions.errors.UnauthorizedException;
 import fit.iuh.student.userservice.exceptions.errors.UserNotFoundException;
 import fit.iuh.student.userservice.publisher.payload.UserEventPayload;
 import fit.iuh.student.userservice.services.AuthenticationService;
+import fit.iuh.student.userservice.services.DoctorService;
 import fit.iuh.student.userservice.services.EmailService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,6 +30,7 @@ public class AuthController {
 
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private final AuthenticationService authenticationService;
+    private final DoctorService doctorService;
     private final EmailService emailService;
 
     @PostMapping("/register")
@@ -64,11 +67,11 @@ public class AuthController {
         try {
             Object result = authenticationService.getMe(request, Object.class);
             if (result == null) {
-               throw new UnauthorizedException("Unauthorized access. Please log in again.");
+                throw new UnauthorizedException("Unauthorized access. Please log in again.");
             }
             return SuccessEntityResponse.ok("User details retrieved successfully", result);
         } catch (Exception e) {
-           throw e;
+            throw e;
         }
     }
 
@@ -89,23 +92,24 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/send-otp-register/{email}")
-    public ResponseEntity<MessageResponse<Boolean>> sendOtpRegister(
-            @PathVariable String email
-    ){
-        UserEventPayload payload = new UserEventPayload(email,"Xác minh tài khoản");
-        emailService.sendOTPEmail(payload);
-        return SuccessEntityResponse.ok("OTP sent successfully", true);
-    }
+//    @GetMapping("/send-otp-register/{email}")
+//    public ResponseEntity<MessageResponse<Boolean>> sendOtpRegister(
+//            @PathVariable String email
+//    ){
+//        UserEventPayload payload = new UserEventPayload(email,"Xác minh tài khoản");
+//        emailService.sendOTPEmail(payload);
+//        return SuccessEntityResponse.ok("OTP sent successfully", true);
+//    }
     /*
        Nếu là otp reset password thì email + "-reset-pwd"
      */
+    @PreAuthorize("hasAnyRole('PATIENT', 'DOCTOR')")
     @GetMapping("/validate-otp")
     public ResponseEntity<MessageResponse<Boolean>> validateOtp(
             @QueryParam("email") String email,
             @QueryParam("otp") String otp
     ) {
-        boolean isValid = emailService.validateOTP(email,otp);
+        boolean isValid = emailService.validateOTP(email, otp);
         if (isValid) {
             return SuccessEntityResponse.ok("OTP is valid", true);
         } else {
@@ -119,11 +123,32 @@ public class AuthController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('PATIENT')")
+    @PostMapping("/verify-account")
+    public ResponseEntity<MessageResponse<Boolean>> verifyAccount(
+            @QueryParam("email") String email,
+            @QueryParam("otp") String otp
+    ) {
+        boolean isVerified = authenticationService.verifyAccount(email, otp);
+        if (isVerified) {
+            return SuccessEntityResponse.ok("Account verified successfully", true);
+        } else {
+            MessageResponse<Boolean> response = new MessageResponse<>(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Failed to verify account",
+                    false,
+                    isVerified
+            );
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('PATIENT', 'DOCTOR')")
     @GetMapping("/send-otp-reset-password/{email}")
     public ResponseEntity<MessageResponse<Object>> sendOtpResetPassword(
             @PathVariable String email
     ) {
-        UserEventPayload payload = new UserEventPayload(email,"Xác minh mật khẩu");
+        UserEventPayload payload = new UserEventPayload(email, "Xác minh mật khẩu");
         ResetPasswordResponse response = emailService.sendOTPResetPassword(payload);
         if (response != null && response.getStatusCode() == HttpStatus.OK.value()) {
             return SuccessEntityResponse.ok("OTP sent successfully", response);
@@ -132,6 +157,7 @@ public class AuthController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('PATIENT', 'DOCTOR')")
     @PostMapping("/reset-password")
     public ResponseEntity<MessageResponse<Boolean>> resetPassword(
             @RequestBody ResetPasswordRequest resetPasswordRequest
@@ -148,5 +174,12 @@ public class AuthController {
             );
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
+    }
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/doctor-account")
+    public ResponseEntity<MessageResponse<DoctorResponse>> createAccountForDoctor(
+            @RequestBody CreateDoctorAccountRequest request
+    ) {
+        return SuccessEntityResponse.ok("Create account for doctor successfully", doctorService.createAccountForDoctor(request));
     }
 }

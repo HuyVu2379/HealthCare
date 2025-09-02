@@ -1,5 +1,6 @@
 package fit.iuh.student.userservice.services;
 
+import fit.iuh.student.userservice.dtos.requests.CreateDoctorAccountRequest;
 import fit.iuh.student.userservice.dtos.requests.UpdateDoctorCertificationRequest;
 import fit.iuh.student.userservice.dtos.requests.UpdateDoctorRequest;
 import fit.iuh.student.userservice.dtos.responses.DoctorClientResponse;
@@ -15,4 +16,5 @@ public interface DoctorService {
     DoctorResponse getDoctorById(String doctorId);
     List<DoctorResponse> getDoctorByIds(List<String> doctorIds);
     DoctorClientResponse getPatientByIdForClient(String patientId);
+    DoctorResponse createAccountForDoctor(CreateDoctorAccountRequest request);
 }

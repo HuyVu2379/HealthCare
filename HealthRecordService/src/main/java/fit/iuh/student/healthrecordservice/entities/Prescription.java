@@ -1,6 +1,6 @@
 package fit.iuh.student.healthrecordservice.entities;
 
-import fit.iuh.student.healthrecordservice.enums.Frequence;
+import fit.iuh.student.healthrecordservice.enums.Frequency;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,7 +31,7 @@ public class Prescription extends BaseEntity {
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private List<Frequence> frequency;
+    private List<Frequency> frequency;
     
     @Column(length = 1000)
     private String notes;

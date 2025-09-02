@@ -34,4 +34,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment,String>
             "WHERE (:type IS NULL OR a.consultationType = :type) " +
             "AND (:status IS NULL OR a.status = :status)")
     Page<Appointment> findAppointmentFilterWithPagination(@Param("type") String type, @Param("status") String status, Pageable pageable);
+
+    @Query("SELECT a FROM Appointment a " +
+            "WHERE a.doctorId = :doctorId AND (a.appointmentDate BETWEEN :weekStartDate AND :weekEndDate) " +
+            "AND a.status = 'CONFIRMED'")
+    List<Appointment> findAppointmentsInWeek(@Param("doctorId") String doctorId,@Param("weekStartDate") Date weekStartDate, @Param("weekEndDate") Date weekEndDate);
 }

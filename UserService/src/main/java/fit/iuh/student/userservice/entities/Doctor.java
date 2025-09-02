@@ -1,5 +1,7 @@
 package fit.iuh.student.userservice.entities;
 
+import fit.iuh.student.userservice.enums.Role;
+import fit.iuh.student.userservice.enums.Status;
 import fit.iuh.student.userservice.utils.StringListConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -44,4 +46,14 @@ public class Doctor extends User{
     @Column(name = "certifications", columnDefinition = "TEXT")
     @Convert(converter = StringListConverter.class)
     private List<String> certifications;
+
+    public Doctor(String fullName, String email, String phone, String specialty, String password){
+        this.setFullName(fullName);
+        this.setEmail(email);
+        this.setPhone(phone);
+        this.setSpecialty(specialty);
+        this.setPassword(password);
+        this.setRole(Role.DOCTOR);
+        this.setStatus(Status.ACTIVE);
+    }
 }

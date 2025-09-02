@@ -16,24 +16,24 @@ import java.util.List;
 @Builder
 public class MedicalRecord extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "record_id")
-    private int recordId;
+    private String recordId;
     
     @Column(name = "appointment_id")
     private int appointmentId;
     
     @Column(length = 1000)
-    private String diagnosis;
+    private String diagnosis; // Chẩn đoán
     
     @Column(length = 1000)
-    private String treatment;
+    private String treatment; // Phương pháp điều trị
     
     @Column(length = 1000)
-    private String symptoms;
+    private String symptoms; // Triệu chứng
     
     @Column(name = "follow_up_date")
-    private Date followUpDate;
+    private Date followUpDate; // Ngày tái khám
 
     @Column(name = "image_path")
     private List<String> imageAttachments = new ArrayList<>();

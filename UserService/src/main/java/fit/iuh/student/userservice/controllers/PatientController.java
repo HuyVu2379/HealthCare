@@ -2,10 +2,7 @@ package fit.iuh.student.userservice.controllers;
 
 import fit.iuh.student.userservice.dtos.requests.MedicalHistoryRequest;
 import fit.iuh.student.userservice.dtos.requests.UpdatePatientRequest;
-import fit.iuh.student.userservice.dtos.responses.MessageResponse;
-import fit.iuh.student.userservice.dtos.responses.PatientClientResponse;
-import fit.iuh.student.userservice.dtos.responses.SuccessEntityResponse;
-import fit.iuh.student.userservice.dtos.responses.UpdatePatientResponse;
+import fit.iuh.student.userservice.dtos.responses.*;
 import fit.iuh.student.userservice.entities.MedicalHistory;
 import fit.iuh.student.userservice.services.PatientService;
 import lombok.RequiredArgsConstructor;
@@ -46,5 +43,18 @@ public class PatientController {
     @GetMapping("/getPatientForClient/{patientId}")
     public PatientClientResponse getPatientForClient(@PathVariable String patientId){
         return patientService.getPatientByIdForClient(patientId);
+    }
+    // Lay danh sách các bệnh nhân đã được bác sĩ khám bệnh
+    @GetMapping("/getPatientsByDoctorId")
+    public ResponseEntity<MessageResponse<Page<PatientResponse>>> getPatientsByDoctorId(
+            @RequestParam String doctorId,
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam String sortDir,
+            @RequestParam String sortBy,
+            @RequestParam(required = false) String namePatient,
+            @RequestParam(required = false) String statusHealth
+    ){
+        return SuccessEntityResponse.ok("get patients by doctorId success!",patientService.getPatientsByDoctorId(doctorId, page, size, sortBy, sortDir,namePatient,statusHealth));
     }
 }
