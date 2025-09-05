@@ -17,7 +17,7 @@ public class Prescription extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "prescription_id")
-    private int prescriptionId;
+    private String prescriptionId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "record_id")

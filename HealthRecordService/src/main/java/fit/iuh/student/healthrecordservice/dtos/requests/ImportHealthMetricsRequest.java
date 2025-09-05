@@ -19,7 +19,7 @@ public class ImportHealthMetricsRequest {
     public static class HealthMetricData {
         private String patientId;
         private String metricName;
-        private int metricValue;
+        private double metricValue;
         private String unit;
         private String recordId;
         private Date measuredAt;

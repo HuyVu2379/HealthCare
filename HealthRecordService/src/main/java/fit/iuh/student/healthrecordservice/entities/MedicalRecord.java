@@ -6,6 +6,7 @@ import lombok.*;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "medical_records")
@@ -20,8 +21,8 @@ public class MedicalRecord extends BaseEntity {
     @Column(name = "record_id")
     private String recordId;
     
-    @Column(name = "appointment_id")
-    private int appointmentId;
+    @Column(name = "appointment_id", nullable = false, unique = true)
+    private String appointmentId;
     
     @Column(length = 1000)
     private String diagnosis; // Chẩn đoán
@@ -69,17 +70,15 @@ public class MedicalRecord extends BaseEntity {
         prescriptions.remove(prescription);
         prescription.setMedicalRecord(null);
     }
-    
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MedicalRecord)) return false;
-        MedicalRecord that = (MedicalRecord) o;
-        return recordId == that.recordId;
+        if (!(o instanceof MedicalRecord that)) return false;
+        return Objects.equals(appointmentId, that.appointmentId);
     }
-    
+
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return Objects.hashCode(appointmentId);
     }
 }

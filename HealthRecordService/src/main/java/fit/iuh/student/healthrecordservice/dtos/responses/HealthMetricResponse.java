@@ -20,8 +20,8 @@ public class HealthMetricResponse {
     private String metricId;
     private String patientId;
     private String metricName;
-    private int metricValue;
+    private double metricValue;
     private String unit;
-    private String recordId;
+    private String medicalRecordId;
     private Date measuredAt;
 }

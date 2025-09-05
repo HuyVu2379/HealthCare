@@ -1,6 +1,7 @@
 package fit.iuh.student.healthrecordservice.exceptions;
 
 import fit.iuh.student.healthrecordservice.dtos.responses.ErrorResponse;
+import fit.iuh.student.healthrecordservice.exceptions.errors.DuplicationObjectException;
 import fit.iuh.student.healthrecordservice.exceptions.errors.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -58,5 +59,14 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(System.currentTimeMillis());
         errorResponse.setPath(request.getRequestURI());
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+    @ExceptionHandler(DuplicationObjectException.class)
+    public ResponseEntity<ErrorResponse> DuplicationObjectException(DuplicationObjectException exc, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse();
+        error.setMessage(exc.getMessage());
+        error.setStatus(HttpStatus.CONFLICT.value());
+        error.setTimestamp(System.currentTimeMillis());
+        error.setPath(request.getRequestURI());
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 }
