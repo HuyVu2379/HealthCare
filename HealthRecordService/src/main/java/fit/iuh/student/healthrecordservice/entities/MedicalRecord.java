@@ -20,7 +20,9 @@ public class MedicalRecord extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "record_id")
     private String recordId;
-    
+
+    private String serviceName; // Tên dịch vụ y tế
+
     @Column(name = "appointment_id", nullable = false, unique = true)
     private String appointmentId;
     

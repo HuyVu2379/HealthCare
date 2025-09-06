@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CreateMedicalRecordResponse {
     private String recordId;
+    private String serviceName;
     private String appointmentId;
     private String diagnosis;
     private String treatment;

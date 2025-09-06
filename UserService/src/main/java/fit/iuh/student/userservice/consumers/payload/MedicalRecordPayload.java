@@ -12,6 +12,7 @@ import java.sql.Date;
 @AllArgsConstructor
 public class MedicalRecordPayload {
     private String appointmentId;
+    private String serviceName; // Tên dịch vụ y tế
     private String diagnosis; // Chẩn đoán
     private String treatment; // Phương pháp điều trị
     private String symptoms; // Triệu chứng

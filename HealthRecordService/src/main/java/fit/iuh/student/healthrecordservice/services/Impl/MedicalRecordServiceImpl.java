@@ -39,6 +39,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             medicalRecordEventPublisher.publishCreateMedicalRecordEvent(
                     MedicalRecordPayload.builder()
                             .appointmentId(medicalRecord.getAppointmentId())
+                            .serviceName(medicalRecord.getServiceName())
                             .diagnosis(medicalRecord.getDiagnosis())
                             .doctorNote(medicalRecord.getDoctorNote())
                             .dateDiagnosis(Date.valueOf(medicalRecord.getCreatedAt().toLocalDate()))
@@ -46,6 +47,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                             .symptoms(medicalRecord.getSymptoms())
                             .treatment(medicalRecord.getTreatment())
                             .statusHealth(request.getStatusHealth())
+                            .eventType("MEDICAL_RECORD_CREATED")
                             .build());
             return CreateMedicalRecordResponse.builder()
                     .recordId(medicalRecord.getRecordId())
@@ -56,6 +58,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                     .imageAttachments(medicalRecord.getImageAttachments())
                     .symptoms(medicalRecord.getSymptoms())
                     .treatment(medicalRecord.getTreatment())
+                    .serviceName(medicalRecord.getServiceName())
                     .build();
         } catch (Exception e) {
             throw e;

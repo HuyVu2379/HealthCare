@@ -101,6 +101,6 @@ public class AppointmentController {
     public AppointmentClientResponse getAppointmentDetailForClientById(
             @PathVariable String appointmentId
     ) {
-        return appointmentService.getAppointmentDetailForClientById(appointmentId));
+        return appointmentService.getAppointmentDetailForClientById(appointmentId);
     }
 }
