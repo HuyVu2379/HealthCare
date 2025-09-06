@@ -1,7 +1,7 @@
-package fit.iuh.student.notificationservice.consumer.payload;
+package fit.iuh.student.notificationservice.consumers.payload;
 
-import fit.iuh.student.notificationservice.consumer.enums.AppointmentStatus;
-import fit.iuh.student.notificationservice.consumer.enums.ConsultationType;
+import fit.iuh.student.notificationservice.consumers.enums.AppointmentStatus;
+import fit.iuh.student.notificationservice.consumers.enums.ConsultationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

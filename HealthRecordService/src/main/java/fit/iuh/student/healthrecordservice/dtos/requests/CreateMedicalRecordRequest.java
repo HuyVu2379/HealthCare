@@ -18,4 +18,6 @@ public class CreateMedicalRecordRequest {
     private String followUpDate;
     private String doctorNote;
     private List<String> imageAttachments;
+    private int stage;
+    private String statusHealth;
 }

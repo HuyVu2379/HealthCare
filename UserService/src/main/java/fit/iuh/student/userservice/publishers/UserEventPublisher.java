@@ -1,7 +1,6 @@
-package fit.iuh.student.userservice.publisher;
+package fit.iuh.student.userservice.publishers;
 
-import fit.iuh.student.userservice.publisher.events.UserEvent;
-import fit.iuh.student.userservice.publisher.payload.UserEventPayload;
+import fit.iuh.student.userservice.publishers.payload.UserEventPayload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

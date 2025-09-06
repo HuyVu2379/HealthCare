@@ -1,4 +1,4 @@
-package fit.iuh.student.notificationservice.consumer.event;
+package fit.iuh.student.notificationservice.consumers.event;
 
 public enum AppointmentEvent {
     BOOKING_APPOINTMENT,

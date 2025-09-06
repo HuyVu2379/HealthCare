@@ -1,4 +1,4 @@
-package fit.iuh.student.notificationservice.consumer.payload;
+package fit.iuh.student.notificationservice.consumers.payload;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

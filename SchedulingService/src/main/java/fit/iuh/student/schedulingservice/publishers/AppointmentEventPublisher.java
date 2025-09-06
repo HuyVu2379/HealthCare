@@ -1,4 +1,4 @@
-package fit.iuh.student.schedulingservice.publisher;
+package fit.iuh.student.schedulingservice.publishers;
 
 import fit.iuh.student.schedulingservice.dtos.responses.AppointmentResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.RescheduleAppointmentResponse;
@@ -58,16 +58,16 @@ public class AppointmentEventPublisher {
         }
     }
     
-    public void publishCompletedStatusAppointmentEvent(AppointmentResponse payload) {
-        try {
-            log.info("Publishing update status appointment event for patient: {}", payload.getPatient().getFullName());
-            // Tạo message wrapper với eventType
-            AppointmentEventMessage message = new AppointmentEventMessage(payload, "COMPLETED_APPOINTMENT");
-            rabbitTemplate.convertAndSend(APPOINTMENT_NOTIFICATION_QUEUE, message);
-        } catch (Exception e) {
-            log.error("Error in publishing update status appointment event", e);
-        }
-    }
+//    public void publishCompletedStatusAppointmentEvent(AppointmentResponse payload) {
+//        try {
+//            log.info("Publishing update status appointment event for patient: {}", payload.getPatient().getFullName());
+//            // Tạo message wrapper với eventType
+//            AppointmentEventMessage message = new AppointmentEventMessage(payload, "COMPLETED_APPOINTMENT");
+//            rabbitTemplate.convertAndSend(APPOINTMENT_NOTIFICATION_QUEUE, message);
+//        } catch (Exception e) {
+//            log.error("Error in publishing update status appointment event", e);
+//        }
+//    }
     
     public void publishNoShowStatusAppointmentEvent(AppointmentResponse payload) {
         try {

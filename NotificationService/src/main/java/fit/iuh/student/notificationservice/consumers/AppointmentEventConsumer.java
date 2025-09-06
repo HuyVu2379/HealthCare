@@ -1,7 +1,8 @@
-package fit.iuh.student.notificationservice.consumer;
+package fit.iuh.student.notificationservice.consumers;
 
-import fit.iuh.student.notificationservice.consumer.event.AppointmentEvent;
-import fit.iuh.student.notificationservice.consumer.payload.AppointmentEventPayload;
+import fit.iuh.student.notificationservice.consumers.event.AppointmentEvent;
+import fit.iuh.student.notificationservice.consumers.payload.AppointmentEventPayload;
+import fit.iuh.student.notificationservice.consumers.payload.RescheduleAppointmentResponse;
 import fit.iuh.student.notificationservice.services.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,34 +48,24 @@ public class AppointmentEventConsumer {
                     log.info("Appointment reminder email sent successfully for appointment: {}", payload.getAppointmentId());
                     break;
                     
-                case "RESCHEDULE_APPOINTMENT":
-                    payload.setEventType(AppointmentEvent.RESCHEDULE_APPOINTMENT);
-                    log.info("Processing rescheduled appointment event for patient: {}", payload.getPatient().getFullName());
-//                    emailService.sendEmailRescheduleAppointment(payload);
-                    log.info("Reschedule appointment email sent successfully for appointment: {}", payload.getAppointmentId());
-                    break;
-                    
                 case "CONFIRM_APPOINTMENT":
                     payload.setEventType(AppointmentEvent.CONFIRM_APPOINTMENT);
                     log.info("Processing confirm appointment event for patient: {}", payload.getPatient().getFullName());
                     emailService.sendEmailConfirmAppointmentStatus(payload);
                     log.info("Confirm appointment email sent successfully for appointment: {}", payload.getAppointmentId());
                     break;
-                    
-                case "COMPLETED_APPOINTMENT":
-                    payload.setEventType(AppointmentEvent.COMPLETED_APPOINTMENT);
-                    log.info("Processing completed appointment event for patient: {}", payload.getPatient().getFullName());
-                    emailService.sendEmailCompleteAppointmentStatus(payload);
-                    log.info("Completed appointment email sent successfully for appointment: {}", payload.getAppointmentId());
-                    break;
-                    
+
                 case "NO_SHOW_APPOINTMENT":
                     payload.setEventType(AppointmentEvent.NO_SHOW_APPOINTMENT);
                     log.info("Processing no-show appointment event for patient: {}", payload.getPatient().getFullName());
                     emailService.sendEmailRejectAppointmentStatus(payload);
                     log.info("No-show appointment email sent successfully for appointment: {}", payload.getAppointmentId());
                     break;
-                    
+                case "RESCHEDULE_APPOINTMENT":
+                        RescheduleAppointmentResponse reschedulePayload = message.getReschedulePayload();
+                        log.info("Processing reschedule appointment event for patient: {}", payload.getPatient().getFullName());
+                        emailService.sendEmailRescheduleAppointment(reschedulePayload);
+                        log.info("Reschedule appointment email sent successfully for appointment: {}", payload.getAppointmentId());
                 default:
                     log.warn("Unknown appointment event type: {}", eventType);
                     break;
@@ -83,15 +74,16 @@ public class AppointmentEventConsumer {
             logger.error("Error processing appointment event", e);
         }
     }
-    
+
     // Inner class để nhận message từ SchedulingService
     public static class AppointmentEventMessage {
         private AppointmentEventPayload payload;
         private String eventType;
-        
+        private RescheduleAppointmentResponse reschedulePayload;
         public AppointmentEventMessage() {}
         
         public AppointmentEventPayload getPayload() { return payload; }
+        public RescheduleAppointmentResponse getReschedulePayload() { return reschedulePayload; }
         public void setPayload(AppointmentEventPayload payload) { this.payload = payload; }
         public String getEventType() { return eventType; }
         public void setEventType(String eventType) { this.eventType = eventType; }

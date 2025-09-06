@@ -4,6 +4,8 @@ import fit.iuh.student.healthrecordservice.dtos.requests.CreateMedicalRecordRequ
 import fit.iuh.student.healthrecordservice.dtos.responses.CreateMedicalRecordResponse;
 import fit.iuh.student.healthrecordservice.entities.MedicalRecord;
 import fit.iuh.student.healthrecordservice.exceptions.errors.DuplicationObjectException;
+import fit.iuh.student.healthrecordservice.publishers.MedicalRecordEventPublisher;
+import fit.iuh.student.healthrecordservice.publishers.payload.MedicalRecordPayload;
 import fit.iuh.student.healthrecordservice.repositories.MedicalRecordRepository;
 import fit.iuh.student.healthrecordservice.services.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import java.sql.Date;
 @RequiredArgsConstructor
 public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final MedicalRecordRepository medicalRecordRepository;
+    private final MedicalRecordEventPublisher medicalRecordEventPublisher;
     @Override
     public CreateMedicalRecordResponse createMedicalRecord(CreateMedicalRecordRequest request) {
         try{
@@ -33,6 +36,17 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                     .treatment(request.getTreatment())
                     .build();
             medicalRecord = medicalRecordRepository.save(medicalRecord);
+            medicalRecordEventPublisher.publishCreateMedicalRecordEvent(
+                    MedicalRecordPayload.builder()
+                            .appointmentId(medicalRecord.getAppointmentId())
+                            .diagnosis(medicalRecord.getDiagnosis())
+                            .doctorNote(medicalRecord.getDoctorNote())
+                            .dateDiagnosis(Date.valueOf(medicalRecord.getCreatedAt().toLocalDate()))
+                            .stage(request.getStage())
+                            .symptoms(medicalRecord.getSymptoms())
+                            .treatment(medicalRecord.getTreatment())
+                            .statusHealth(request.getStatusHealth())
+                            .build());
             return CreateMedicalRecordResponse.builder()
                     .recordId(medicalRecord.getRecordId())
                     .appointmentId(medicalRecord.getAppointmentId())

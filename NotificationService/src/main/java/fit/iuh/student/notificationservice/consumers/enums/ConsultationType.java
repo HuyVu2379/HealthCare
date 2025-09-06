@@ -1,4 +1,4 @@
-package fit.iuh.student.notificationservice.consumer.enums;
+package fit.iuh.student.notificationservice.consumers.enums;
 
 public enum ConsultationType {
     ALL,

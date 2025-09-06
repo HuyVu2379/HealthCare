@@ -13,7 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreatePrescriptionRequest {
-    private int prescriptionId;
 
     private String medicalRecordId;
 

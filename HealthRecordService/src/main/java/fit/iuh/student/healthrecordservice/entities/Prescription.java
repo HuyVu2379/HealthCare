@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 public class Prescription extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "prescription_id")
     private String prescriptionId;
     
@@ -24,20 +24,20 @@ public class Prescription extends BaseEntity {
     private MedicalRecord medicalRecord;
     
     @Column(name = "medical_name", nullable = false)
-    private String medicalName;
+    private String medicalName; // tên thuốc
     
     @Column(nullable = false)
-    private String dosage;
+    private String dosage; // liều lượng
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private List<Frequency> frequency;
+    private List<Frequency> frequency; // tần suất sử dụng
     
     @Column(length = 1000)
-    private String notes;
+    private String notes; // ghi chú
     
     @Column(nullable = false)
-    private String duration;
+    private String duration; // thời gian sử dụng
     
     @Override
     public boolean equals(Object o) {

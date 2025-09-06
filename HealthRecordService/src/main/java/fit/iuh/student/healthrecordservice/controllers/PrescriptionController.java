@@ -7,6 +7,7 @@ import fit.iuh.student.healthrecordservice.dtos.responses.SuccessEntityResponse;
 import fit.iuh.student.healthrecordservice.services.PrescriptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class PrescriptionController {
     private final PrescriptionService prescriptionService;
+    @PostMapping("create")
     public ResponseEntity<MessageResponse<PrescriptionResponse>> createPrescription(
             @RequestBody CreatePrescriptionRequest request
     ) {

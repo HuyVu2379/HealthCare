@@ -7,7 +7,7 @@ import fit.iuh.student.userservice.dtos.requests.ResetPasswordRequest;
 import fit.iuh.student.userservice.dtos.responses.*;
 import fit.iuh.student.userservice.exceptions.errors.UnauthorizedException;
 import fit.iuh.student.userservice.exceptions.errors.UserNotFoundException;
-import fit.iuh.student.userservice.publisher.payload.UserEventPayload;
+import fit.iuh.student.userservice.publishers.payload.UserEventPayload;
 import fit.iuh.student.userservice.services.AuthenticationService;
 import fit.iuh.student.userservice.services.DoctorService;
 import fit.iuh.student.userservice.services.EmailService;

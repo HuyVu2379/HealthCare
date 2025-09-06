@@ -1,7 +1,7 @@
 package fit.iuh.student.userservice.services;
 
 import fit.iuh.student.userservice.dtos.responses.ResetPasswordResponse;
-import fit.iuh.student.userservice.publisher.payload.UserEventPayload;
+import fit.iuh.student.userservice.publishers.payload.UserEventPayload;
 
 public interface EmailService {
     void sendOTPEmail(UserEventPayload payload);

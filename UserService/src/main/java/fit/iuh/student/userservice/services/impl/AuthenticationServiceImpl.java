@@ -16,7 +16,7 @@ import fit.iuh.student.userservice.exceptions.errors.DuplicateUserException;
 import fit.iuh.student.userservice.exceptions.errors.UnauthorizedException;
 import fit.iuh.student.userservice.exceptions.errors.UserNotFoundException;
 import fit.iuh.student.userservice.mappers.UserMapper;
-import fit.iuh.student.userservice.publisher.payload.UserEventPayload;
+import fit.iuh.student.userservice.publishers.payload.UserEventPayload;
 import fit.iuh.student.userservice.repositories.DoctorRepository;
 import fit.iuh.student.userservice.repositories.UserRepository;
 import fit.iuh.student.userservice.services.AuthenticationService;

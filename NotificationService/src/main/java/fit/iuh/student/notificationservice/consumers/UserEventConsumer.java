@@ -1,6 +1,6 @@
-package fit.iuh.student.notificationservice.consumer;
+package fit.iuh.student.notificationservice.consumers;
 
-import fit.iuh.student.notificationservice.consumer.payload.UserEventPayload;
+import fit.iuh.student.notificationservice.consumers.payload.UserEventPayload;
 import fit.iuh.student.notificationservice.services.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

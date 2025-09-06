@@ -2,8 +2,7 @@ package fit.iuh.student.schedulingservice.jobs;
 
 import fit.iuh.student.schedulingservice.dtos.responses.AppointmentResponse;
 import fit.iuh.student.schedulingservice.entities.Appointment;
-import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
-import fit.iuh.student.schedulingservice.publisher.AppointmentEventPublisher;
+import fit.iuh.student.schedulingservice.publishers.AppointmentEventPublisher;
 import fit.iuh.student.schedulingservice.repositories.AppointmentRepository;
 import fit.iuh.student.schedulingservice.services.AppointmentService;
 import lombok.RequiredArgsConstructor;
@@ -13,11 +12,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.stereotype.Component;
 
-import java.sql.Date;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.List;
 
 @Slf4j

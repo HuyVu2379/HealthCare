@@ -2,9 +2,9 @@ package fit.iuh.student.userservice.services.impl;
 
 import fit.iuh.student.userservice.dtos.responses.ResetPasswordResponse;
 import fit.iuh.student.userservice.entities.User;
-import fit.iuh.student.userservice.publisher.UserEventPublisher;
-import fit.iuh.student.userservice.publisher.events.UserEvent;
-import fit.iuh.student.userservice.publisher.payload.UserEventPayload;
+import fit.iuh.student.userservice.publishers.UserEventPublisher;
+import fit.iuh.student.userservice.publishers.events.UserEvent;
+import fit.iuh.student.userservice.publishers.payload.UserEventPayload;
 import fit.iuh.student.userservice.repositories.UserRepository;
 import fit.iuh.student.userservice.services.EmailService;
 import jakarta.mail.MessagingException;

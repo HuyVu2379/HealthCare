@@ -1,8 +1,9 @@
 package fit.iuh.student.notificationservice.services;
 
-import fit.iuh.student.notificationservice.consumer.payload.AppointmentEventPayload;
-import fit.iuh.student.notificationservice.consumer.payload.RescheduleAppointmentResponse;
-import fit.iuh.student.notificationservice.consumer.payload.UserEventPayload;
+import fit.iuh.student.notificationservice.consumers.payload.AppointmentEventPayload;
+import fit.iuh.student.notificationservice.consumers.payload.MedicalRecordPayload;
+import fit.iuh.student.notificationservice.consumers.payload.RescheduleAppointmentResponse;
+import fit.iuh.student.notificationservice.consumers.payload.UserEventPayload;
 
 public interface EmailService {
     void sendOtpRegisterEmail(UserEventPayload payload);
@@ -11,7 +12,7 @@ public interface EmailService {
     void sendEmailCancelAppointment(AppointmentEventPayload payload);
     void sendEmailRescheduleAppointment(RescheduleAppointmentResponse payload);
     void sendEmailConfirmAppointmentStatus(AppointmentEventPayload payload);
-    void sendEmailCompleteAppointmentStatus(AppointmentEventPayload payload);
+    void sendEmailCompleteAppointmentStatus(MedicalRecordPayload payload);
     void sendEmailRejectAppointmentStatus(AppointmentEventPayload payload);
     void sendEmailRemindAppointment(AppointmentEventPayload payload);
 }
