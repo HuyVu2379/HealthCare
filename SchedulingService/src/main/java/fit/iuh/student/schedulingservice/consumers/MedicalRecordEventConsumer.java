@@ -8,16 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class MedicalRecordEventConsumer {
     private final AppointmentRepository appointmentRepository;
-    @RabbitListener(queues = "MEDICAL_RECORD_QUEUE")
+    @RabbitListener(queues = "SCHEDULE_HEALTH_RECORD_QUEUE")
     public void handleCreateMedicalRecordEvent(MedicalRecordPayload payload){
-        if(Objects.equals(payload.getEventType(), "CREATE_MEDICAL_RECORD")){
+        if(payload.getEventType().equals("MEDICAL_RECORD_CREATED")){
             log.info("Received create medical record event: {}", payload);
             appointmentRepository.updateAppointmentStatusById(payload.getAppointmentId(), AppointmentStatus.COMPLETED);
         }

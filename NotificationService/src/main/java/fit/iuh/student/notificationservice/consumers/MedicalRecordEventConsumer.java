@@ -4,8 +4,6 @@ import fit.iuh.student.notificationservice.consumers.payload.MedicalRecordPayloa
 import fit.iuh.student.notificationservice.services.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -14,14 +12,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MedicalRecordEventConsumer {
     private final EmailService emailService;
-    private static final Logger logger = LoggerFactory.getLogger(MedicalRecordEventConsumer.class);
-    @RabbitListener(queues = "MEDICAL_RECORD_QUEUE")
+    @RabbitListener(queues = "NOTIFICATION_HEALTH_RECORD_QUEUE")
     public void handleMedicalRecordEvent(MedicalRecordPayload payload){
         try{
             String eventType = payload.getEventType();
-            log.info("Received medical record event: {}", eventType);
+            log.info("Notification Service received medical record event: {}", eventType);
             switch (eventType) {
-                case "CREATE_MEDICAL_RECORD":
+                case "MEDICAL_RECORD_CREATED":
                     log.info("Processing create medical record event for appointment: {}", payload.getAppointmentId());
                     emailService.sendEmailCompleteAppointmentStatus(payload);
                     log.info("Create medical record email sent successfully for appointment: {}", payload.getAppointmentId());
@@ -30,7 +27,10 @@ public class MedicalRecordEventConsumer {
                     log.warn("Unknown event type: {}", eventType);
             }
         } catch (Exception e) {
-            log.error("Error in processing medical record event", e);
+            log.error("Error in processing medical record event for appointment: {}",
+                    payload.getAppointmentId(), e);
+            // Có thể throw exception để RabbitMQ retry
+            // throw e;
         }
     }
 }

@@ -22,7 +22,7 @@ public class SecurityConfig {
     private final HeaderAuthenticationFilter headerAuthenticationFilter;
 
     private List<String> publicEndpoints = Arrays.asList(
-            "/api/v1/client/{appointmentId}/detail/**"
+            "/api/v1/appointments/client/**"
     );
 
     @Bean

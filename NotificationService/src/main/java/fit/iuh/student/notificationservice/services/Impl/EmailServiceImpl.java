@@ -828,12 +828,15 @@ public class EmailServiceImpl implements EmailService {
                     .replace("{{prescriptionSection}}", prescriptionSection);
 
             // Set email subject and content
-            helper.setSubject("✅ Khám bệnh hoàn thành - Mã: " + (payload.getAppointmentId() != null ? payload.getAppointmentId() : ""));
             helper.setText(htmlBody, true);
-
-            // Note: Since MedicalRecordPayload doesn't have patient email info,
-            // this method would need to be called with additional patient info or
-            // retrieve patient email separately. For now, log the completion.
+            if (payload.getPatient() != null && payload.getPatient().getEmail() != null) {
+                helper.setTo(payload.getPatient().getEmail());
+                helper.setSubject("✅ Khám bệnh hoàn thành - Mã: " + (payload.getAppointmentId() != null ? payload.getAppointmentId() : ""));
+                helper.setText(htmlBody, true);
+                mailSender.send(message);
+            } else {
+                logger.error("Cannot send complete appointment email: patient or email is null");
+            }
             logger.info("Medical record completion email prepared for appointment: {}", payload.getAppointmentId());
 
         } catch (Exception e) {

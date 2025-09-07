@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class MedicalRecordEventPublisher {
     private final RabbitTemplate rabbitTemplate;
-    private static final String MEDICAL_RECORD_QUEUE = "MEDICAL_RECORD_QUEUE";
+    private static final String HEALTH_RECORD_NOTIFICATION_EXCHANGE = "HEALTH_RECORD_NOTIFICATION_EXCHANGE";
 
     public void publishCreateMedicalRecordEvent(MedicalRecordPayload payload){
         try {
-            rabbitTemplate.convertAndSend(MEDICAL_RECORD_QUEUE, payload);
+            rabbitTemplate.convertAndSend(HEALTH_RECORD_NOTIFICATION_EXCHANGE,"", payload);
         } catch (Exception e) {
             log.error("Error in publishing booking appointment event", e);
         }

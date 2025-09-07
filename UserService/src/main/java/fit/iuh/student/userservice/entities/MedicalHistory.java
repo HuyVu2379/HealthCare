@@ -32,7 +32,7 @@ public class MedicalHistory extends BaseEntity {
     private Integer medicalHistoryId;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     @JsonIgnore
     private Patient patient;
 

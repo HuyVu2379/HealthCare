@@ -1,5 +1,6 @@
 package fit.iuh.student.healthrecordservice.services.Impl;
 
+import fit.iuh.student.healthrecordservice.clients.UserClient;
 import fit.iuh.student.healthrecordservice.dtos.requests.CreateMedicalRecordRequest;
 import fit.iuh.student.healthrecordservice.dtos.responses.CreateMedicalRecordResponse;
 import fit.iuh.student.healthrecordservice.entities.MedicalRecord;
@@ -17,6 +18,7 @@ import java.sql.Date;
 public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final MedicalRecordRepository medicalRecordRepository;
     private final MedicalRecordEventPublisher medicalRecordEventPublisher;
+    private final UserClient userClient;
     @Override
     public CreateMedicalRecordResponse createMedicalRecord(CreateMedicalRecordRequest request) {
         try{
@@ -34,6 +36,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                     .imageAttachments(request.getImageAttachments())
                     .symptoms(request.getSymptoms())
                     .treatment(request.getTreatment())
+                    .serviceName(request.getServiceName())
                     .build();
             medicalRecord = medicalRecordRepository.save(medicalRecord);
             medicalRecordEventPublisher.publishCreateMedicalRecordEvent(
@@ -48,9 +51,11 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                             .treatment(medicalRecord.getTreatment())
                             .statusHealth(request.getStatusHealth())
                             .eventType("MEDICAL_RECORD_CREATED")
+                            .patient(userClient.getPatientForClient(request.getPatientId()))
                             .build());
             return CreateMedicalRecordResponse.builder()
                     .recordId(medicalRecord.getRecordId())
+                    .patientId(request.getPatientId())
                     .appointmentId(medicalRecord.getAppointmentId())
                     .diagnosis(medicalRecord.getDiagnosis())
                     .doctorNote(medicalRecord.getDoctorNote())

@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -45,5 +44,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment,String>
 
     @Query("UPDATE Appointment a SET a.status = :status WHERE a.appointmentId = :appointmentId")
     @Modifying
-    int updateAppointmentStatusById(String appointmentId, AppointmentStatus status);
+    @Transactional
+    void updateAppointmentStatusById(String appointmentId, AppointmentStatus status);
 }

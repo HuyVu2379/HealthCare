@@ -1,4 +1,5 @@
 package fit.iuh.student.healthrecordservice.publishers.payload;
+import fit.iuh.student.healthrecordservice.clients.dtos.PatientClientResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class MedicalRecordPayload {
     private Date dateDiagnosis; // Ngày chẩn đoán
     private String doctorNote;
     private int stage;
+    private PatientClientResponse patient;
     private String statusHealth;
     private String eventType;
 }

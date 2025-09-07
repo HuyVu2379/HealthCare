@@ -1,4 +1,5 @@
 package fit.iuh.student.userservice.consumers.payload;
+import fit.iuh.student.userservice.dtos.responses.PatientClientResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class MedicalRecordPayload {
     private Date dateDiagnosis; // Ngày chẩn đoán
     private String doctorNote;
     private int stage;
+    private PatientClientResponse patient;
     private String statusHealth;
     private String eventType;
 }
