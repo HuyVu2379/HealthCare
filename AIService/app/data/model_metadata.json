@@ -1,0 +1,45 @@
+{
+  "model_name": "LightGBM (Optimized)",
+  "test_accuracy": 0.99,
+  "f1_macro": 0.9789787012591179,
+  "feature_columns": {
+    "numerical": [
+      "serum_creatinine",
+      "gfr",
+      "bun",
+      "serum_calcium",
+      "ana",
+      "c3_c4",
+      "hematuria",
+      "oxalate_levels",
+      "urine_ph",
+      "blood_pressure",
+      "water_intake",
+      "months",
+      "cluster"
+    ],
+    "categorical": [
+      "physical_activity",
+      "diet",
+      "smoking",
+      "alcohol",
+      "painkiller_usage",
+      "family_history",
+      "weight_changes",
+      "stress_level"
+    ]
+  },
+  "target_classes": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "preprocessing_info": {
+    "preprocessor_file": "ckd_preprocessor.pkl",
+    "scaler": "StandardScaler for numerical features",
+    "encoder": "OneHotEncoder for categorical features"
+  }
+}
