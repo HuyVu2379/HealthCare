@@ -13,7 +13,7 @@ import java.sql.Date;
 @AllArgsConstructor
 @Builder
 public class HealthMetric extends BaseEntity {
-    public HealthMetric(String patientId, String metricName, int metricValue, String unit, MedicalRecord medicalRecord, Date measuredAt) {
+    public HealthMetric(String patientId, String metricName, double metricValue, String unit, MedicalRecord medicalRecord, Date measuredAt) {
         this.patientId = patientId;
         this.metricName = metricName;
         this.metricValue = metricValue;
@@ -33,7 +33,7 @@ public class HealthMetric extends BaseEntity {
     private String metricName;
     
     @Column(name = "metric_value", nullable = false)
-    private int metricValue;
+    private double metricValue;
     
     @Column(nullable = false)
     private String unit;

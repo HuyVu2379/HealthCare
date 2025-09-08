@@ -21,10 +21,11 @@ public class AppointmentController {
     @PostMapping("/booking-appointment")
     public ResponseEntity<MessageResponse<AppointmentResponse>> bookingAppointment(
             @RequestBody CreateAppointmentRequest request
-            ) {
+    ) {
         return SuccessEntityResponse.created("Booking appointment successfully",
                 appointmentService.bookingAppointment(request));
     }
+
     @DeleteMapping("/{appointmentId}/cancel")
     public ResponseEntity<MessageResponse<Boolean>> cancelAppointment(
             @PathVariable String appointmentId,
@@ -39,14 +40,15 @@ public class AppointmentController {
             @RequestParam String patientId,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value ="startTime") String startTime,
-            @RequestParam(value ="endTime") String endTime,
+            @RequestParam(value = "startTime") String startTime,
+            @RequestParam(value = "endTime") String endTime,
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir
-    ){
+    ) {
         return SuccessEntityResponse.ok("Get appointment by patient id successfully",
                 appointmentService.getAppointmentByPatientIdWithPage(patientId, page, size, sortBy, startTime, endTime, sortDir));
     }
+
     @PutMapping("/reschedule-appointment")
     public ResponseEntity<MessageResponse<RescheduleAppointmentResponse>> rescheduleAppointment(
             @RequestBody UpdateAppointmentRequest request
@@ -54,6 +56,7 @@ public class AppointmentController {
         return SuccessEntityResponse.ok("Reschedule appointment successfully",
                 appointmentService.rescheduleAppointment(request));
     }
+
     @PutMapping("/{appointmentId}/update-status")
     public ResponseEntity<MessageResponse<AppointmentResponse>> updateAppointmentStatus(
             @PathVariable String appointmentId,
@@ -62,6 +65,7 @@ public class AppointmentController {
         return SuccessEntityResponse.ok("Update appointment status successfully",
                 appointmentService.updateAppointmentStatus(appointmentId, Enum.valueOf(AppointmentStatus.class, status)));
     }
+
     @GetMapping("/{appointmentId}/detail")
     public ResponseEntity<MessageResponse<AppointmentResponse>> getAppointmentDetailById(
             @PathVariable String appointmentId
@@ -78,7 +82,7 @@ public class AppointmentController {
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir
-    ){
+    ) {
         return SuccessEntityResponse.ok("Get appointment with filter successfully",
                 appointmentService.getAppointmentWithFilterPagination(type, status, page, size, sortBy, sortDir));
     }
@@ -86,10 +90,17 @@ public class AppointmentController {
     @GetMapping("/get-appointment-with-doctorId")
     public ResponseEntity<MessageResponse<List<AppointmentWeekFilterResponse>>> getAppointmentByDoctorId(
             @RequestParam String doctorId,
-            @RequestParam(value ="startTime") String startTime,
-            @RequestParam(value ="endTime") String endTime
-    ){
+            @RequestParam(value = "startTime") String startTime,
+            @RequestParam(value = "endTime") String endTime
+    ) {
         return SuccessEntityResponse.ok("Get appointment by doctor id successfully",
-                appointmentService.getAppointmentWeekFilterForDoctor(doctorId,startTime,endTime));
+                appointmentService.getAppointmentWeekFilterForDoctor(doctorId, startTime, endTime));
+    }
+
+    @GetMapping("/client/{appointmentId}/detail")
+    public AppointmentClientResponse getAppointmentDetailForClientById(
+            @PathVariable String appointmentId
+    ) {
+        return appointmentService.getAppointmentDetailForClientById(appointmentId);
     }
 }

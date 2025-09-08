@@ -4,9 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -15,10 +12,14 @@ import java.util.List;
 @AllArgsConstructor
 public class CreateMedicalRecordRequest {
     private String appointmentId;
+    private String patientId;
+    private String serviceName;
     private String diagnosis;
     private String treatment;
     private String symptoms;
-    private Date followUpDate;
+    private String followUpDate;
     private String doctorNote;
-    private List<String> imageAttachments = new ArrayList<>();
+    private List<String> imageAttachments;
+    private int stage;
+    private String statusHealth;
 }

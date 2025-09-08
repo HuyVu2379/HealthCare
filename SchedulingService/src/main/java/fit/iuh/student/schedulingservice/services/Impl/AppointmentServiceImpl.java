@@ -4,17 +4,14 @@ import fit.iuh.student.schedulingservice.clients.UserClient;
 import fit.iuh.student.schedulingservice.clients.dtos.DoctorClientResponse;
 import fit.iuh.student.schedulingservice.dtos.requests.CreateAppointmentRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.UpdateAppointmentRequest;
-import fit.iuh.student.schedulingservice.dtos.responses.AppointmentResponse;
-import fit.iuh.student.schedulingservice.dtos.responses.AppointmentWeekFilterResponse;
-import fit.iuh.student.schedulingservice.dtos.responses.RescheduleAppointmentResponse;
-import fit.iuh.student.schedulingservice.dtos.responses.TimeSlotDTO;
+import fit.iuh.student.schedulingservice.dtos.responses.*;
 import fit.iuh.student.schedulingservice.entities.Appointment;
 import fit.iuh.student.schedulingservice.entities.DoctorSchedule;
 import fit.iuh.student.schedulingservice.entities.TimeSlot;
 import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
 import fit.iuh.student.schedulingservice.exceptions.errors.NotFoundException;
 import fit.iuh.student.schedulingservice.mappers.TimeSlotMapper;
-import fit.iuh.student.schedulingservice.publisher.AppointmentEventPublisher;
+import fit.iuh.student.schedulingservice.publishers.AppointmentEventPublisher;
 import fit.iuh.student.schedulingservice.repositories.AppointmentRepository;
 import fit.iuh.student.schedulingservice.repositories.DoctorScheduleRepository;
 import fit.iuh.student.schedulingservice.repositories.TimeSlotRepository;
@@ -253,7 +250,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 
-    // Cập nhật trạng thái COMPLETED, CONFIRMED, REJECTED và NO_SHOW
+    // Cập nhật trạng thái CONFIRMED, REJECTED và NO_SHOW
     @Override
     public AppointmentResponse updateAppointmentStatus(String appointmentId, AppointmentStatus status) {
         try {
@@ -281,8 +278,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .build();
             if (status == AppointmentStatus.CONFIRMED) {
                 appointmentEventPublisher.publishConfirmStatusAppointmentEvent(ap);
-            } else if (status == AppointmentStatus.COMPLETED) {
-                appointmentEventPublisher.publishCompletedStatusAppointmentEvent(ap);
             } else if (status == AppointmentStatus.NO_SHOW) {
                 appointmentEventPublisher.publishNoShowStatusAppointmentEvent(ap);
             } else {
@@ -400,6 +395,23 @@ public class AppointmentServiceImpl implements AppointmentService {
                         .build();
             }).toList();
         } catch(Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public AppointmentClientResponse getAppointmentDetailForClientById(String appointmentId) {
+        try{
+            Appointment appointment = appointmentRepository.findById(appointmentId).orElse(null);
+            if (appointment == null) {
+                throw new NotFoundException("Appointment not found");
+            } else {
+                return AppointmentClientResponse.builder()
+                        .doctorId(appointment.getDoctorId())
+                        .patientId(appointment.getPatientId())
+                        .build();
+            }
+        } catch (Exception e) {
             throw e;
         }
     }

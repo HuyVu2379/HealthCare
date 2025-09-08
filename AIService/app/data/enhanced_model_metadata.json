@@ -1,0 +1,47 @@
+{
+  "model_name": "Enhanced Random Forest",
+  "model_file": "enhanced_ckd_model.pkl",
+  "preprocessor_file": "enhanced_ckd_preprocessor.pkl",
+  "capabilities": {
+    "handles_missing_data": true,
+    "missing_data_strategy": {
+      "numerical": "median imputation",
+      "categorical": "unknown category imputation"
+    }
+  },
+  "feature_columns": {
+    "numerical": [
+      "serum_creatinine",
+      "gfr",
+      "bun",
+      "serum_calcium",
+      "ana",
+      "c3_c4",
+      "hematuria",
+      "oxalate_levels",
+      "urine_ph",
+      "blood_pressure",
+      "water_intake",
+      "months",
+      "cluster"
+    ],
+    "categorical": [
+      "physical_activity",
+      "diet",
+      "smoking",
+      "alcohol",
+      "painkiller_usage",
+      "family_history",
+      "weight_changes",
+      "stress_level"
+    ]
+  },
+  "target_classes": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ]
+}

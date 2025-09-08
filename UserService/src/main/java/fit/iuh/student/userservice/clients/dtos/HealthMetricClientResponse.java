@@ -13,6 +13,6 @@ public class HealthMetricClientResponse {
     private String metricId;
     private String patientId;
     private String metricName;
-    private int metricValue;
+    private double metricValue;
     private String unit;
 }

@@ -15,7 +15,7 @@ import java.util.List;
 public class CreateHealthMetricRequest {
     private String patientId;
     private String metricName;
-    private int metricValue;
+    private double metricValue;
     private String unit;
     private String recordId;
     private Date measuredAt;

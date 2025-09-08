@@ -6,16 +6,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateMedicalRecordResponse {
-    private String patientId;
-    private String metricName;
-    private int metricValue;
-    private String unit;
     private String recordId;
-    private Date measuredAt;
+    private String patientId;
+    private String serviceName;
+    private String appointmentId;
+    private String diagnosis;
+    private String treatment;
+    private String symptoms;
+    private Date followUpDate;
+    private List<String> imageAttachments;
+    private String doctorNote;
 }

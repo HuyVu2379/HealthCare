@@ -1,15 +1,17 @@
 package fit.iuh.student.schedulingservice.repositories;
 
 import fit.iuh.student.schedulingservice.entities.Appointment;
+import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -39,4 +41,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment,String>
             "WHERE a.doctorId = :doctorId AND (a.appointmentDate BETWEEN :weekStartDate AND :weekEndDate) " +
             "AND a.status = 'CONFIRMED'")
     List<Appointment> findAppointmentsInWeek(@Param("doctorId") String doctorId,@Param("weekStartDate") Date weekStartDate, @Param("weekEndDate") Date weekEndDate);
+
+    @Query("UPDATE Appointment a SET a.status = :status WHERE a.appointmentId = :appointmentId")
+    @Modifying
+    @Transactional
+    void updateAppointmentStatusById(String appointmentId, AppointmentStatus status);
 }
