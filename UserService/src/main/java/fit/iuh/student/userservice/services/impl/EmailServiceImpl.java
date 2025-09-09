@@ -49,13 +49,61 @@ public class EmailServiceImpl implements EmailService {
         }
     }
     public boolean validateOTP(String email, String otp) {
-        String storedOtp = redisTemplate.opsForValue().get(email);
-        if (storedOtp != null && storedOtp.equals(otp)) {
-            redisTemplate.delete(email); // Xóa OTP sau khi xác thực thành công
+        return validateOTPWithOption(email, otp, false); // Mặc định không xóa
+    }
+
+    public boolean validateOTPForPasswordReset(String email, String otp) {
+        return validateOTPWithOption(email, otp, true); // Xóa sau khi validate thành công
+    }
+
+    /**
+     * Validate OTP với tùy chọn xóa sau khi thành công
+     * @param deleteAfterSuccess true để xóa OTP sau khi validate thành công
+     */
+    private boolean validateOTPWithOption(String email, String otp, boolean deleteAfterSuccess) {
+        String action = deleteAfterSuccess ? "PASSWORD_RESET" : "VALIDATE_ONLY";
+        logger.info("VALIDATE OTP [{}] -> email={}, otp={}", action, email, otp);
+
+        // Ưu tiên tìm OTP reset password trước (key: {email}-reset-pwd)
+        String resetPwdKey = email + "-reset-pwd";
+        logger.info("Trying to find reset password OTP with key: {}", resetPwdKey);
+
+        String storedOtp = redisTemplate.opsForValue().get(resetPwdKey);
+        String usedKey = resetPwdKey;
+
+        // Kiểm tra TTL cho reset password key
+        Long ttl = redisTemplate.getExpire(usedKey, TimeUnit.SECONDS);
+        logger.info("Reset password key check: key={}, ttlSeconds={}, storedOtp={}",
+                   usedKey, ttl, storedOtp);
+
+        // Nếu không tìm thấy reset password OTP hoặc đã expire, thử tìm register OTP
+        if (storedOtp == null || ttl <= 0) {
+            logger.info("Reset password OTP not found or expired, trying register OTP key: {}", email);
+            storedOtp = redisTemplate.opsForValue().get(email);
+            usedKey = email;
+            ttl = redisTemplate.getExpire(usedKey, TimeUnit.SECONDS);
+            logger.info("Register OTP key check: key={}, ttlSeconds={}, storedOtp={}",
+                       usedKey, ttl, storedOtp);
+        }
+
+        logger.info("Final validation [{}]: redisKey={}, ttlSeconds={}, storedOtp={}, inputOtp={}",
+                   action, usedKey, ttl, storedOtp, otp);
+
+        if (storedOtp != null && ttl > 0 && storedOtp.equals(otp)) {
+            if (deleteAfterSuccess) {
+                redisTemplate.delete(usedKey);
+                logger.info("OTP validated and deleted for {} - email={}", action, email);
+            } else {
+                logger.info("OTP validation SUCCESS for {} - email={} (OTP preserved)", action, email);
+            }
             return true;
         }
+
+        logger.warn("OTP validation FAILED for {} - email={}, storedOtp={}, ttlSeconds={}, inputOtp={}",
+                   action, email, storedOtp, ttl, otp);
         return false;
     }
+
 
     @Override
     public ResetPasswordResponse sendOTPResetPassword(UserEventPayload payload) {
@@ -66,17 +114,30 @@ public class EmailServiceImpl implements EmailService {
             }
             // Tạo OTP ngẫu nhiên
             int otp = (int) (Math.random() * 900000) + 100000;
+            String redisKey = payload.getEmail() + "-reset-pwd";
+
+            // Kiểm tra và xóa OTP cũ nếu có
+            String existingOtp = redisTemplate.opsForValue().get(redisKey);
+            if (existingOtp != null) {
+                logger.info("Removing existing OTP for email: {}", payload.getEmail());
+                redisTemplate.delete(redisKey);
+            }
+
+            logger.info("SEND OTP RESET PASSWORD -> email={}, redisKey={}, otp={}, previousOtp={}",
+                       payload.getEmail(), redisKey, otp, existingOtp);
 
             // Lưu vào Redis với thời gian sống là 5 phút
-            redisTemplate.opsForValue().set(payload.getEmail()+"-reset-pwd", String.valueOf(otp), 5 * 60L, TimeUnit.SECONDS);
+            redisTemplate.opsForValue().set(redisKey, String.valueOf(otp), 5 * 60L, TimeUnit.SECONDS);
             payload.setOtp(String.valueOf(otp));
             payload.setReceiptId(user.get().getUserId());
             payload.setEventType(UserEvent.OTP_RESET_PASSWORD);
             // Gửi sự kiện OTP reset password
             userEventPublisher.publishOtpResetPasswordEvent(payload);
+
+            logger.info("OTP RESET PASSWORD sent successfully for email={}", payload.getEmail());
         }
         catch (Exception e){
-            logger.error("Failed to send email to: {}", payload.getEmail(), e);
+            logger.error("Failed to send reset password email to: {}", payload.getEmail(), e);
         }
         return new ResetPasswordResponse(HttpStatus.OK.value(), "Send email reset password successfully !", payload.getEmail());
     }

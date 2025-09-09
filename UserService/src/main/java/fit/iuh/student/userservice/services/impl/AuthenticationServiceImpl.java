@@ -237,14 +237,25 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public boolean resetPassword(ResetPasswordRequest request) {
         try {
+            // Validate OTP trước khi reset password (và xóa OTP sau khi thành công)
+            boolean isOtpValid = emailService.validateOTPForPasswordReset(request.getEmail(), request.getOtp());
+            if (!isOtpValid) {
+                log.warn("Invalid OTP provided for password reset: email={}, otp={}", request.getEmail(), request.getOtp());
+                return false;
+            }
+
             Optional<User> user = userRepository.findByEmail(request.getEmail());
             if (user.isPresent()) {
                 User existingUser = user.get();
                 existingUser.setPassword(passwordEncoder.encode(request.getNewPassword()));
                 userRepository.save(existingUser);
+                log.info("Password reset successfully for email: {}", request.getEmail());
                 return true;
+            } else {
+                log.warn("User not found for password reset: email={}", request.getEmail());
             }
         } catch (Exception e) {
+            log.error("Failed to reset password for user with email: {}", request.getEmail(), e);
             throw new UnauthorizedException("Failed to reset password for user with email: " + request.getEmail());
         }
         return false;
