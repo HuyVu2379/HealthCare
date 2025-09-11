@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Date;
 import java.util.List;
 
 @Data
@@ -24,5 +25,7 @@ public class CreatePrescriptionRequest {
 
     private String notes;
 
-    private String duration;
+    private Date startDate;
+
+    private Date endDate;
 }

@@ -4,6 +4,7 @@ import fit.iuh.student.healthrecordservice.enums.Frequency;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.sql.Date;
 import java.util.List;
 
 @Entity
@@ -18,7 +19,7 @@ public class Prescription extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "prescription_id")
     private String prescriptionId;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "record_id")
     private MedicalRecord medicalRecord;
@@ -35,9 +36,11 @@ public class Prescription extends BaseEntity {
     
     @Column(length = 1000)
     private String notes; // ghi chú
-    
+
     @Column(nullable = false)
-    private String duration; // thời gian sử dụng
+    private Date startDate; // thời gian bắt đầu sử dụng
+
+    private Date endDate; // thời gian kết thúc sử dụng
     
     @Override
     public boolean equals(Object o) {

@@ -3,14 +3,41 @@ from app.models.ai_models import ChatMessage, ChatResponse
 import asyncio
 import json
 from datetime import datetime
+from .rag_service import rag_service
 
 class ChatService:
     def __init__(self):
         self.chat_history = {}  # In-memory storage, replace with database in production
+        self.use_rag = True  # Cờ để bật/tắt RAG
         
     async def get_ai_response(self, message: str, user_id: Optional[str] = None, session_id: Optional[str] = None) -> Dict[str, Any]:
         """
         Get AI response for user message
+        Ưu tiên sử dụng RAG chatbot, fallback về simple AI response
+        """
+        try:
+            # Thử sử dụng RAG chatbot trước
+            if self.use_rag:
+                rag_response = await rag_service.get_rag_response(message, user_id, session_id)
+                
+                # Nếu RAG response thành công và có nội dung hữu ích
+                if rag_response.get("is_rag_response", False) and not rag_response["response"].startswith("Lỗi"):
+                    return rag_response
+                
+                # Nếu RAG không thành công, log lỗi và fallback
+                print(f"RAG fallback: {rag_response.get('response', 'Unknown error')}")
+            
+            # Fallback về simple AI response
+            return await self._get_simple_ai_response(message, user_id, session_id)
+            
+        except Exception as e:
+            # Nếu có lỗi, fallback về simple AI response
+            print(f"Error in AI response, falling back to simple response: {str(e)}")
+            return await self._get_simple_ai_response(message, user_id, session_id)
+    
+    async def _get_simple_ai_response(self, message: str, user_id: Optional[str] = None, session_id: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Simple AI response (fallback method)
         """
         try:
             # Store message in history
@@ -34,13 +61,19 @@ class ChatService:
                     "type": "assistant",
                     "message": ai_response["response"],
                     "timestamp": datetime.now().isoformat(),
-                    "confidence": ai_response.get("confidence")
+                    "confidence": ai_response.get("confidence"),
+                    "is_rag_response": False
                 })
             
-            return ai_response
+            return {
+                **ai_response,
+                "sources": [],
+                "num_sources": 0,
+                "is_rag_response": False
+            }
             
         except Exception as e:
-            raise Exception(f"Error getting AI response: {str(e)}")
+            raise Exception(f"Error getting simple AI response: {str(e)}")
     
     async def _generate_ai_response(self, message: str) -> Dict[str, Any]:
         """

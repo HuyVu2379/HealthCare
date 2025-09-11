@@ -15,6 +15,7 @@ import java.util.List;
 public class CreateMedicalRecordResponse {
     private String recordId;
     private String patientId;
+    private String doctorId;
     private String serviceName;
     private String appointmentId;
     private String diagnosis;

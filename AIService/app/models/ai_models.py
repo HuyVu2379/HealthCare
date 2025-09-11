@@ -12,6 +12,9 @@ class ChatResponse(BaseModel):
     session_id: str
     timestamp: datetime
     confidence: Optional[float] = None
+    sources: Optional[List[Dict[str, Any]]] = None
+    num_sources: Optional[int] = None
+    is_rag_response: Optional[bool] = False
 
 class HealthAnalysisRequest(BaseModel):
     symptoms: List[str]

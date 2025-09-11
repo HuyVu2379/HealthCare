@@ -21,6 +21,10 @@ public class MedicalRecord extends BaseEntity {
     @Column(name = "record_id")
     private String recordId;
 
+    private String patientId; // Mã bệnh nhân
+
+    private String doctorId; // Mã bác sĩ
+
     private String serviceName; // Tên dịch vụ y tế
 
     @Column(name = "appointment_id", nullable = false, unique = true)

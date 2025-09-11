@@ -107,7 +107,7 @@ public class PatientServiceImpl implements PatientService {
             }
 
             Sort sort = Sort.by(direction, sortBy);
-            Pageable pageable = PageRequest.of(page, size, sort);
+            Pageable pageable = PageRequest.of(page-1, size, sort);
             
             Page<Patient> patients = patientRepository.findPatientsByDoctorId(doctorId, pageable, namePatient, statusHealth);
             return patients.map(patient -> {

@@ -7,10 +7,9 @@ import fit.iuh.student.healthrecordservice.dtos.responses.SuccessEntityResponse;
 import fit.iuh.student.healthrecordservice.services.PrescriptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/prescriptions")
@@ -22,5 +21,12 @@ public class PrescriptionController {
             @RequestBody CreatePrescriptionRequest request
     ) {
         return SuccessEntityResponse.ok("Create prescription successfully", prescriptionService.createPrescription(request));
+    }
+
+    @GetMapping("get-using/{patientId}")
+    public ResponseEntity<MessageResponse<List<PrescriptionResponse>>> getPrescriptionUsing(
+            @PathVariable String patientId
+    ){
+        return SuccessEntityResponse.ok("Get prescription using successfully", prescriptionService.getPrescriptionUsing(patientId));
     }
 }

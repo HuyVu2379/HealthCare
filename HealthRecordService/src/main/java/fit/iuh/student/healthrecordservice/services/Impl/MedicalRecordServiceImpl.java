@@ -28,6 +28,8 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             }
             MedicalRecord medicalRecord = MedicalRecord.builder()
                     .appointmentId(request.getAppointmentId())
+                    .patientId(request.getPatientId())
+                    .doctorId(request.getDoctorId())
                     .diagnosis(request.getDiagnosis())
                     .doctorNote(request.getDoctorNote())
                     .followUpDate(Date.valueOf(request.getFollowUpDate()))
@@ -56,6 +58,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             return CreateMedicalRecordResponse.builder()
                     .recordId(medicalRecord.getRecordId())
                     .patientId(request.getPatientId())
+                    .doctorId(request.getDoctorId())
                     .appointmentId(medicalRecord.getAppointmentId())
                     .diagnosis(medicalRecord.getDiagnosis())
                     .doctorNote(medicalRecord.getDoctorNote())

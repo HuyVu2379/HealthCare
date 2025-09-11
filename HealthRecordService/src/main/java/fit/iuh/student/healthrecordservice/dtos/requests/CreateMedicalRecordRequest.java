@@ -13,6 +13,7 @@ import java.util.List;
 public class CreateMedicalRecordRequest {
     private String appointmentId;
     private String patientId;
+    private String doctorId;
     private String serviceName;
     private String diagnosis;
     private String treatment;

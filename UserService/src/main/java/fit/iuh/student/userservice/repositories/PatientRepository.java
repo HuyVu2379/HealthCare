@@ -13,7 +13,7 @@ public interface PatientRepository extends JpaRepository<Patient,String> {
             "JOIN p.medicalHistories mh " +
             "JOIN mh.doctor d " +
             "WHERE d.userId = :doctorId " +
-            "AND (:namePatient IS NULL OR LOWER(p.fullName) LIKE LOWER(CONCAT('%', :namePatient, '%'))) " +
+            "AND (:namePatient IS NULL OR lower(p.fullName) LIKE lower(CONCAT('%', :namePatient, '%')) ) " +
             "AND (:statusHealth IS NULL OR mh.statusHealth = :statusHealth)")
     Page<Patient> findPatientsByDoctorId(String doctorId, Pageable pageable, String namePatient, String statusHealth);
 }
