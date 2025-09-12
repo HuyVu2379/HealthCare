@@ -103,7 +103,7 @@ public class AuthController {
     /*
        Nếu là otp reset password thì email + "-reset-pwd"
      */
-    @PreAuthorize("hasAnyRole('PATIENT', 'DOCTOR')")
+    // @PreAuthorize("hasAnyRole('PATIENT', 'DOCTOR')")
     @GetMapping("/validate-otp")
     public ResponseEntity<MessageResponse<Boolean>> validateOtp(
             @QueryParam("email") String email,
@@ -142,8 +142,7 @@ public class AuthController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
-
-    @PreAuthorize("hasAnyRole('PATIENT', 'DOCTOR')")
+    // @PreAuthorize("hasAnyRole('PATIENT', 'DOCTOR')")
     @GetMapping("/send-otp-reset-password/{email}")
     public ResponseEntity<MessageResponse<Object>> sendOtpResetPassword(
             @PathVariable String email
@@ -157,7 +156,7 @@ public class AuthController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('PATIENT', 'DOCTOR')")
+    // @PreAuthorize("hasAnyRole('PATIENT', 'DOCTOR')")
     @PostMapping("/reset-password")
     public ResponseEntity<MessageResponse<Boolean>> resetPassword(
             @RequestBody ResetPasswordRequest resetPasswordRequest
