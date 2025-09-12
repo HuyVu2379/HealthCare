@@ -4,7 +4,7 @@ from typing import Optional
 class Settings(BaseSettings):
     # API Configuration
     API_V1_STR: str = "/api/v1"
-    PROJECT_NAME: str = "AI Service"
+    PROJECT_NAME: str = "AI_Service"
     
     # OpenAI Configuration
     OPENAI_API_KEY: Optional[str] = None
@@ -15,8 +15,8 @@ class Settings(BaseSettings):
     SERVICE_PORT: int = 8086
     SERVICE_HOST: str = "localhost"
     
-    # Database Configuration (if needed)
-    DATABASE_URL: Optional[str] = None
+    # # Database Configuration (if needed)
+    # DATABASE_URL: Optional[str] = None
     
     # Security
     SECRET_KEY: str = "your-secret-key-here"

@@ -6,7 +6,7 @@ import requests
 import json
 
 # URL của API
-API_BASE_URL = "http://localhost:8086/api/v1/analysis"
+API_BASE_URL = "http://localhost:8080/api/v1/analysis"
 
 def test_complete_data():
     """Test với dữ liệu đầy đủ - sẽ sử dụng primary model"""

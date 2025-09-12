@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.schema import Document
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnablePassthrough
@@ -61,13 +61,41 @@ class RAGPDFChatbot:
         # self.model = genai.GenerativeModel('gemini-2.5-pro')
         # self.model = genai.GenerativeModel('gemini-2.5-flash')
         
-        # Khởi tạo embeddings model (sử dụng model local để tiết kiệm chi phí)
-        self.embeddings = HuggingFaceEmbeddings(
-            # model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-            model_name="intfloat/multilingual-e5-large",
-            model_kwargs={'device': 'cpu'}
-        )
+        # Khởi tạo embeddings model (ưu tiên dùng GPU nếu có, fallback về CPU)
+        import torch
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
         
+        # Thử model nhẹ hơn trước cho GPU có ít RAM
+        model_name = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+        
+        try:
+            print(f"🔧 Đang thử embedding model: {model_name} (device={device})")
+            self.embeddings = HuggingFaceEmbeddings(
+                model_name=model_name,
+                model_kwargs={'device': device}
+            )
+            print(f"✅ Thành công với {model_name} trên {device}")
+        except Exception as cuda_error:
+            if "CUDA out of memory" in str(cuda_error) and device == 'cuda':
+                print(f"⚠️  GPU hết bộ nhớ, chuyển về CPU: {cuda_error}")
+                try:
+                    self.embeddings = HuggingFaceEmbeddings(
+                        model_name=model_name,
+                        model_kwargs={'device': 'cpu'}
+                    )
+                    print(f"✅ Thành công với {model_name} trên CPU")
+                except Exception as cpu_error:
+                    print(f"❌ Lỗi trên CPU, thử model nhỏ hơn: {cpu_error}")
+                    # Fallback về model rất nhỏ
+                    model_name = "sentence-transformers/paraphrase-multilingual-MiniLM-L6-v2"
+                    self.embeddings = HuggingFaceEmbeddings(
+                        model_name=model_name,
+                        model_kwargs={'device': 'cpu'}
+                    )
+                    print(f"✅ Thành công với model nhỏ: {model_name} trên CPU")
+            else:
+                raise cuda_error
+
         # Text splitter
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=self.chunk_size,

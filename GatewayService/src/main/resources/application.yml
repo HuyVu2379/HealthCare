@@ -31,6 +31,12 @@ spring:
             - Path=/api/v1/schedules/**, /api/v1/time-slots/**, /api/v1/doctor-schedules/**, /api/v1/appointments/**
           filters:
             - AuthenticationFilter
+        - id: AI_Service
+          uri: lb://ai-service
+          predicates:
+                - Path=/api/v1/chat/**, /api/v1/analysis/**
+#          filters:
+#                - AuthenticationFilter
   profiles:
     active: docker
 jwt:

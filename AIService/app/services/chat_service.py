@@ -3,12 +3,12 @@ from app.models.ai_models import ChatMessage, ChatResponse
 import asyncio
 import json
 from datetime import datetime
-from .rag_service import rag_service
 
 class ChatService:
-    def __init__(self):
+    def __init__(self, rag_service=None):
         self.chat_history = {}  # In-memory storage, replace with database in production
         self.use_rag = True  # Cờ để bật/tắt RAG
+        self.rag_service = rag_service
         
     async def get_ai_response(self, message: str, user_id: Optional[str] = None, session_id: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -17,8 +17,8 @@ class ChatService:
         """
         try:
             # Thử sử dụng RAG chatbot trước
-            if self.use_rag:
-                rag_response = await rag_service.get_rag_response(message, user_id, session_id)
+            if self.use_rag and self.rag_service:
+                rag_response = await self.rag_service.get_rag_response(message, user_id, session_id)
                 
                 # Nếu RAG response thành công và có nội dung hữu ích
                 if rag_response.get("is_rag_response", False) and not rag_response["response"].startswith("Lỗi"):

@@ -51,3 +51,4 @@ UserService/src/main/resources/application.yml
 
 GatewayService/src/main/resources/application.yml
 NotificationService/src/main/resources/application.yml
+AIService/.env
