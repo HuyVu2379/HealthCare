@@ -1,17 +1,16 @@
 package fit.iuh.student.userservice.dtos.requests;
 
-import fit.iuh.student.userservice.dtos.CertificationDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateDoctorCertificationRequest {
-    List<CertificationDto> certifications;
+public class AddCertificationRequest {
+    private String name;
+    private String issuingOrganization;
+    private Integer yearIssued;
 }

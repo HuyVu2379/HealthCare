@@ -42,10 +42,9 @@ public class Doctor extends User{
     @Column(name = "medical_histories")
     private List<MedicalHistory> medicalHistories;
 
-    // Lưu certifications dưới dạng JSON trong một cột
-    @Column(name = "certifications", columnDefinition = "TEXT")
-    @Convert(converter = StringListConverter.class)
-    private List<String> certifications;
+    // Relationship với Certification entity
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Certification> certifications = new ArrayList<>();
 
     public Doctor(String fullName, String email, String phone, String specialty, String password){
         this.setFullName(fullName);
@@ -57,3 +56,4 @@ public class Doctor extends User{
         this.setStatus(Status.ACTIVE);
     }
 }
+
