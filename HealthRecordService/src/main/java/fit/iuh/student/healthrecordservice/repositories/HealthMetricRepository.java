@@ -17,4 +17,6 @@ public interface HealthMetricRepository extends JpaRepository<HealthMetric,Strin
 
     @Query(value = "SELECT * FROM health_metric hm WHERE hm.patient_id = :patientId AND hm.metric_name = :metricName AND hm.measured_at >= DATE_SUB(CURDATE(), INTERVAL :month MONTH) ORDER BY hm.measured_at DESC", nativeQuery = true)
     List<HealthMetric> findHealthMetricFilterByMetricName(String patientId, String metricName, int month);
+
+    List<HealthMetric> findByPatientIdOrderByMeasuredAtDesc(String patientId);
 }

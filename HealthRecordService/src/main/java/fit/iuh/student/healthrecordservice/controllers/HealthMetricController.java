@@ -2,6 +2,8 @@ package fit.iuh.student.healthrecordservice.controllers;
 
 import fit.iuh.student.healthrecordservice.dtos.requests.CreateHealthMetricRequest;
 import fit.iuh.student.healthrecordservice.dtos.requests.ImportHealthMetricsRequest;
+import fit.iuh.student.healthrecordservice.dtos.requests.CreateHealthMetricPanelRequest;
+import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricPanelResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricClientResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.MessageResponse;
@@ -37,5 +39,32 @@ public class HealthMetricController {
     public ResponseEntity<MessageResponse<List<HealthMetricResponse>>> importHealthMetrics(
            @RequestBody ImportHealthMetricsRequest request) {
         return SuccessEntityResponse.ok("Import health metrics successfully !",healthMetricService.importHealthMetrics(request));
+    }
+
+    @PostMapping("/create-panel")
+    @PreAuthorize("hasAnyRole('PATIENT','DOCTOR')")
+    public ResponseEntity<MessageResponse<List<HealthMetricResponse>>> createPanel(
+           @RequestBody CreateHealthMetricPanelRequest request) {
+        ImportHealthMetricsRequest mapped = new ImportHealthMetricsRequest();
+        ImportHealthMetricsRequest.HealthMetricData dataTemplate = new ImportHealthMetricsRequest.HealthMetricData();
+        List<ImportHealthMetricsRequest.HealthMetricData> items = request.getMetrics().stream().map(m -> {
+            ImportHealthMetricsRequest.HealthMetricData item = new ImportHealthMetricsRequest.HealthMetricData();
+            item.setPatientId(request.getPatientId());
+            item.setRecordId(request.getRecordId());
+            item.setMeasuredAt(request.getMeasuredAt());
+            item.setMetricName(m.getName());
+            item.setMetricValue(m.getValue());
+            item.setUnit(m.getUnit());
+            return item;
+        }).toList();
+        mapped.setHealthMetrics(items);
+        return SuccessEntityResponse.ok("Create health metric panel successfully !",healthMetricService.importHealthMetrics(mapped));
+    }
+
+    @GetMapping("/by-patient")
+    @PreAuthorize("hasAnyRole('PATIENT','DOCTOR')")
+    public ResponseEntity<MessageResponse<List<HealthMetricPanelResponse>>> getPanelsByPatient(
+           @RequestParam String patientId) {
+        return SuccessEntityResponse.ok("Get health metric panels successfully !",healthMetricService.getPanelsByPatient(patientId));
     }
 }
