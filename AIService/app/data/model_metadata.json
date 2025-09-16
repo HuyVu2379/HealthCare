@@ -14,9 +14,7 @@
       "oxalate_levels",
       "urine_ph",
       "blood_pressure",
-      "water_intake",
-      "months",
-      "cluster"
+      "water_intake"
     ],
     "categorical": [
       "physical_activity",

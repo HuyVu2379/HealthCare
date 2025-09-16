@@ -1,10 +1,7 @@
 package fit.iuh.student.userservice.exceptions;
 
 import fit.iuh.student.userservice.dtos.responses.ErrorResponse;
-import fit.iuh.student.userservice.exceptions.errors.FileDeleteException;
-import fit.iuh.student.userservice.exceptions.errors.FileUploadException;
-import fit.iuh.student.userservice.exceptions.errors.UnauthorizedException;
-import fit.iuh.student.userservice.exceptions.errors.UserNotFoundException;
+import fit.iuh.student.userservice.exceptions.errors.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +28,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(FileDeleteException.class)
-    public ResponseEntity<ErrorResponse> handleFileDeleteException(FileDeleteException ex,HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleFileDeleteException(FileDeleteException ex, HttpServletRequest request) {
         ErrorResponse error = new ErrorResponse();
         error.setMessage("Delete File Failed: " + ex.getMessage());
         error.setStatus(HttpStatus.BAD_REQUEST.value());
@@ -103,5 +100,15 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(System.currentTimeMillis());
         errorResponse.setPath(request.getRequestURI());
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(NotFoundException exc, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setMessage("Not found:" + exc.getMessage());
+        errorResponse.setStatus(HttpStatus.NOT_FOUND.value());
+        errorResponse.setTimestamp(System.currentTimeMillis());
+        errorResponse.setPath(request.getRequestURI());
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 }

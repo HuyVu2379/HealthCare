@@ -3,10 +3,7 @@ package fit.iuh.student.userservice.services.impl;
 import fit.iuh.student.userservice.dtos.requests.AuthenticationRequest;
 import fit.iuh.student.userservice.dtos.requests.RegisterRequest;
 import fit.iuh.student.userservice.dtos.requests.ResetPasswordRequest;
-import fit.iuh.student.userservice.dtos.responses.AuthenticationResponse;
-import fit.iuh.student.userservice.dtos.responses.DoctorResponse;
-import fit.iuh.student.userservice.dtos.responses.LoginResponse;
-import fit.iuh.student.userservice.dtos.responses.UserResponse;
+import fit.iuh.student.userservice.dtos.responses.*;
 import fit.iuh.student.userservice.entities.Doctor;
 import fit.iuh.student.userservice.entities.Patient;
 import fit.iuh.student.userservice.entities.User;
@@ -19,10 +16,7 @@ import fit.iuh.student.userservice.mappers.UserMapper;
 import fit.iuh.student.userservice.publishers.payload.UserEventPayload;
 import fit.iuh.student.userservice.repositories.DoctorRepository;
 import fit.iuh.student.userservice.repositories.UserRepository;
-import fit.iuh.student.userservice.services.AuthenticationService;
-import fit.iuh.student.userservice.services.DoctorService;
-import fit.iuh.student.userservice.services.EmailService;
-import fit.iuh.student.userservice.services.JwtService;
+import fit.iuh.student.userservice.services.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +51,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final DoctorRepository doctorRepository;
     private final DoctorService doctorService;
     private final UserMapper userMapper;
+    private final PatientService patientService;
     private final EmailService emailService;
     private static final Logger log = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
     @Value("${jwt.expiration}")
@@ -349,23 +344,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             User user = userRepository.findByEmail(userEmail)
                     .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-            if (clazz.equals(Object.class)) {
-                if (user.getRole().equals(Role.DOCTOR)) {
-                    return clazz.cast(doctorService.getDoctorById(user.getUserId()));
-                } else if (user.getRole().equals(Role.PATIENT)) {
-                    return clazz.cast(user);
-                }
-            }
+//            if (clazz.equals(Object.class)) {
+//                if (user.getRole().equals(Role.DOCTOR)) {
+//                    return clazz.cast(doctorService.getDoctorById(user.getUserId()));
+//                } else if (user.getRole().equals(Role.PATIENT)) {
+//                    return clazz.cast(user);
+//                }
+//            }
 
             if (user.getRole().equals(Role.DOCTOR)) {
                 DoctorResponse doctorResponse = doctorService.getDoctorById(user.getUserId());
                 return clazz.cast(doctorResponse);
             } else if (user.getRole().equals(Role.PATIENT)) {
-                UserResponse userResponse = userMapper.toUserResponse(user);
-                return clazz.cast(userResponse);
+                GetPatientResponse patientResponse = patientService.getPatientById(user.getUserId());
+                return clazz.cast(patientResponse);
             }
             return null;
-
         } catch (Exception e) {
             log.error("Error occurred in getMe method: ", e);
             throw e;

@@ -3,13 +3,11 @@ package fit.iuh.student.userservice.services.impl;
 import fit.iuh.student.userservice.clients.HealthRecordClient;
 import fit.iuh.student.userservice.dtos.requests.MedicalHistoryRequest;
 import fit.iuh.student.userservice.dtos.requests.UpdatePatientRequest;
-import fit.iuh.student.userservice.dtos.responses.DoctorClientResponse;
-import fit.iuh.student.userservice.dtos.responses.PatientClientResponse;
-import fit.iuh.student.userservice.dtos.responses.PatientResponse;
-import fit.iuh.student.userservice.dtos.responses.UpdatePatientResponse;
+import fit.iuh.student.userservice.dtos.responses.*;
 import fit.iuh.student.userservice.entities.Doctor;
 import fit.iuh.student.userservice.entities.MedicalHistory;
 import fit.iuh.student.userservice.entities.Patient;
+import fit.iuh.student.userservice.exceptions.errors.UserNotFoundException;
 import fit.iuh.student.userservice.mappers.UserMapper;
 import fit.iuh.student.userservice.repositories.DoctorRepository;
 import fit.iuh.student.userservice.repositories.MedicalHistoryRepository;
@@ -143,6 +141,34 @@ public class PatientServiceImpl implements PatientService {
                 return response;
             });
         } catch (RuntimeException e) {
+            throw e;
+        }
+    }
+
+    @Override
+    public GetPatientResponse getPatientById(String patientId) {
+        try{
+            Patient patient = patientRepository.findById(patientId).orElse(null);
+            if(patient == null){
+                throw new UserNotFoundException("Patient not found with id: " + patientId);
+            }
+            return GetPatientResponse.builder()
+                    .userId(patient.getUserId())
+                    .fullName(patient.getFullName())
+                    .email(patient.getEmail())
+                    .gender(patient.getGender())
+                    .dob(patient.getDob())
+                    .phone(patient.getPhone())
+                    .address(patient.getAddress())
+                    .avatarUrl(patient.getAvatarUrl())
+                    .role(patient.getRole())
+                    .status(patient.getStatus())
+                    .height(patient.getHeight())
+                    .weight(patient.getWeight())
+                    .bloodType(patient.getBloodType())
+                    .bmi(patient.getBmi())
+                    .build();
+        } catch (Exception e) {
             throw e;
         }
     }
