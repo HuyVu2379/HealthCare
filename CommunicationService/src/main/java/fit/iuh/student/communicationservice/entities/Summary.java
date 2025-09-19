@@ -1,25 +1,24 @@
 package fit.iuh.student.communicationservice.entities;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.sql.Timestamp;
+
 import java.time.LocalDateTime;
 
 @Document
 @Data
-@EqualsAndHashCode(of = {"message_id","appointment_id"})
-public class Message {
+@Builder
+@EqualsAndHashCode(of = {"summaryId"})
+public class Summary {
     @Id
-    private String message_id;
-    private String group_id;
-    private String sender_id;
-    private String receiver_id;
-    private String content;
-    private Timestamp sendAt;
+    private String summaryId;
+    private String groupId;
+    private String contentSummary;
     @CreatedDate
     private LocalDateTime createdAt;
     @LastModifiedDate

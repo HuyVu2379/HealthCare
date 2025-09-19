@@ -181,4 +181,20 @@ public class AuthController {
     ) {
         return SuccessEntityResponse.ok("Create account for doctor successfully", doctorService.createAccountForDoctor(request));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<MessageResponse<Boolean>> logout(HttpServletRequest request, @RequestParam String refreshToken) {
+        Boolean result = authenticationService.logout(request, refreshToken);
+        if (result) {
+            return SuccessEntityResponse.ok("Logout successful", true);
+        } else {
+            MessageResponse<Boolean> response = new MessageResponse<>(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Failed to logout",
+                    false,
+                    false
+            );
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
 }

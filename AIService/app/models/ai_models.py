@@ -5,11 +5,11 @@ from datetime import datetime
 class ChatMessage(BaseModel):
     message: str
     user_id: Optional[str] = None
-    session_id: Optional[str] = None
+    summary: Optional[str] = None
+    messages: List[str] = []
 
 class ChatResponse(BaseModel):
     response: str
-    session_id: str
     timestamp: datetime
     confidence: Optional[float] = None
     sources: Optional[List[Dict[str, Any]]] = None
@@ -23,6 +23,9 @@ class HealthAnalysisRequest(BaseModel):
     medical_history: Optional[List[str]] = None
     vital_signs: Optional[Dict[str, Any]] = None
 
+class GetSummaryResponse(BaseModel):
+    summary: str
+    messages: List[str]
 class HealthAnalysisResponse(BaseModel):
     analysis: str
     recommendations: List[str]

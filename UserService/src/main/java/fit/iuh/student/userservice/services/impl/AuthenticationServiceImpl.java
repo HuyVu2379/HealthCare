@@ -366,4 +366,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
+    @Override
+    public Boolean logout(HttpServletRequest request,String refreshToken) {
+        try{
+            final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+            // Kiểm tra header Authorization
+            if (authHeader == null || !authHeader.startsWith(tokenPrefix + " ")) {
+                return false;
+            }
+
+            final String jwt = authHeader.substring(tokenPrefix.length() + 1);
+            jwtService.blacklistToken(jwt);
+            jwtService.blacklistToken(refreshToken);
+            return true;
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
 }

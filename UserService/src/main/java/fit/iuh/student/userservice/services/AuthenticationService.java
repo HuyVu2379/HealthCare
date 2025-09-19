@@ -61,4 +61,6 @@ public interface AuthenticationService {
     AuthenticationResponse registerAdmin(RegisterRequest request);
 
     <T> T getMe(HttpServletRequest request, Class<T> clazz);
+
+    Boolean logout(HttpServletRequest request,String refreshToken);
 }

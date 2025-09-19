@@ -6,20 +6,19 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.sql.Timestamp;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Document
 @Data
-@EqualsAndHashCode(of = {"message_id","appointment_id"})
-public class Message {
+@EqualsAndHashCode(of = {"groupId"})
+public class Group {
     @Id
-    private String message_id;
-    private String group_id;
-    private String sender_id;
-    private String receiver_id;
-    private String content;
-    private Timestamp sendAt;
+    private String groupId;
+    private String groupName;
+    private String appointment_id;
+    private List<String> memberIds;
     @CreatedDate
     private LocalDateTime createdAt;
     @LastModifiedDate
