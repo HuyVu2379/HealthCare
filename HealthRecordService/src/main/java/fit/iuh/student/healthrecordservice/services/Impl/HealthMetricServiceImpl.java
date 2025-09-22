@@ -99,4 +99,23 @@ public class HealthMetricServiceImpl implements HealthMetricService {
             throw e;
         }
     }
+
+    @Override
+    public List<HealthMetricPanelResponse> getPanelsByPatientAndDate(String patientId, Date measuredAt) {
+        try{
+            List<HealthMetric> metrics = healthMetricRepository.findByPatientIdAndMeasuredAtOrderByMetricNameAsc(patientId, measuredAt);
+            if(metrics.isEmpty()) return List.of();
+            HealthMetricPanelResponse panel = HealthMetricPanelResponse.builder()
+                    .measuredAt(measuredAt)
+                    .metrics(metrics.stream().map(m -> HealthMetricPanelResponse.Item.builder()
+                            .name(m.getMetricName())
+                            .value(m.getMetricValue())
+                            .unit(m.getUnit())
+                            .build()).toList())
+                    .build();
+            return List.of(panel);
+        }catch (Exception e){
+            throw e;
+        }
+    }
 }

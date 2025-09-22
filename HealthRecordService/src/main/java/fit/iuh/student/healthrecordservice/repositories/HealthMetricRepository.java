@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.sql.Date;
 
 @Repository
 public interface HealthMetricRepository extends JpaRepository<HealthMetric,String> {
@@ -19,4 +20,5 @@ public interface HealthMetricRepository extends JpaRepository<HealthMetric,Strin
     List<HealthMetric> findHealthMetricFilterByMetricName(String patientId, String metricName, int month);
 
     List<HealthMetric> findByPatientIdOrderByMeasuredAtDesc(String patientId);
+    List<HealthMetric> findByPatientIdAndMeasuredAtOrderByMetricNameAsc(String patientId, Date measuredAt);
 }

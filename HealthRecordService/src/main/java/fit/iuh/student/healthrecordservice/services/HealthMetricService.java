@@ -13,4 +13,5 @@ public interface HealthMetricService {
     HealthMetricResponse createHealthMetric(CreateHealthMetricRequest healthMetric);
     List<HealthMetricResponse> importHealthMetrics(ImportHealthMetricsRequest request);
     List<HealthMetricPanelResponse> getPanelsByPatient(String patientId);
+    List<HealthMetricPanelResponse> getPanelsByPatientAndDate(String patientId, java.sql.Date measuredAt);
 }

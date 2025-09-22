@@ -67,4 +67,12 @@ public class HealthMetricController {
            @RequestParam String patientId) {
         return SuccessEntityResponse.ok("Get health metric panels successfully !",healthMetricService.getPanelsByPatient(patientId));
     }
+
+    @GetMapping("/by-patient-and-date")
+    @PreAuthorize("hasAnyRole('PATIENT','DOCTOR')")
+    public ResponseEntity<MessageResponse<List<HealthMetricPanelResponse>>> getPanelsByPatientAndDate(
+           @RequestParam String patientId,
+           @RequestParam java.sql.Date measuredAt) {
+        return SuccessEntityResponse.ok("Get health metric panels by date successfully !",healthMetricService.getPanelsByPatientAndDate(patientId, measuredAt));
+    }
 }
