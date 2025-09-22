@@ -4,7 +4,6 @@ import fit.iuh.student.communicationservice.dtos.requests.SendMessageRequest;
 import fit.iuh.student.communicationservice.dtos.requests.UpdateSummaryRequest;
 import fit.iuh.student.communicationservice.dtos.responses.MessageResponse;
 import fit.iuh.student.communicationservice.entities.Message;
-import fit.iuh.student.communicationservice.mappers.GroupMapper;
 import fit.iuh.student.communicationservice.mappers.MessageMapper;
 import fit.iuh.student.communicationservice.repositories.MessageRepository;
 import fit.iuh.student.communicationservice.services.MessageService;

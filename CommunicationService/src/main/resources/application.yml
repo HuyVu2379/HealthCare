@@ -1,15 +1,19 @@
 server:
   port: 8085
 
+
 spring:
   application:
     name: CommunicationService
   data:
     mongodb:
       # MongoDB Atlas configuration (uncomment to use)
-       uri: mongodb+srv://huyvu2379kh:${MONGODB_PSD}@communicationdb.yr4mous.mongodb.net/?retryWrites=true&w=majority&appName=CommunicationDB
+       uri: mongodb+srv://huyvu2379kh:${MONGODB_PSD:admin123}@communicationdb.yr4mous.mongodb.net/CommunicationDB?retryWrites=true&w=majority&appName=CommunicationDB
   profiles:
     active: local
+
+gemini:
+  api-key: ${GEMINI_API_KEY:AIzaSyCSpXYJbaoIJIFgHhSlk3nK1YYGwSxceeQ}
 # Eureka Client Configuration
 eureka:
   client:

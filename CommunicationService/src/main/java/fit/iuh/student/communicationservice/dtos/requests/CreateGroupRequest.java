@@ -8,10 +8,10 @@ import java.util.List;
 @Data
 public class CreateGroupRequest {
     @NotBlank(message = "Group name is required")
-    private String groupName;
+        private String groupName;
 
-    private String appointmentId;
+        private String appointmentId;
 
-    @NotEmpty(message = "Member IDs cannot be empty")
-    private List<String> memberIds;
+        @NotEmpty(message = "Member IDs cannot be empty")
+        private List<String> memberIds;
 }

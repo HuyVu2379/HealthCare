@@ -2,14 +2,16 @@ package fit.iuh.student.communicationservice.services.Impl;
 
 import fit.iuh.student.communicationservice.dtos.requests.UpdateSummaryRequest;
 import fit.iuh.student.communicationservice.dtos.responses.GetSummaryResponse;
-import fit.iuh.student.communicationservice.dtos.responses.MessageResponse;
+import fit.iuh.student.communicationservice.entities.Message;
 import fit.iuh.student.communicationservice.entities.Summary;
+import fit.iuh.student.communicationservice.repositories.MessageRepository;
 import fit.iuh.student.communicationservice.repositories.SummaryRepository;
-import fit.iuh.student.communicationservice.services.MessageService;
 import fit.iuh.student.communicationservice.services.SummaryService;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -26,7 +28,7 @@ import java.util.UUID;
 public class SummaryServiceImpl implements SummaryService {
     private final SummaryRepository summaryRepository;
     private final RestTemplate restTemplate;
-    private final MessageService messageService;
+    private final MessageRepository messageService;
     @Value("${gemini.api-key}")
     private String gemini_api_key;
 //    public Summary createSummary(CreateSummaryRequest summary) {
@@ -110,8 +112,9 @@ public class SummaryServiceImpl implements SummaryService {
     public GetSummaryResponse getSummaryByGroupId(String groupId) {
         try {
             Summary existSum = summaryRepository.findByGroupId(groupId);
-            List<String> messages = messageService.getMessagesByGroupIdWithPagination(groupId, 0, 10).stream()
-                    .map(MessageResponse::getContent)
+            Pageable pageable = PageRequest.of(0, 10);
+            List<String> messages = messageService.findByGroup_idOrderByCreatedAtDesc(groupId, pageable).stream()
+                    .map(Message::getContent)
                     .toList();
             return GetSummaryResponse.builder()
                     .summary(existSum != null ? existSum.getContentSummary() : "")
