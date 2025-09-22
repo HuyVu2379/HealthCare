@@ -30,7 +30,8 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             "/api/v1/auth/send-otp-reset-password/**",
             "/api/v1/auth/validate-otp",
             "/api/v1/auth/reset-password",
-            "/api/v1/auth/google");
+            "/api/v1/auth/google",
+            "/ws/**");
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
 
     @Autowired

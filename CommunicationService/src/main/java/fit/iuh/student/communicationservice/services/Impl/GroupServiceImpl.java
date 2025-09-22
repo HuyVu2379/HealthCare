@@ -28,11 +28,9 @@ public class GroupServiceImpl implements GroupService {
         group.setGroupName(request.getGroupName());
         group.setAppointment_id(request.getAppointmentId());
         group.setMemberIds(request.getMemberIds());
-        group.setCreatedAt(LocalDateTime.now());
-        group.setUpdatedAt(LocalDateTime.now());
-
+//        group.setCreatedAt(LocalDateTime.now());
+//        group.setUpdatedAt(LocalDateTime.now());
         Group savedGroup = groupRepository.save(group);
-
         return groupMapper.toGroupResponse(savedGroup);
     }
 

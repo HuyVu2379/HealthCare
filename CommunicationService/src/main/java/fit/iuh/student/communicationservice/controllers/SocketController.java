@@ -77,7 +77,6 @@ public class SocketController {
 //                    messageResponse
 //                );
 //            }
-
         } catch (Exception e) {
             // Gửi thông báo lỗi đến sender
             simpMessagingTemplate.convertAndSend(
