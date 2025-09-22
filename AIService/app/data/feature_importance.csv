@@ -1,27 +1,25 @@
 Feature,Importance
-gfr,6803
-c3_c4,3128
-blood_pressure,2191
-bun,1617
-urine_ph,1502
-serum_creatinine,1421
-oxalate_levels,1417
-serum_calcium,1348
-water_intake,1304
-cluster,880
-months,477
-smoking_yes,226
-weight_changes_loss,205
-stress_level_low,168
-physical_activity_rarely,155
-alcohol_occasionally,106
-diet_low salt,87
-alcohol_never,85
-family_history_yes,73
-painkiller_usage_yes,64
-weight_changes_stable,62
-stress_level_moderate,61
-physical_activity_weekly,48
-diet_high protein,47
-ana,36
-hematuria,8
+gfr,2665
+c3_c4,1163
+blood_pressure,752
+oxalate_levels,582
+bun,568
+water_intake,564
+serum_creatinine,505
+urine_ph,474
+serum_calcium,419
+physical_activity_rarely,89
+weight_changes_loss,84
+family_history_yes,39
+alcohol_occasionally,37
+stress_level_moderate,37
+alcohol_never,34
+stress_level_low,31
+smoking_yes,27
+diet_high protein,24
+painkiller_usage_yes,23
+weight_changes_stable,23
+diet_low salt,19
+physical_activity_weekly,19
+ana,1
+hematuria,0

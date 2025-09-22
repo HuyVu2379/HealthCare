@@ -1,9 +1,6 @@
 package fit.iuh.student.userservice.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Date;
@@ -17,9 +14,10 @@ import java.sql.Date;
 public class Insurance {
     @Id
     @Column(name = "insurance_id", nullable = false, unique = true)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String insuranceId;
     private String insuranceName;
     private Date insuranceEndDate;
-    @OneToOne(mappedBy = "insurance", optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Patient insurancePatient;
 }

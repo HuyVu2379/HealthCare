@@ -5,7 +5,6 @@ from datetime import datetime
 import uuid
 
 router = APIRouter()
-
 @router.post("/ask", response_model=ChatResponse)
 async def chat_with_ai(message: ChatMessage, request: Request):
     """
@@ -16,19 +15,14 @@ async def chat_with_ai(message: ChatMessage, request: Request):
         rag_service = request.app.state.rag_service
         chat_service = ChatService(rag_service=rag_service)
         
-        # Generate session ID if not provided
-        session_id = message.session_id or str(uuid.uuid4())
-        
         # Get AI response
         ai_response = await chat_service.get_ai_response(
             message.message,
             user_id=message.user_id,
-            session_id=session_id
         )
         
         return ChatResponse(
             response=ai_response["response"],
-            session_id=session_id,
             timestamp=datetime.now(),
             confidence=ai_response.get("confidence"),
             sources=ai_response.get("sources"),

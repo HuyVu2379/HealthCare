@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class Message {
     @Id
     private String message_id;
-    private String appointment_id;
+    private String group_id;
     private String sender_id;
     private String receiver_id;
     private String content;

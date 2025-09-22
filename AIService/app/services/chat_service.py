@@ -1,39 +1,56 @@
 from typing import Dict, Any, List, Optional
-from app.models.ai_models import ChatMessage, ChatResponse
+
+import httpx
 import asyncio
 import json
 from datetime import datetime
-
+from models.ai_models import GetSummaryResponse
 class ChatService:
     def __init__(self, rag_service=None):
         self.chat_history = {}  # In-memory storage, replace with database in production
         self.use_rag = True  # Cờ để bật/tắt RAG
         self.rag_service = rag_service
-        
-    async def get_ai_response(self, message: str, user_id: Optional[str] = None, session_id: Optional[str] = None) -> Dict[str, Any]:
+        self.chat_routing = "http://localhost:8080/api/v1/chats"
+
+    async def fetch_summary(self, group_id: str) -> GetSummaryResponse:
         """
-        Get AI response for user message
-        Ưu tiên sử dụng RAG chatbot, fallback về simple AI response
+        Gọi API Spring Boot để lấy summary
         """
+        url = f"{self.chat_routing}/get-summary/{group_id}"
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(url)
+            if resp.status_code == 200:
+                data = resp.json()
+                return GetSummaryResponse(**data)
+            else:
+                print(f"⚠️ Lỗi khi gọi summary API: {resp.status_code}")
+                return GetSummaryResponse()
+
+    async def get_ai_response(self, message: str, user_id: Optional[str] = None, group_id: Optional[str] = None) -> Dict[str, Any]:
         try:
-            # Thử sử dụng RAG chatbot trước
+            context = ""
+            if group_id:
+                summary_resp = await self.fetch_summary(group_id)
+                if summary_resp.summary:
+                    context += f"Tóm tắt cuộc hội thoại trước: {summary_resp.summary}\n"
+                if summary_resp.messages:
+                    context += "Các tin nhắn gần đây:\n" + "\n".join(summary_resp.messages)  # lấy 5 tin gần nhất
+            
+            # Gửi context + message cho AI (Gemini hoặc simple AI)
+            final_prompt = f"{context}\nNgười dùng: {message}"
+            
             if self.use_rag and self.rag_service:
-                rag_response = await self.rag_service.get_rag_response(message, user_id, session_id)
-                
-                # Nếu RAG response thành công và có nội dung hữu ích
-                if rag_response.get("is_rag_response", False) and not rag_response["response"].startswith("Lỗi"):
+                rag_response = await self.rag_service.get_rag_response(final_prompt, user_id)
+                if rag_response.get("is_rag_response", False):
                     return rag_response
-                
-                # Nếu RAG không thành công, log lỗi và fallback
-                print(f"RAG fallback: {rag_response.get('response', 'Unknown error')}")
             
-            # Fallback về simple AI response
-            return await self._get_simple_ai_response(message, user_id, session_id)
-            
+            # fallback
+            return await self._get_simple_ai_response(final_prompt, user_id)
+        
         except Exception as e:
-            # Nếu có lỗi, fallback về simple AI response
-            print(f"Error in AI response, falling back to simple response: {str(e)}")
-            return await self._get_simple_ai_response(message, user_id, session_id)
+            print(f"⚠️ Lỗi trong get_ai_response: {e}")
+            return await self._get_simple_ai_response(message, user_id)
+
     
     async def _get_simple_ai_response(self, message: str, user_id: Optional[str] = None, session_id: Optional[str] = None) -> Dict[str, Any]:
         """

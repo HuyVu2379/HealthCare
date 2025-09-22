@@ -3,17 +3,15 @@ package fit.iuh.student.userservice.dtos.responses;
 
 import lombok.*;
 
-import java.util.Map;
+import java.io.Serializable;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
-public class ErrorResponse {
-    private int status;
+public class ErrorResponse<T> implements Serializable {
+    private int statusCode;
     private String message;
-    private boolean success;
-    private Map<String, String> details;
-    private long timestamp;
-    private String path;
+    private boolean success = false;
+    private T data;
 }

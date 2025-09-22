@@ -1,5 +1,6 @@
 package fit.iuh.student.userservice.exceptions.errors;
 
+import org.springframework.amqp.core.Exchange;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 

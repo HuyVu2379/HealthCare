@@ -22,9 +22,10 @@ public class Patient extends User {
     private double weight; // in kg
     private String bloodType; // e.g., A+, O-, etc.
     private double bmi; // Body Mass Index
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Insurance insurance;
-
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Insurance> insurances;
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Allergy> allergies;
     public double calculateBMI() {
         if (weight <= 0 || height <= 0) {
             return 0; // Avoid division by zero
