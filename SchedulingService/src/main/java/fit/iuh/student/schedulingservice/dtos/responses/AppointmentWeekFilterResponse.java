@@ -19,6 +19,7 @@ public class AppointmentWeekFilterResponse {
     private String appointmentId;
     private AppointmentStatus status;
     private String patientName;
+    private String patientId;
     private TimeSlotDTO timeSlot;
     private String note;
 }

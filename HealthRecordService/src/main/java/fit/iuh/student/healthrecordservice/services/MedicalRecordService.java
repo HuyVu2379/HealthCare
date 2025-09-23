@@ -5,4 +5,5 @@ import fit.iuh.student.healthrecordservice.dtos.responses.CreateMedicalRecordRes
 
 public interface MedicalRecordService {
     CreateMedicalRecordResponse createMedicalRecord(CreateMedicalRecordRequest request);
+    CreateMedicalRecordResponse findByAppointmentId(String appointmentId);
 }

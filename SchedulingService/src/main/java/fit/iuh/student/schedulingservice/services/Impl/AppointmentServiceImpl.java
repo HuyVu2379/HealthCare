@@ -386,6 +386,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 }
                 return AppointmentWeekFilterResponse.builder()
                         .appointmentId(appointment.getAppointmentId())
+                        .patientId(appointment.getPatientId())
                         .note(appointment.getNote())
                         .status(appointment.getStatus())
                         .timeSlot(timeSlotDTO)

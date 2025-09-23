@@ -23,7 +23,31 @@ public class MedicalRecordController {
     public ResponseEntity<MessageResponse<CreateMedicalRecordResponse>> createMedicalRecord(
             @RequestBody CreateMedicalRecordRequest request
     ) {
-        return SuccessEntityResponse.ok("Create medical record successfully",
-                medicalRecordService.createMedicalRecord(request));
+        try {
+            CreateMedicalRecordResponse response = medicalRecordService.createMedicalRecord(request);
+            return SuccessEntityResponse.ok("Create medical record successfully", response);
+        } catch (Exception e) {
+            // Log the error for debugging
+            System.err.println("Error creating medical record: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Check if record was actually created despite the error
+            try {
+                // Try to find existing record by appointmentId as fallback
+                CreateMedicalRecordResponse existingRecord = medicalRecordService.findByAppointmentId(request.getAppointmentId());
+                if (existingRecord != null) {
+                    // Record exists, return success response
+                    System.out.println("Medical record already exists, returning existing record");
+                    return SuccessEntityResponse.ok("Medical record already exists", existingRecord);
+                }
+            } catch (Exception fallbackError) {
+                System.err.println("Error checking existing record: " + fallbackError.getMessage());
+            }
+            
+            // Only return error if no record was found
+            return ResponseEntity.status(500).body(
+                new MessageResponse<>(500, "Failed to create medical record: " + e.getMessage(), false, null)
+            );
+        }
     };
 }
