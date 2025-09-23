@@ -133,7 +133,8 @@ public class AppointmentServiceImpl implements AppointmentService {
                         .timeSlot(timeSlotDTO)
                         .appointmentDate(appointment.getAppointmentDate())
                         .consultationType(appointment.getConsultationType())
-                        .addressDetail(doctor.getClinicAddress())
+                        // .addressDetail(doctor.getClinicAddress())
+                        .addressDetail(appointment.getAddressDetail())
                         .build();
             });
         } catch (Exception e) {
