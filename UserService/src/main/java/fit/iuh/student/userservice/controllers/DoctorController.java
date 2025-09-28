@@ -1,5 +1,8 @@
 package fit.iuh.student.userservice.controllers;
 
+import fit.iuh.student.userservice.dtos.CertificationDto;
+import fit.iuh.student.userservice.dtos.requests.AddCertificationRequest;
+import fit.iuh.student.userservice.dtos.requests.UpdateCertificationRequest;
 import fit.iuh.student.userservice.dtos.requests.UpdateDoctorCertificationRequest;
 import fit.iuh.student.userservice.dtos.requests.UpdateDoctorRequest;
 import fit.iuh.student.userservice.dtos.responses.*;
@@ -80,5 +83,45 @@ public class DoctorController {
     )
     {
         return doctorService.getPatientByIdForClient(doctorId);
+    }
+    
+    // API thêm certification mới
+    @PostMapping("/addCertification/{userId}")
+    public ResponseEntity<MessageResponse<CertificationDto>> addCertification(
+            @RequestBody AddCertificationRequest request,
+            @PathVariable String userId
+    ){
+        CertificationDto response = doctorService.addCertification(request, userId);
+        return SuccessEntityResponse.ok("Add certification success", response);
+    }
+
+    // API cập nhật certification theo ID
+    @PutMapping("/updateCertification/{userId}/{certificationId}")
+    public ResponseEntity<MessageResponse<CertificationDto>> updateCertification(
+            @RequestBody UpdateCertificationRequest request,
+            @PathVariable String userId,
+            @PathVariable String certificationId
+    ){
+        CertificationDto response = doctorService.updateCertification(request, userId, certificationId);
+        return SuccessEntityResponse.ok("Update certification success", response);
+    }
+
+    // API xóa certification theo ID
+    @DeleteMapping("/deleteCertification/{userId}/{certificationId}")
+    public ResponseEntity<MessageResponse<String>> deleteCertification(
+            @PathVariable String userId,
+            @PathVariable String certificationId
+    ){
+        doctorService.deleteCertification(userId, certificationId);
+        return SuccessEntityResponse.ok("Delete certification success", "Certification deleted successfully");
+    }
+    
+    // API lấy danh sách certifications của user
+    @GetMapping("/getCertifications/{userId}")
+    public ResponseEntity<MessageResponse<List<CertificationDto>>> getCertifications(
+            @PathVariable String userId
+    ){
+        List<CertificationDto> response = doctorService.getCertificationsByUserId(userId);
+        return SuccessEntityResponse.ok("Get certifications success", response);
     }
 }

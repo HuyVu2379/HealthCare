@@ -1,6 +1,9 @@
 package fit.iuh.student.userservice.services;
 
+import fit.iuh.student.userservice.dtos.CertificationDto;
+import fit.iuh.student.userservice.dtos.requests.AddCertificationRequest;
 import fit.iuh.student.userservice.dtos.requests.CreateDoctorAccountRequest;
+import fit.iuh.student.userservice.dtos.requests.UpdateCertificationRequest;
 import fit.iuh.student.userservice.dtos.requests.UpdateDoctorCertificationRequest;
 import fit.iuh.student.userservice.dtos.requests.UpdateDoctorRequest;
 import fit.iuh.student.userservice.dtos.responses.DoctorClientResponse;
@@ -17,4 +20,13 @@ public interface DoctorService {
     List<DoctorResponse> getDoctorByIds(List<String> doctorIds);
     DoctorClientResponse getPatientByIdForClient(String patientId);
     DoctorResponse createAccountForDoctor(CreateDoctorAccountRequest request);
+    
+    // New certification methods
+    CertificationDto addCertification(AddCertificationRequest request, String userId);
+    CertificationDto updateCertification(UpdateCertificationRequest request, String userId, String certificationId);
+    void deleteCertification(String userId, String certificationId);
+    List<CertificationDto> getCertificationsByUserId(String userId);
 }
+
+
+

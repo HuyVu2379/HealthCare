@@ -28,7 +28,7 @@ public interface AppointmentService {
     RescheduleAppointmentResponse rescheduleAppointment(UpdateAppointmentRequest request);
     AppointmentResponse updateAppointmentStatus(String appointmentId,AppointmentStatus status);
     AppointmentResponse getAppointmentDetailById(String appointmentId);
-    Page<AppointmentResponse> getAppointmentWithFilterPagination(String type, String status, int page, int size, String sortBy, String sortDir);
+    Page<AppointmentResponse> getAppointmentWithFilterPagination(String type, AppointmentStatus status, int page, int size, String sortBy, String sortDir);
     List<AppointmentWeekFilterResponse> getAppointmentWeekFilterForDoctor(String doctorId,String weekStartDate, String weekEndDate);
     AppointmentClientResponse getAppointmentDetailForClientById(String appointmentId);
 //    void cancelAppointment(String appointmentId, String userId);

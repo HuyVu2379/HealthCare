@@ -133,7 +133,8 @@ public class AppointmentServiceImpl implements AppointmentService {
                         .timeSlot(timeSlotDTO)
                         .appointmentDate(appointment.getAppointmentDate())
                         .consultationType(appointment.getConsultationType())
-                        .addressDetail(doctor.getClinicAddress())
+                        // .addressDetail(doctor.getClinicAddress())
+                        .addressDetail(appointment.getAddressDetail())
                         .build();
             });
         } catch (Exception e) {
@@ -320,7 +321,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Page<AppointmentResponse> getAppointmentWithFilterPagination(String type, String status, int page, int size, String sortBy, String sortDir) {
+    public Page<AppointmentResponse> getAppointmentWithFilterPagination(String type, AppointmentStatus status, int page, int size, String sortBy, String sortDir) {
         try {
             if (sortBy == null || sortBy.isEmpty()) {
                 sortBy = "createdAt";
@@ -386,6 +387,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 }
                 return AppointmentWeekFilterResponse.builder()
                         .appointmentId(appointment.getAppointmentId())
+                        .patientId(appointment.getPatientId())
                         .note(appointment.getNote())
                         .status(appointment.getStatus())
                         .timeSlot(timeSlotDTO)

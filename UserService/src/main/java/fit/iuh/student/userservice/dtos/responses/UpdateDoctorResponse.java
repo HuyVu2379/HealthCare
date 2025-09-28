@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import fit.iuh.student.userservice.dtos.CertificationDto;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -32,5 +33,5 @@ public class UpdateDoctorResponse {
     private String specialty;
     private Integer experienceYears;
     private String bio;
-    private List<String> certifications;
+    private List<CertificationDto> certifications;
 }

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import fit.iuh.student.userservice.dtos.CertificationDto;
 import java.util.List;
 
 @Data
@@ -12,5 +13,5 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateDoctorCertificationResponse {
-    List<String> certifications;
+    List<CertificationDto> certifications;
 }

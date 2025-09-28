@@ -3,6 +3,7 @@ package fit.iuh.student.healthrecordservice.exceptions;
 import fit.iuh.student.healthrecordservice.dtos.responses.ErrorResponse;
 import fit.iuh.student.healthrecordservice.exceptions.errors.DuplicationObjectException;
 import fit.iuh.student.healthrecordservice.exceptions.errors.UnauthorizedException;
+import fit.iuh.student.healthrecordservice.exceptions.errors.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +60,16 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(System.currentTimeMillis());
         errorResponse.setPath(request.getRequestURI());
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+    
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException exc, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse();
+        error.setMessage(exc.getMessage());
+        error.setStatus(HttpStatus.NOT_FOUND.value());
+        error.setTimestamp(System.currentTimeMillis());
+        error.setPath(request.getRequestURI());
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
     @ExceptionHandler(DuplicationObjectException.class)
     public ResponseEntity<ErrorResponse> DuplicationObjectException(DuplicationObjectException exc, HttpServletRequest request) {

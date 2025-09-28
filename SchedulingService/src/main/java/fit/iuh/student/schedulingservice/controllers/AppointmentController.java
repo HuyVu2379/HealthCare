@@ -83,8 +83,12 @@ public class AppointmentController {
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir
     ) {
+        AppointmentStatus statusEnum = null;
+        if (status != null && !status.isEmpty()) {
+            statusEnum = AppointmentStatus.valueOf(status);
+        }
         return SuccessEntityResponse.ok("Get appointment with filter successfully",
-                appointmentService.getAppointmentWithFilterPagination(type, status, page, size, sortBy, sortDir));
+                appointmentService.getAppointmentWithFilterPagination(type, statusEnum, page, size, sortBy, sortDir));
     }
 
     @GetMapping("/get-appointment-with-doctorId")

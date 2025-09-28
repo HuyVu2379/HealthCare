@@ -1,14 +1,20 @@
 package fit.iuh.student.userservice.services.impl;
 
+import fit.iuh.student.userservice.dtos.CertificationDto;
+import fit.iuh.student.userservice.dtos.requests.AddCertificationRequest;
 import fit.iuh.student.userservice.dtos.requests.CreateDoctorAccountRequest;
+import fit.iuh.student.userservice.dtos.requests.UpdateCertificationRequest;
 import fit.iuh.student.userservice.dtos.requests.UpdateDoctorCertificationRequest;
 import fit.iuh.student.userservice.dtos.requests.UpdateDoctorRequest;
 import fit.iuh.student.userservice.dtos.responses.DoctorClientResponse;
 import fit.iuh.student.userservice.dtos.responses.DoctorResponse;
 import fit.iuh.student.userservice.dtos.responses.UpdateDoctorCertificationResponse;
 import fit.iuh.student.userservice.dtos.responses.UpdateDoctorResponse;
+import fit.iuh.student.userservice.entities.Certification;
 import fit.iuh.student.userservice.entities.Doctor;
+import fit.iuh.student.userservice.exceptions.errors.UserNotFoundException;
 import fit.iuh.student.userservice.mappers.UserMapper;
+import fit.iuh.student.userservice.repositories.CertificationRepository;
 import fit.iuh.student.userservice.repositories.DoctorRepository;
 import fit.iuh.student.userservice.repositories.custom.CustomDoctorRepository;
 import fit.iuh.student.userservice.services.DoctorService;
@@ -25,6 +31,7 @@ public class DoctorServiceImpl implements DoctorService {
     private final CustomDoctorRepository customDoctorRepository;
     private final UserMapper userMapper;
     private final DoctorRepository doctorRepository;
+    private final CertificationRepository certificationRepository;
 
     @Override
     public UpdateDoctorResponse updateDoctor(UpdateDoctorRequest updateDoctorRequest) {
@@ -85,6 +92,68 @@ public class DoctorServiceImpl implements DoctorService {
                     .rating(doctor.getRating())
                     .certifications(new ArrayList<>())
                     .build();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @Override
+    public CertificationDto addCertification(AddCertificationRequest request, String userId) {
+        try {
+            Doctor doctor = doctorRepository.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException("Doctor not found with id: " + userId));
+            
+            Certification certification = new Certification();
+            certification.setName(request.getName());
+            certification.setIssuingOrganization(request.getIssuingOrganization());
+            certification.setYearIssued(request.getYearIssued());
+            certification.setDoctor(doctor);
+            
+            Certification savedCertification = certificationRepository.save(certification);
+            
+            return userMapper.toCertificationDto(savedCertification);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @Override
+    public CertificationDto updateCertification(UpdateCertificationRequest request, String userId, String certificationId) {
+        try {
+            Certification certification = certificationRepository.findByIdAndDoctorUserId(certificationId, userId)
+                    .orElseThrow(() -> new UserNotFoundException("Certification not found with id: " + certificationId));
+            
+            certification.setName(request.getName());
+            certification.setIssuingOrganization(request.getIssuingOrganization());
+            certification.setYearIssued(request.getYearIssued());
+            
+            Certification updatedCertification = certificationRepository.save(certification);
+            
+            return userMapper.toCertificationDto(updatedCertification);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @Override
+    public void deleteCertification(String userId, String certificationId) {
+        try {
+            Certification certification = certificationRepository.findByIdAndDoctorUserId(certificationId, userId)
+                    .orElseThrow(() -> new UserNotFoundException("Certification not found with id: " + certificationId));
+            
+            certificationRepository.delete(certification);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @Override
+    public List<CertificationDto> getCertificationsByUserId(String userId) {
+        try {
+            List<Certification> certifications = certificationRepository.findByDoctorUserId(userId);
+            return certifications.stream()
+                    .map(userMapper::toCertificationDto)
+                    .toList();
         } catch (Exception e) {
             throw e;
         }

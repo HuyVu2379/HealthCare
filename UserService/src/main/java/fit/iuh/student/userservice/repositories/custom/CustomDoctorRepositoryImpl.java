@@ -6,17 +6,23 @@ import fit.iuh.student.userservice.dtos.responses.UpdateDoctorCertificationRespo
 import fit.iuh.student.userservice.dtos.responses.UpdateDoctorResponse;
 import fit.iuh.student.userservice.entities.Doctor;
 import fit.iuh.student.userservice.exceptions.errors.UserNotFoundException;
+import fit.iuh.student.userservice.mappers.UserMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 @Repository
 public class CustomDoctorRepositoryImpl implements CustomDoctorRepository {
 
     @PersistenceContext
     private EntityManager entityManager;
+    
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     @Transactional
@@ -46,7 +52,7 @@ public class CustomDoctorRepositoryImpl implements CustomDoctorRepository {
                 .phone(doctor.getPhone())
                 .specialty(doctor.getSpecialty())
                 .role(doctor.getRole())
-                .certifications(doctor.getCertifications())
+                .certifications(userMapper.map(doctor.getCertifications()))
                 .experienceYears(doctor.getExperienceYears())
                 .userId(doctor.getUserId())
                 .build();
@@ -60,11 +66,11 @@ public class CustomDoctorRepositoryImpl implements CustomDoctorRepository {
             throw new UserNotFoundException("Doctor not found");
         }
 
-        doctor.setCertifications(request.getCertifications());
+        // Map List<CertificationDto> from request to current certifications
         entityManager.merge(doctor);
 
         return UpdateDoctorCertificationResponse.builder()
-                .certifications(request.getCertifications())
+                .certifications(userMapper.map(doctor.getCertifications()))
                 .build();
     }
 }

@@ -4,6 +4,7 @@ import fit.iuh.student.healthrecordservice.dtos.requests.CreateHealthMetricReque
 import fit.iuh.student.healthrecordservice.dtos.requests.ImportHealthMetricsRequest;
 import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricClientResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricResponse;
+import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricPanelResponse;
 import fit.iuh.student.healthrecordservice.entities.HealthMetric;
 import fit.iuh.student.healthrecordservice.mappers.HealthMetricMapper;
 import fit.iuh.student.healthrecordservice.repositories.HealthMetricRepository;
@@ -14,6 +15,9 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +42,9 @@ public class HealthMetricServiceImpl implements HealthMetricService {
                     request.getMetricName(),
                     request.getMetricValue(),
                     request.getUnit(),
-                    medicalRecordRepository.findById(request.getRecordId()).orElse(null),
+                    (request.getRecordId() == null || request.getRecordId().isBlank())
+                            ? null
+                            : medicalRecordRepository.findById(request.getRecordId()).orElse(null),
                     new Date(request.getMeasuredAt().getTime()));
             HealthMetric savedMetric = healthMetricRepository.save(healthMetric);
             return healthMetricMapper.toHealthMetricResponse(savedMetric);
@@ -57,13 +63,58 @@ public class HealthMetricServiceImpl implements HealthMetricService {
                         healthMetric.setMetricName(hm.getMetricName());
                         healthMetric.setMetricValue(hm.getMetricValue());
                         healthMetric.setUnit(hm.getUnit());
-                        healthMetric.setMedicalRecord(medicalRecordRepository.findById(hm.getRecordId()).orElse(null));
+                        healthMetric.setMedicalRecord(
+                                (hm.getRecordId() == null || hm.getRecordId().isBlank())
+                                        ? null
+                                        : medicalRecordRepository.findById(hm.getRecordId()).orElse(null)
+                        );
                         healthMetric.setMeasuredAt(new Date(hm.getMeasuredAt().getTime()));
                         return healthMetric;
                     }).toList();
             List<HealthMetric> hms = healthMetricRepository.saveAll(healthMetrics);
             return hms.stream().map(healthMetricMapper::toHealthMetricResponse).toList();
         } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @Override
+    public List<HealthMetricPanelResponse> getPanelsByPatient(String patientId) {
+        try{
+            List<HealthMetric> metrics = healthMetricRepository.findByPatientIdOrderByMeasuredAtDesc(patientId);
+            Map<Date, List<HealthMetric>> grouped = metrics.stream()
+                    .collect(Collectors.groupingBy(HealthMetric::getMeasuredAt));
+            return grouped.entrySet().stream()
+                    .sorted((a,b) -> b.getKey().compareTo(a.getKey()))
+                    .map(e -> HealthMetricPanelResponse.builder()
+                            .measuredAt(e.getKey())
+                            .metrics(e.getValue().stream().map(m -> HealthMetricPanelResponse.Item.builder()
+                                    .name(m.getMetricName())
+                                    .value(m.getMetricValue())
+                                    .unit(m.getUnit())
+                                    .build()).toList())
+                            .build())
+                    .toList();
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public List<HealthMetricPanelResponse> getPanelsByPatientAndDate(String patientId, Date measuredAt) {
+        try{
+            List<HealthMetric> metrics = healthMetricRepository.findByPatientIdAndMeasuredAtOrderByMetricNameAsc(patientId, measuredAt);
+            if(metrics.isEmpty()) return List.of();
+            HealthMetricPanelResponse panel = HealthMetricPanelResponse.builder()
+                    .measuredAt(measuredAt)
+                    .metrics(metrics.stream().map(m -> HealthMetricPanelResponse.Item.builder()
+                            .name(m.getMetricName())
+                            .value(m.getMetricValue())
+                            .unit(m.getUnit())
+                            .build()).toList())
+                    .build();
+            return List.of(panel);
+        }catch (Exception e){
             throw e;
         }
     }
