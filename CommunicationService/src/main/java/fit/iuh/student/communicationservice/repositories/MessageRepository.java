@@ -13,4 +13,6 @@ public interface MessageRepository extends MongoRepository<Message,String> {
     List<Message> findByGroup_idOrderByCreatedAtAsc(String groupId);
     @Query(value = "{ 'group.id': ?0 }", sort = "{ 'createdAt': -1 }")
     List<Message> findByGroup_idOrderByCreatedAtDesc(String groupId, Pageable pageable);
+    @Query(value = "{ 'group.id': ?0 }", sort = "{ 'sendAt': -1 }")
+    Message findLastMessageByGroupId(String groupId);
 }

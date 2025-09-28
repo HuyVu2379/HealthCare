@@ -42,6 +42,15 @@ spring:
           uri: lb://ai-service
           predicates:
                 - Path=/api/v1/chat/**, /api/v1/analysis/**
+        - id: communication-service
+          uri: lb://CommunicationService
+          predicates:
+                - Path=/api/v1/messages/**, /api/v1/chats/**, /api/v1/calls/**,
+
+        - id: communication-service-ws
+          uri: lb://CommunicationService
+          predicates:
+              - Path=/ws/**
 #          filters:
 #                - AuthenticationFilter
   profiles:

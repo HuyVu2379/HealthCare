@@ -1,30 +1,24 @@
 package fit.iuh.student.communicationservice.configs;
 
+import fit.iuh.student.communicationservice.handlers.CustomWebSocketHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
-import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
-import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
 @Configuration
-@EnableWebSocketMessageBroker
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+@EnableWebSocket
+@RequiredArgsConstructor
+public class WebSocketConfig implements WebSocketConfigurer {
+
+    private final CustomWebSocketHandler customWebSocketHandler;
 
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic", "/queue");
-        config.setApplicationDestinationPrefixes("/app");
-    }
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        registry.addHandler(customWebSocketHandler, "/ws/communication")
+                .setAllowedOrigins("*"); // Cho phép tất cả origins, có thể thay đổi theo yêu cầu bảo mật
+//                .withSockJS(); // Hỗ trợ SockJS fallback
 
-    @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // Đăng ký endpoint cho WebSocket thuần (không SockJS)
-        registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*");
-
-        // Đăng ký endpoint với SockJS fallback
-        registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*")
-                .withSockJS();
     }
 }
