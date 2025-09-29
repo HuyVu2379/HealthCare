@@ -8,6 +8,7 @@ import fit.iuh.student.communicationservice.dtos.requests.GetMessagesRequest;
 import fit.iuh.student.communicationservice.dtos.requests.GetGroupsRequest;
 import fit.iuh.student.communicationservice.dtos.responses.GroupResponse;
 import fit.iuh.student.communicationservice.dtos.responses.MessageResponse;
+import fit.iuh.student.communicationservice.repositories.GroupRepository;
 import fit.iuh.student.communicationservice.services.GroupService;
 import fit.iuh.student.communicationservice.services.MessageService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class CustomWebSocketHandler implements WebSocketHandler {
     private final GroupService groupService;
     private final MessageService messageService;
     private final ObjectMapper objectMapper;
-
+    private final GroupRepository groupRepository;
     // Lưu trữ tất cả các WebSocket sessions
     private final ConcurrentHashMap<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
 
@@ -105,8 +106,11 @@ public class CustomWebSocketHandler implements WebSocketHandler {
 
     private void handleCreateGroup(WebSocketSession session, JsonNode data) throws Exception {
         CreateGroupRequest request = objectMapper.treeToValue(data, CreateGroupRequest.class);
+        if(groupRepository.existsGroupByGroupName(request.getGroupName())){
+            sendError(session, "Group name already exists: " + request.getGroupName());
+            return;
+        }
         GroupResponse response = groupService.createGroup(request);
-
         // Broadcast group created event to all connected clients
         broadcastToAll("group_created", response);
     }

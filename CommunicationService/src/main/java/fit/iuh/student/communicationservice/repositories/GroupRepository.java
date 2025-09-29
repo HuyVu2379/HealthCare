@@ -10,4 +10,5 @@ import java.util.List;
 public interface GroupRepository extends MongoRepository<Group,String> {
     @Query("{ 'members.userId': ?0 }")
     List<Group> findByMembersUserId(String userId);
+    boolean existsGroupByGroupName(String groupName);
 }
