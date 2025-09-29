@@ -25,8 +25,8 @@ public class GroupServiceImpl implements GroupService {
     private final MessageMapper messageMapper;
     public GroupResponse createGroup(CreateGroupRequest request) {
         Group group = new Group();
-        boolean hasAI = request.getMembers() != null && request.getMembers().stream().anyMatch(mem-> "AI".equals(mem.getUserId()));
-        group.setGroupId(hasAI ? UUID.randomUUID().toString(): UUID.randomUUID() + "-AI");
+        boolean hasAI = request.getMembers() != null && request.getMembers().stream().anyMatch(mem -> "AI".equalsIgnoreCase(String.valueOf(mem.getUserId()).trim()));
+        group.setGroupId(hasAI ? UUID.randomUUID() + "-AI" : UUID.randomUUID().toString());
         group.setGroupName(request.getGroupName());
         group.setAppointment_id(request.getAppointmentId());
         group.setMembers(request.getMembers());

@@ -10,6 +10,8 @@ import fit.iuh.student.userservice.entities.Doctor;
 import fit.iuh.student.userservice.entities.Patient;
 import fit.iuh.student.userservice.entities.User;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +20,10 @@ import java.util.stream.Collectors;
 public interface UserMapper {
     UserResponse toUserResponse(User user);
     DoctorResponse toDoctorResponse(Doctor doctor);
+    @Mappings({
+            @Mapping(source = "userId", target = "doctorId"),
+            @Mapping(source = "phone", target = "phoneNumber")
+    })
     DoctorClientResponse toDoctorClientResponse(Doctor doctor);
     PatientClientResponse toPatientClientResponse(Patient patient);
     
