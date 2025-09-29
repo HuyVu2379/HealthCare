@@ -4,7 +4,6 @@ import fit.iuh.student.communicationservice.dtos.requests.CreateGroupRequest;
 import lombok.Builder;
 import lombok.Data;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,7 +14,7 @@ public class GroupResponse {
     private String groupName;
     private String appointmentId;
     private String lastMessageContent;
-    private Timestamp timeLastMessage;
+    private LocalDateTime timeLastMessage;
     private List<CreateGroupRequest.MemberDTO> members;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

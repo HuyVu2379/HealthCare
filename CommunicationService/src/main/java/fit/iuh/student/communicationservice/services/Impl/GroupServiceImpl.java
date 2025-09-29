@@ -27,7 +27,7 @@ public class GroupServiceImpl implements GroupService {
     public GroupResponse createGroup(CreateGroupRequest request) {
         boolean hasAI = request.getMembers() != null && request.getMembers().stream().anyMatch(mem-> "AI".equals(mem.getUserId()));
         Group savedGroup = groupRepository.insert(Group.builder()
-                .groupId(hasAI ? UUID.randomUUID().toString(): UUID.randomUUID() + "-AI")
+                .groupId(hasAI ? UUID.randomUUID() + "-AI" : UUID.randomUUID().toString())
                         .groupName(request.getGroupName() != null ? request.getGroupName() : "Chat with AI"
                         ).members(request.getMembers())
                         .appointment_id(request.getAppointmentId())
@@ -51,7 +51,12 @@ public class GroupServiceImpl implements GroupService {
     public GroupResponse findById(String groupId) {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Group not found with id: " + groupId));
-        MessageResponse lastMessage = messageMapper.toMessageResponse(messageRepository.findLastMessageByGroupId(groupId));
+        MessageResponse lastMessage = messageRepository
+                .findLatestMessageByGroupId(groupId, org.springframework.data.domain.PageRequest.of(0, 1))
+                .stream()
+                .findFirst()
+                .map(messageMapper::toMessageResponse)
+                .orElse(null);
         return GroupResponse
                 .builder()
                 .groupId(group.getGroupId())
@@ -69,7 +74,12 @@ public class GroupServiceImpl implements GroupService {
         List<Group> groups = groupRepository.findByMembersUserId(userId);
         return groups.stream()
                 .map(group -> {
-                    MessageResponse lastMessage = messageMapper.toMessageResponse(messageRepository.findLastMessageByGroupId(group.getGroupId()));
+                    MessageResponse lastMessage = messageRepository
+                            .findLatestMessageByGroupId(group.getGroupId(), org.springframework.data.domain.PageRequest.of(0, 1))
+                            .stream()
+                            .findFirst()
+                            .map(messageMapper::toMessageResponse)
+                            .orElse(null);
                     return GroupResponse
                             .builder()
                             .groupId(group.getGroupId())
@@ -89,7 +99,12 @@ public class GroupServiceImpl implements GroupService {
         List<Group> groups = groupRepository.findAll();
         return groups.stream()
                 .map(group -> {
-                    MessageResponse lastMessage = messageMapper.toMessageResponse(messageRepository.findLastMessageByGroupId(group.getGroupId()));
+                    MessageResponse lastMessage = messageRepository
+                            .findLatestMessageByGroupId(group.getGroupId(), org.springframework.data.domain.PageRequest.of(0, 1))
+                            .stream()
+                            .findFirst()
+                            .map(messageMapper::toMessageResponse)
+                            .orElse(null);
                     return GroupResponse
                             .builder()
                             .groupId(group.getGroupId())
