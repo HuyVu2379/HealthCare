@@ -27,7 +27,7 @@ public class GroupServiceImpl implements GroupService {
     public GroupResponse createGroup(CreateGroupRequest request) {
         boolean hasAI = request.getMembers() != null && request.getMembers().stream().anyMatch(mem-> "AI".equals(mem.getUserId()));
         Group savedGroup = groupRepository.insert(Group.builder()
-                .groupId(hasAI ? UUID.randomUUID().toString(): UUID.randomUUID() + "-AI")
+                .groupId(hasAI ? UUID.randomUUID() + "-AI" : UUID.randomUUID().toString())
                         .groupName(request.getGroupName() != null ? request.getGroupName() : "Chat with AI"
                         ).members(request.getMembers())
                         .appointment_id(request.getAppointmentId())
