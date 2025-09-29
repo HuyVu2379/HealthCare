@@ -32,7 +32,6 @@ public class MessageServiceImpl implements MessageService {
         message.setMessage_id(UUID.randomUUID().toString());
         message.setGroup_id(request.getGroupId());
         message.setSender_id(request.getSenderId());
-        message.setReceiver_id(request.getReceiverId());
         message.setContent(request.getContent());
         message.setSendAt(Timestamp.valueOf(LocalDateTime.now()));
         Message savedMessage = messageRepository.save(message);
@@ -58,6 +57,11 @@ public class MessageServiceImpl implements MessageService {
         return messages.stream()
                 .map(messageMapper::toMessageResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public MessageResponse getLastMessageByGroupId(String groupId) {
+        return messageMapper.toMessageResponse(messageRepository.findLastMessageByGroupId(groupId));
     }
 
 }

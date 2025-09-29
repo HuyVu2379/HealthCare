@@ -1,5 +1,6 @@
 package fit.iuh.student.communicationservice.entities;
 
+import fit.iuh.student.communicationservice.dtos.requests.CreateGroupRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.CreatedDate;
@@ -18,7 +19,7 @@ public class Group {
     private String groupId;
     private String groupName;
     private String appointment_id;
-    private List<String> memberIds;
+    private List<CreateGroupRequest.MemberDTO> members;
     @CreatedDate
     private LocalDateTime createdAt;
     @LastModifiedDate

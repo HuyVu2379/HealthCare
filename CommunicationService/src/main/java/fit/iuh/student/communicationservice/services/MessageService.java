@@ -9,4 +9,6 @@ public interface MessageService {
     MessageResponse sendMessage(SendMessageRequest request);
     List<MessageResponse> getMessagesByGroupId(String groupId);
     List<MessageResponse> getMessagesByGroupIdWithPagination(String groupId, Integer page, Integer size);
+    MessageResponse getLastMessageByGroupId(String groupId);
+
 }
