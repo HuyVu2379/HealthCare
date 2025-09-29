@@ -13,7 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -33,7 +32,7 @@ public class MessageServiceImpl implements MessageService {
         message.setGroup_id(request.getGroupId());
         message.setSender_id(request.getSenderId());
         message.setContent(request.getContent());
-        message.setSendAt(Timestamp.valueOf(LocalDateTime.now()));
+        message.setSendAt(LocalDateTime.now());
         Message savedMessage = messageRepository.save(message);
         if (request.getGroupId().contains("AI")) {
             summaryService.updateSummary(UpdateSummaryRequest.builder()
@@ -41,7 +40,11 @@ public class MessageServiceImpl implements MessageService {
                     .contentSummary(request.getContent()).build()
             );
         }
-        return messageMapper.toMessageResponse(savedMessage);
+        MessageResponse response = messageMapper.toMessageResponse(savedMessage);
+        if (request.getTempMessageId() != null && !request.getTempMessageId().isEmpty()) {
+            response.setTempMessageId(request.getTempMessageId());
+        }
+        return response;
     }
 
     public List<MessageResponse> getMessagesByGroupId(String groupId) {
@@ -61,7 +64,12 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public MessageResponse getLastMessageByGroupId(String groupId) {
-        return messageMapper.toMessageResponse(messageRepository.findLastMessageByGroupId(groupId));
+        return messageRepository
+                .findLatestMessageByGroupId(groupId, PageRequest.of(0, 1))
+                .stream()
+                .findFirst()
+                .map(messageMapper::toMessageResponse)
+                .orElse(null);
     }
 
 }

@@ -19,7 +19,7 @@ public class Message {
     private String sender_id;
     private String receiver_id;
     private String content;
-    private Timestamp sendAt;
+    private LocalDateTime sendAt;
     @CreatedDate
     private LocalDateTime createdAt;
     @LastModifiedDate

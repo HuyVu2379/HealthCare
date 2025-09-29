@@ -21,4 +21,7 @@ public class SendMessageRequest {
     private String content;
 
     private String messageType = "TEXT"; // TEXT, IMAGE, FILE, etc.
+
+    // Frontend gửi tạm để match optimistic UI
+    private String tempMessageId;
 }
