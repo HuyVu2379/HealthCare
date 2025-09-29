@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
@@ -40,8 +42,19 @@ public class CustomWebSocketHandler implements WebSocketHandler {
         log.info("WebSocket connection established: {}", session.getId());
         sessions.put(session.getId(), session);
 
-        // Gửi message chào mừng
-        sendMessage(session, createResponse("connection", "established", "WebSocket connected successfully"));
+        // Delay 200ms để đảm bảo client socket sẵn sàng trước khi gửi welcome message
+        CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS)
+                .execute(() -> {
+                    try {
+                        if (session.isOpen()) {
+                            sendWelcomeMessage(session);
+                        } else {
+                            log.warn("Session {} is closed before sending welcome message", session.getId());
+                        }
+                    } catch (Exception e) {
+                        log.error("Failed to send welcome message after delay", e);
+                    }
+                });
     }
 
     @Override
@@ -189,6 +202,10 @@ public class CustomWebSocketHandler implements WebSocketHandler {
         if (session.isOpen()) {
             session.sendMessage(new TextMessage(message));
         }
+    }
+
+    private void sendWelcomeMessage(WebSocketSession session) throws IOException {
+        sendMessage(session, createResponse("connection", "established", "WebSocket connected successfully"));
     }
 
     private void sendError(WebSocketSession session, String error) {
