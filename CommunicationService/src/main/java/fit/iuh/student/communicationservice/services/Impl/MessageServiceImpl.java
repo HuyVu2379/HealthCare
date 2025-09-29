@@ -35,7 +35,7 @@ public class MessageServiceImpl implements MessageService {
         message.setContent(request.getContent());
         message.setSendAt(Timestamp.valueOf(LocalDateTime.now()));
         Message savedMessage = messageRepository.save(message);
-        if (request.getGroupId().equals("AI")) {
+        if (request.getGroupId().contains("AI")) {
             summaryService.updateSummary(UpdateSummaryRequest.builder()
                     .groupId(request.getGroupId())
                     .contentSummary(request.getContent()).build()

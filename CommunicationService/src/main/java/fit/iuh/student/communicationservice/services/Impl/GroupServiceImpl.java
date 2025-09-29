@@ -12,6 +12,7 @@ import fit.iuh.student.communicationservice.services.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -24,13 +25,16 @@ public class GroupServiceImpl implements GroupService {
     private final MessageRepository messageRepository;
     private final MessageMapper messageMapper;
     public GroupResponse createGroup(CreateGroupRequest request) {
-        Group group = new Group();
-        boolean hasAI = request.getMembers() != null && request.getMembers().stream().anyMatch(mem -> "AI".equalsIgnoreCase(String.valueOf(mem.getUserId()).trim()));
-        group.setGroupId(hasAI ? UUID.randomUUID() + "-AI" : UUID.randomUUID().toString());
-        group.setGroupName(request.getGroupName());
-        group.setAppointment_id(request.getAppointmentId());
-        group.setMembers(request.getMembers());
-        Group savedGroup = groupRepository.save(group);
+        boolean hasAI = request.getMembers() != null && request.getMembers().stream().anyMatch(mem-> "AI".equals(mem.getUserId()));
+        Group savedGroup = groupRepository.insert(Group.builder()
+                .groupId(hasAI ? UUID.randomUUID().toString(): UUID.randomUUID() + "-AI")
+                        .groupName(request.getGroupName() != null ? request.getGroupName() : "Chat with AI"
+                        ).members(request.getMembers())
+                        .appointment_id(request.getAppointmentId())
+                        .createdAt(LocalDateTime.now())
+                        .hasMessage(false)
+                        .build()
+                );
 
         return GroupResponse.builder()
                 .groupId(savedGroup.getGroupId())
@@ -38,7 +42,7 @@ public class GroupServiceImpl implements GroupService {
                 .appointmentId(savedGroup.getAppointment_id())
                 .members(savedGroup.getMembers())
                 .createdAt(savedGroup.getCreatedAt())
-                .updatedAt(group.getUpdatedAt())
+                .updatedAt(savedGroup.getUpdatedAt())
                 .lastMessageContent("")
                 .timeLastMessage(null)
                 .build();
