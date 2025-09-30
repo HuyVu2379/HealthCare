@@ -5,6 +5,7 @@ import fit.iuh.student.communicationservice.dtos.requests.UpdateSummaryRequest;
 import fit.iuh.student.communicationservice.dtos.responses.MessageResponse;
 import fit.iuh.student.communicationservice.entities.Message;
 import fit.iuh.student.communicationservice.mappers.MessageMapper;
+import fit.iuh.student.communicationservice.repositories.GroupRepository;
 import fit.iuh.student.communicationservice.repositories.MessageRepository;
 import fit.iuh.student.communicationservice.services.MessageService;
 import fit.iuh.student.communicationservice.services.SummaryService;
@@ -25,6 +26,7 @@ public class MessageServiceImpl implements MessageService {
     private final MessageRepository messageRepository;
     private final MessageMapper messageMapper;
     private final SummaryService summaryService;
+    private final GroupRepository groupRepository;
 
     public MessageResponse sendMessage(SendMessageRequest request) {
         Message message = new Message();
@@ -34,6 +36,14 @@ public class MessageServiceImpl implements MessageService {
         message.setContent(request.getContent());
         message.setSendAt(LocalDateTime.now());
         Message savedMessage = messageRepository.save(message);
+
+        // Đánh dấu group đã có tin nhắn
+        groupRepository.findById(request.getGroupId()).ifPresent(g -> {
+            if (Boolean.FALSE.equals(g.getHasMessage())) {
+                g.setHasMessage(true);
+                groupRepository.save(g);
+            }
+        });
         if (request.getGroupId().contains("AI")) {
             summaryService.updateSummary(UpdateSummaryRequest.builder()
                     .groupId(request.getGroupId())
