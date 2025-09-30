@@ -189,7 +189,7 @@ public class CustomWebSocketHandler implements WebSocketHandler {
         }
     }
 
-    private void broadcastToAll(String action, Object data) {
+    public void broadcastToAll(String action, Object data) {
         String message = createResponse(action, "broadcast", data);
         sessions.values().forEach(session -> {
             if (session.isOpen()) {
