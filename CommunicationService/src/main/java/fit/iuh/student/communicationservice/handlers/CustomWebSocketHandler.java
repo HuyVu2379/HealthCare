@@ -8,6 +8,7 @@ import fit.iuh.student.communicationservice.dtos.requests.GetMessagesRequest;
 import fit.iuh.student.communicationservice.dtos.requests.GetGroupsRequest;
 import fit.iuh.student.communicationservice.dtos.responses.GroupResponse;
 import fit.iuh.student.communicationservice.dtos.responses.MessageResponse;
+import fit.iuh.student.communicationservice.entities.Group;
 import fit.iuh.student.communicationservice.repositories.GroupRepository;
 import fit.iuh.student.communicationservice.services.GroupService;
 import fit.iuh.student.communicationservice.services.MessageService;
@@ -18,10 +19,12 @@ import org.springframework.web.socket.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -119,13 +122,31 @@ public class CustomWebSocketHandler implements WebSocketHandler {
 
     private void handleCreateGroup(WebSocketSession session, JsonNode data) throws Exception {
         CreateGroupRequest request = objectMapper.treeToValue(data, CreateGroupRequest.class);
-        if(groupRepository.existsGroupByGroupName(request.getGroupName())){
-            sendError(session, "Group name already exists: " + request.getGroupName());
-            return;
+
+        // Kiểm tra xem có member nào có userId là "AI" không
+        boolean hasAI = request.getMembers().stream()
+                .anyMatch(member -> "AI".equals(member.getUserId()));
+
+        if(hasAI){
+            // Nếu có AI thì tạo group trực tiếp (không kiểm tra duplicate)
+            GroupResponse response = groupService.createGroup(request);
+            broadcastToAll("group_created", response);
+        } else {
+            // Chuyển đổi danh sách members thành List userId
+            List<String> memberIds = request.getMembers().stream()
+                    .map(m -> m.getUserId())
+                    .collect(Collectors.toList());
+
+            // Kiểm tra xem đã tồn tại group với cùng members chưa
+            Optional<Group> existingGroup = groupRepository.findGroupByMemberIds(memberIds);
+            if(existingGroup.isPresent()){
+                sendError(session, "Group with these members already exists");
+                return;
+            }
+
+            GroupResponse response = groupService.createGroup(request);
+            broadcastToAll("group_created", response);
         }
-        GroupResponse response = groupService.createGroup(request);
-        // Broadcast group created event to all connected clients
-        broadcastToAll("group_created", response);
     }
 
     private void handleSendMessage(WebSocketSession session, JsonNode data) throws Exception {
