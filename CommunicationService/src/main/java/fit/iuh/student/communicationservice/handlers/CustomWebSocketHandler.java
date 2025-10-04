@@ -3,6 +3,7 @@ package fit.iuh.student.communicationservice.handlers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fit.iuh.student.communicationservice.dtos.requests.CreateGroupRequest;
+import fit.iuh.student.communicationservice.dtos.requests.DeleteGroupRequest;
 import fit.iuh.student.communicationservice.dtos.requests.SendMessageRequest;
 import fit.iuh.student.communicationservice.dtos.requests.GetMessagesRequest;
 import fit.iuh.student.communicationservice.dtos.requests.GetGroupsRequest;
@@ -19,6 +20,7 @@ import org.springframework.web.socket.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -40,6 +42,9 @@ public class CustomWebSocketHandler implements WebSocketHandler {
 
     // Lưu trữ các sessions theo group
     private final ConcurrentHashMap<String, CopyOnWriteArrayList<String>> groupSessions = new ConcurrentHashMap<>();
+
+    // Lưu trữ các sessions theo userId
+    private final ConcurrentHashMap<String, CopyOnWriteArrayList<String>> userSessions = new ConcurrentHashMap<>();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -72,8 +77,14 @@ public class CustomWebSocketHandler implements WebSocketHandler {
             JsonNode data = jsonMessage.get("data");
 
             switch (action) {
+                case "authenticate":
+                    handleAuthenticate(session, data);
+                    break;
                 case "create_group":
                     handleCreateGroup(session, data);
+                    break;
+                case "delete_group":
+                    handleDeleteGroup(session, data);
                     break;
                 case "send_message":
                     handleSendMessage(session, data);
@@ -111,6 +122,9 @@ public class CustomWebSocketHandler implements WebSocketHandler {
         // Xóa session khỏi tất cả các group
         groupSessions.values().forEach(sessionList -> sessionList.remove(session.getId()));
 
+        // Xóa session khỏi userSessions
+        userSessions.values().forEach(sessionList -> sessionList.remove(session.getId()));
+
         // Xóa session khỏi danh sách chung
         sessions.remove(session.getId());
     }
@@ -120,6 +134,19 @@ public class CustomWebSocketHandler implements WebSocketHandler {
         return false;
     }
 
+    private void handleAuthenticate(WebSocketSession session, JsonNode data) throws Exception {
+        String userId = data.get("userId").asText();
+
+        // Thêm session vào userSessions map (với kiểm tra trùng)
+        CopyOnWriteArrayList<String> userSessionList = userSessions.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>());
+        if (!userSessionList.contains(session.getId())) {
+            userSessionList.add(session.getId());
+            log.info("Session {} authenticated for user {}", session.getId(), userId);
+        }
+
+        sendMessage(session, createResponse("authenticate", "success", "User authenticated: " + userId));
+    }
+
     private void handleCreateGroup(WebSocketSession session, JsonNode data) throws Exception {
         CreateGroupRequest request = objectMapper.treeToValue(data, CreateGroupRequest.class);
 
@@ -127,10 +154,10 @@ public class CustomWebSocketHandler implements WebSocketHandler {
         boolean hasAI = request.getMembers().stream()
                 .anyMatch(member -> "AI".equals(member.getUserId()));
 
+        GroupResponse response;
         if(hasAI){
             // Nếu có AI thì tạo group trực tiếp (không kiểm tra duplicate)
-            GroupResponse response = groupService.createGroup(request);
-            broadcastToAll("group_created", response);
+            response = groupService.createGroup(request);
         } else {
             // Chuyển đổi danh sách members thành List userId
             List<String> memberIds = request.getMembers().stream()
@@ -144,9 +171,25 @@ public class CustomWebSocketHandler implements WebSocketHandler {
                 return;
             }
 
-            GroupResponse response = groupService.createGroup(request);
-            broadcastToAll("group_created", response);
+            response = groupService.createGroup(request);
         }
+
+        String groupId = response.getGroupId();
+
+        // Auto-join session của người tạo vào group (với kiểm tra trùng)
+        CopyOnWriteArrayList<String> groupSessionList = groupSessions.computeIfAbsent(groupId, k -> new CopyOnWriteArrayList<>());
+        if (!groupSessionList.contains(session.getId())) {
+            groupSessionList.add(session.getId());
+            log.info("Creator session {} joined group {}", session.getId(), groupId);
+        }
+
+        // Lấy danh sách userId của tất cả members
+        List<String> memberIds = response.getMembers().stream()
+                .map(member -> member.getUserId())
+                .collect(Collectors.toList());
+
+        // Gửi event group_created cho tất cả members đang online và auto-join họ vào group
+        notifyMembersAndJoinGroup(memberIds, groupId, "group_created", response);
     }
 
     private void handleSendMessage(WebSocketSession session, JsonNode data) throws Exception {
@@ -193,6 +236,46 @@ public class CustomWebSocketHandler implements WebSocketHandler {
         log.info("Session {} left group {}", session.getId(), groupId);
     }
 
+    private void handleDeleteGroup(WebSocketSession session, JsonNode data) throws Exception {
+        DeleteGroupRequest request = objectMapper.treeToValue(data, DeleteGroupRequest.class);
+
+        // Lấy thông tin group trước khi xóa để thông báo cho members
+        GroupResponse groupInfo = null;
+        try {
+            groupInfo = groupService.findById(request.getGroupId());
+        } catch (Exception e) {
+            sendError(session, "Group not found");
+            return;
+        }
+
+        // Thực hiện xóa group
+        boolean isDeleted = groupService.deleteGroup(request);
+
+        if (isDeleted) {
+            // Xóa group khỏi groupSessions
+            groupSessions.remove(request.getGroupId());
+
+            // Lấy danh sách userId của tất cả members để thông báo
+            List<String> memberIds = groupInfo.getMembers().stream()
+                    .map(member -> member.getUserId())
+                    .collect(Collectors.toList());
+
+            // Gửi thông báo group_deleted cho tất cả members
+            notifyMembers(memberIds, "group_deleted",
+                Map.of("groupId", request.getGroupId(),
+                       "groupName", groupInfo.getGroupName(),
+                       "deletedBy", request.getUserId()));
+
+            // Gửi response thành công cho người xóa
+            sendMessage(session, createResponse("group_deleted", "success",
+                Map.of("groupId", request.getGroupId(), "message", "Group deleted successfully")));
+
+            log.info("Group {} deleted by user {}", request.getGroupId(), request.getUserId());
+        } else {
+            sendError(session, "Failed to delete group. You may not have permission or group not found.");
+        }
+    }
+
     private void broadcastToGroup(String groupId, String action, Object data) {
         CopyOnWriteArrayList<String> sessionList = groupSessions.get(groupId);
         if (sessionList != null) {
@@ -219,6 +302,67 @@ public class CustomWebSocketHandler implements WebSocketHandler {
                 } catch (Exception e) {
                     log.error("Error broadcasting to all sessions: ", e);
                 }
+            }
+        });
+    }
+
+    /**
+     * Helper method to notify group members and auto-join their sessions to the group
+     * @param memberIds List of userId to notify
+     * @param groupId Group ID to join sessions to
+     * @param action WebSocket action type
+     * @param data Data to send
+     */
+    private void notifyMembersAndJoinGroup(List<String> memberIds, String groupId, String action, Object data) {
+        String message = createResponse(action, "broadcast", data);
+        CopyOnWriteArrayList<String> groupSessionList = groupSessions.computeIfAbsent(groupId, k -> new CopyOnWriteArrayList<>());
+
+        memberIds.forEach(userId -> {
+            CopyOnWriteArrayList<String> userSessionList = userSessions.get(userId);
+            if (userSessionList != null) {
+                userSessionList.forEach(sessionId -> {
+                    WebSocketSession session = sessions.get(sessionId);
+                    if (session != null && session.isOpen()) {
+                        try {
+                            // Gửi thông báo cho session
+                            sendMessage(session, message);
+
+                            // Auto-join session vào group (với kiểm tra trùng)
+                            if (!groupSessionList.contains(sessionId)) {
+                                groupSessionList.add(sessionId);
+                                log.info("Auto-joined session {} (user {}) to group {}", sessionId, userId, groupId);
+                            }
+                        } catch (Exception e) {
+                            log.error("Error notifying session {} for user {}: ", sessionId, userId, e);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Helper method to notify group members (without auto-join)
+     * @param memberIds List of userId to notify
+     * @param action WebSocket action type
+     * @param data Data to send
+     */
+    private void notifyMembers(List<String> memberIds, String action, Object data) {
+        String message = createResponse(action, "broadcast", data);
+
+        memberIds.forEach(userId -> {
+            CopyOnWriteArrayList<String> userSessionList = userSessions.get(userId);
+            if (userSessionList != null) {
+                userSessionList.forEach(sessionId -> {
+                    WebSocketSession session = sessions.get(sessionId);
+                    if (session != null && session.isOpen()) {
+                        try {
+                            sendMessage(session, message);
+                        } catch (Exception e) {
+                            log.error("Error notifying session {} for user {}: ", sessionId, userId, e);
+                        }
+                    }
+                });
             }
         });
     }

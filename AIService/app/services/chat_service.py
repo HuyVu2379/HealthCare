@@ -4,7 +4,7 @@ import httpx
 import asyncio
 import json
 from datetime import datetime
-from models.ai_models import GetSummaryResponse
+from app.models.ai_models import GetSummaryResponse
 class ChatService:
     def __init__(self, rag_service=None):
         self.chat_history = {}  # In-memory storage, replace with database in production
@@ -21,6 +21,7 @@ class ChatService:
             resp = await client.get(url)
             if resp.status_code == 200:
                 data = resp.json()
+                print(f"✅ Lấy summary thành công cho group_id {group_id}: {data}")
                 return GetSummaryResponse(**data)
             else:
                 print(f"⚠️ Lỗi khi gọi summary API: {resp.status_code}")
@@ -84,8 +85,6 @@ class ChatService:
             
             return {
                 **ai_response,
-                "sources": [],
-                "num_sources": 0,
                 "is_rag_response": False
             }
             

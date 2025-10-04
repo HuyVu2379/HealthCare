@@ -15,4 +15,8 @@ public interface GroupRepository extends MongoRepository<Group,String> {
 
     @Query("{ 'members.userId': { $all: ?0 } }")
     Optional<Group> findGroupByMemberIds(List<String> memberIds);
+
+    Group findByGroupId(String groupId);
+
+    void deleteByGroupId(String groupId);
 }

@@ -11,9 +11,12 @@ import java.util.List;
 public interface MessageRepository extends MongoRepository<Message,String> {
     @Query(value = "{ 'group_id': ?0 }", sort = "{ 'createdAt': 1 }")
     List<Message> findByGroup_idOrderByCreatedAtAsc(String groupId);
-    @Query(value = "{ 'group_id': ?0 }", sort = "{ 'createdAt': -1 }")
-    List<Message> findByGroup_idOrderByCreatedAtDesc(String groupId, Pageable pageable);
+    @Query(value = "{ 'group_id': ?0 }", sort = "{ 'sendAt': -1 }")
+    List<Message> findByGroup_idOrderBySendAtDesc(String groupId, Pageable pageable);
     // Lấy message mới nhất (sendAt desc, createdAt desc) với LIMIT 1 qua pageable
     @Query(value = "{ 'group_id': ?0 }", sort = "{ 'sendAt': -1, 'createdAt': -1 }")
     List<Message> findLatestMessageByGroupId(String groupId, Pageable pageable);
+
+    @Query(value = "{ 'group_id': ?0 }", delete = true)
+    void deleteAllByGroup_id(String groupId);
 }

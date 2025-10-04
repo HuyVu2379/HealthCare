@@ -5,6 +5,7 @@ from datetime import datetime
 class ChatMessage(BaseModel):
     message: str
     user_id: Optional[str] = None
+    group_id: Optional[str] = None
     summary: Optional[str] = None
     messages: List[str] = []
 
@@ -15,6 +16,10 @@ class ChatResponse(BaseModel):
     sources: Optional[List[Dict[str, Any]]] = None
     num_sources: Optional[int] = None
     is_rag_response: Optional[bool] = False
+
+class SimpleChatResponse(BaseModel):
+    response: str
+    confidence: Optional[float] = None
 
 class HealthAnalysisRequest(BaseModel):
     symptoms: List[str]

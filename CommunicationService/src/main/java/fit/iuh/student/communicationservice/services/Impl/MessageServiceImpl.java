@@ -56,7 +56,7 @@ public class MessageServiceImpl implements MessageService {
 
     public List<MessageResponse> getMessagesByGroupIdWithPagination(String groupId, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
-        List<Message> messages = messageRepository.findByGroup_idOrderByCreatedAtDesc(groupId, pageable);
+        List<Message> messages = messageRepository.findByGroup_idOrderBySendAtDesc(groupId, pageable);
         return messages.stream()
                 .map(messageMapper::toMessageResponse)
                 .collect(Collectors.toList());

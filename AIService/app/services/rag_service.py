@@ -91,8 +91,6 @@ class RAGService:
             if not self.is_initialized:
                 return {
                     "response": f"Lỗi: RAG chatbot chưa được khởi tạo. {self.initialization_error}",
-                    "sources": [],
-                    "num_sources": 0,
                     "confidence": 0.0,
                     "is_rag_response": False
                 }
@@ -116,18 +114,15 @@ class RAGService:
             if session_id:
                 self.chat_history[session_id].append({
                     "type": "assistant",
-                    "message": result['answer'],
+                    "message": result['response'],
                     "timestamp": datetime.now().isoformat(),
-                    "sources": result.get('sources', []),
-                    "num_sources": result.get('num_sources', 0),
+                    "confidence": result.get('confidence', 0.0),
                     "is_rag_response": True
                 })
             
             return {
-                "response": result['answer'],
-                "sources": result.get('sources', []),
-                "num_sources": result.get('num_sources', 0),
-                "confidence": 0.9,  # RAG responses have high confidence
+                "response": result['response'],
+                "confidence": result.get('confidence', 0.0),
                 "is_rag_response": True
             }
             
@@ -145,8 +140,6 @@ class RAGService:
             
             return {
                 "response": error_response,
-                "sources": [],
-                "num_sources": 0,
                 "confidence": 0.0,
                 "is_rag_response": False
             }
