@@ -65,12 +65,12 @@ class CKDPredictionRequest(BaseModel):
     serum_creatinine: Optional[float] = None
     gfr: Optional[float] = None
     
-    # Optional numerical features (có thể thiếu)
+    # Optional num= None
+    hematuria: Optioerical features (có thể thiếu)
     bun: Optional[float] = None
     serum_calcium: Optional[float] = None
     ana: Optional[int] = None  # 0 or 1
-    c3_c4: Optional[float] = None
-    hematuria: Optional[int] = None  # 0 or 1
+    c3_c4: Optional[float] nal[int] = None  # 0 or 1
     oxalate_levels: Optional[float] = None
     urine_ph: Optional[float] = None
     blood_pressure: Optional[float] = None

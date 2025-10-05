@@ -25,5 +25,6 @@ public class AppointmentEventPayload {
     private Date appointmentDate;
     private ConsultationType consultationType;
     private String addressDetail;
+    private boolean hasPredict;
     private AppointmentEvent eventType;
 }

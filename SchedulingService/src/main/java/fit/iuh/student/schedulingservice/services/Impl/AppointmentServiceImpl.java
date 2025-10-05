@@ -16,6 +16,7 @@ import fit.iuh.student.schedulingservice.repositories.AppointmentRepository;
 import fit.iuh.student.schedulingservice.repositories.DoctorScheduleRepository;
 import fit.iuh.student.schedulingservice.repositories.TimeSlotRepository;
 import fit.iuh.student.schedulingservice.services.AppointmentService;
+import fit.iuh.student.schedulingservice.services.PredictService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +36,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final DoctorScheduleRepository doctorScheduleRepository;
     private final AppointmentEventPublisher appointmentEventPublisher;
     private final TimeSlotMapper timeSlotMapper;
+    private final PredictService predictService;
 
     @Override
     public AppointmentResponse bookingAppointment(CreateAppointmentRequest request) {
@@ -43,6 +45,8 @@ public class AppointmentServiceImpl implements AppointmentService {
             if (doctorSchedule.getTimeSlots().stream().noneMatch(ts -> ts.getSlotId() == request.getSlotId())) {
                 throw new NotFoundException("Time slot not found in the doctor's schedule");
             }
+            PredictResponse hasPredict = predictService.getPredictResponseByPatientId(request.getPatientId());
+            boolean hasPredictCondition = hasPredict != null;
             Appointment apm = Appointment.builder()
                     .patientId(request.getPatientId())
                     .doctorId(request.getDoctorId())
@@ -55,6 +59,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .consultationType(request.getConsultationType())
                     .addressDetail(request.getAddressDetail())
                     .doctorSchedule(doctorScheduleRepository.findById(request.getScheduleId()).orElse(null))
+                    .hasPredict(hasPredictCondition)
                     .build();
             Appointment appointment = appointmentRepository.save(apm);
             doctorSchedule.removeTimeSlot(timeSlotRepository.findById(request.getSlotId()).orElse(null));
@@ -81,6 +86,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .appointmentDate(apm.getAppointmentDate())
                     .consultationType(apm.getConsultationType())
                     .addressDetail(doctor.getClinicAddress())
+                    .hasPredict(hasPredictCondition)
                     .build();
             appointmentEventPublisher.publishBookingAppointmentEvent(aprs);
             return aprs;
@@ -135,6 +141,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                         .consultationType(appointment.getConsultationType())
                         // .addressDetail(doctor.getClinicAddress())
                         .addressDetail(appointment.getAddressDetail())
+                        .hasPredict(appointment.isHasPredict())
                         .build();
             });
         } catch (Exception e) {
@@ -313,6 +320,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                         .appointmentDate(appointment.getAppointmentDate())
                         .consultationType(appointment.getConsultationType())
                         .addressDetail(appointment.getAddressDetail())
+                        .hasPredict(appointment.isHasPredict())
                         .build();
             }
         } catch (Exception e) {
@@ -362,6 +370,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                         .appointmentDate(appointment.getAppointmentDate())
                         .consultationType(appointment.getConsultationType())
                         .addressDetail(appointment.getAddressDetail())
+                        .hasPredict(appointment.isHasPredict())
                         .build();
             });
         } catch (Exception e) {
@@ -394,16 +403,17 @@ public class AppointmentServiceImpl implements AppointmentService {
                         .patientName(userClient.getPatientForClient(appointment.getPatientId()).getFullName())
                         .date(appointment.getAppointmentDate())
                         .dayOfWeek(appointment.getDoctorSchedule().getWeekDay())
+                        .hasPredict(appointment.isHasPredict())
                         .build();
             }).toList();
-        } catch(Exception e){
+        } catch (Exception e) {
             throw e;
         }
     }
 
     @Override
     public AppointmentClientResponse getAppointmentDetailForClientById(String appointmentId) {
-        try{
+        try {
             Appointment appointment = appointmentRepository.findById(appointmentId).orElse(null);
             if (appointment == null) {
                 throw new NotFoundException("Appointment not found");

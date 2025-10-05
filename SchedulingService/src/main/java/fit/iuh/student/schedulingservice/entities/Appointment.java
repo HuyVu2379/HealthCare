@@ -55,4 +55,6 @@ public class Appointment extends BaseEntity {
 
     @Column(name = "address_detail", length = 255)
     private String addressDetail;
+
+    private boolean hasPredict = false;
 }

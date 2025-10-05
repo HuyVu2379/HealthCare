@@ -25,4 +25,5 @@ public class AppointmentResponse {
     private Date appointmentDate;
     private ConsultationType consultationType;
     private String addressDetail;
+    private boolean hasPredict = false;
 }

@@ -118,4 +118,54 @@ public class HealthMetricServiceImpl implements HealthMetricService {
             throw e;
         }
     }
+
+    @Override
+    public List<HealthMetricResponse> getMetricByPatientId(String patientId) {
+        try {
+            List<HealthMetric> allMetrics = healthMetricRepository.findByPatientIdOrderByMeasuredAtDesc(patientId);
+
+            // Group by metric name and get the latest one for each metric type
+            Map<String, HealthMetric> latestMetrics = allMetrics.stream()
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toMap(
+                            HealthMetric::getMetricName,
+                            metric -> metric,
+                            (existing, replacement) ->
+                                existing.getMeasuredAt().compareTo(replacement.getMeasuredAt()) >= 0
+                                    ? existing : replacement
+                    ));
+
+            return latestMetrics.values().stream()
+                    .sorted((a, b) -> b.getMeasuredAt().compareTo(a.getMeasuredAt()))
+                    .map(healthMetricMapper::toHealthMetricResponse)
+                    .toList();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @Override
+    public List<HealthMetricResponse> createHealthMetrics(List<CreateHealthMetricRequest> healthMetrics) {
+        try{
+            List<HealthMetric> metrics = healthMetrics.stream()
+                    .map(hm -> {
+                        HealthMetric healthMetric = new HealthMetric();
+                        healthMetric.setPatientId(hm.getPatientId());
+                        healthMetric.setMetricName(hm.getMetricName());
+                        healthMetric.setMetricValue(hm.getMetricValue());
+                        healthMetric.setUnit(hm.getUnit());
+                        healthMetric.setMedicalRecord(
+                                (hm.getRecordId() == null || hm.getRecordId().isBlank())
+                                        ? null
+                                        : medicalRecordRepository.findById(hm.getRecordId()).orElse(null)
+                        );
+                        healthMetric.setMeasuredAt(new Date(hm.getMeasuredAt().getTime()));
+                        return healthMetric;
+                    }).toList();
+            List<HealthMetric> savedMetrics = healthMetricRepository.saveAll(metrics);
+            return savedMetrics.stream().map(healthMetricMapper::toHealthMetricResponse).toList();
+        }catch (Exception e){
+            throw e;
+        }
+    }
 }

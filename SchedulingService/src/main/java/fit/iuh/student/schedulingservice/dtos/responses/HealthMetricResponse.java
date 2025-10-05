@@ -1,22 +1,22 @@
-package fit.iuh.student.healthrecordservice.dtos.requests;
+package fit.iuh.student.schedulingservice.dtos.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-import java.util.List;
+import java.sql.Date;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class CreateHealthMetricRequest {
+@NoArgsConstructor
+public class HealthMetricResponse {
+    private String metricId;
     private String patientId;
     private String metricName;
     private double metricValue;
     private String unit;
-    private String recordId;
+    private String medicalRecordId = null;
     private Date measuredAt;
 }
