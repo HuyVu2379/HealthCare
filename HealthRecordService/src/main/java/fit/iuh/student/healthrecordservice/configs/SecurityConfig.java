@@ -22,7 +22,8 @@ public class SecurityConfig {
     private final HeaderAuthenticationFilter headerAuthenticationFilter;
 
     private List<String> publicEndpoints = Arrays.asList(
-            "/api/v1/health-metrics/getEGFRMetric/**"
+            "/api/v1/health-metrics/getEGFRMetric/**",
+            "/api/v1/health-metrics/get-health-metrics-latest/**"
     );
 
     @Bean

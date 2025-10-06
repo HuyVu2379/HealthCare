@@ -23,9 +23,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -39,14 +41,22 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final PredictService predictService;
 
     @Override
+    @Transactional
     public AppointmentResponse bookingAppointment(CreateAppointmentRequest request) {
         try {
-            DoctorSchedule doctorSchedule = doctorScheduleRepository.findById(request.getScheduleId()).orElse(null);
-            if (doctorSchedule.getTimeSlots().stream().noneMatch(ts -> ts.getSlotId() == request.getSlotId())) {
-                throw new NotFoundException("Time slot not found in the doctor's schedule");
-            }
+            // Use the new repository method to eagerly fetch timeSlots
+            DoctorSchedule doctorSchedule = doctorScheduleRepository.findWithSlotsById(request.getScheduleId())
+                    .orElseThrow(() -> new NotFoundException("Doctor schedule not found"));
+
+            // Find the matching time slot using Objects.equals() for comparison
+            TimeSlot matchingTimeSlot = doctorSchedule.getTimeSlots().stream()
+                    .filter(ts -> Objects.equals(ts.getSlotId(), request.getSlotId()))
+                    .findFirst()
+                    .orElseThrow(() -> new NotFoundException("Time slot not found in the doctor's schedule"));
+
             PredictResponse hasPredict = predictService.getPredictResponseByPatientId(request.getPatientId());
             boolean hasPredictCondition = hasPredict != null;
+
             Appointment apm = Appointment.builder()
                     .patientId(request.getPatientId())
                     .doctorId(request.getDoctorId())
@@ -54,27 +64,31 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .note(request.getNote())
                     .slotId(request.getSlotId())
                     .status(request.getStatus())
-                    .timeSlot(timeSlotRepository.findById(request.getSlotId()).orElse(null))
+                    .timeSlot(matchingTimeSlot) // Use the already loaded TimeSlot
                     .appointmentDate(doctorSchedule.getWorkDate())
                     .consultationType(request.getConsultationType())
                     .addressDetail(request.getAddressDetail())
-                    .doctorSchedule(doctorScheduleRepository.findById(request.getScheduleId()).orElse(null))
+                    .doctorSchedule(doctorSchedule) // Use the already loaded DoctorSchedule
                     .hasPredict(hasPredictCondition)
                     .build();
+
             Appointment appointment = appointmentRepository.save(apm);
-            doctorSchedule.removeTimeSlot(timeSlotRepository.findById(request.getSlotId()).orElse(null));
+
+            // Remove the timeSlot from doctorSchedule and save
+            doctorSchedule.removeTimeSlot(matchingTimeSlot);
             doctorScheduleRepository.save(doctorSchedule);
             DoctorClientResponse doctor = userClient.getDoctorForClient(request.getDoctorId());
 
-            // Map TimeSlot to TimeSlotDTO
+            // Map TimeSlot to TimeSlotDTO using the already loaded timeSlot
             TimeSlotDTO timeSlotDTO = null;
-            if (apm.getTimeSlot() != null) {
+            if (matchingTimeSlot != null) {
                 timeSlotDTO = TimeSlotDTO.builder()
-                        .slotId(apm.getTimeSlot().getSlotId())
-                        .startTime(apm.getTimeSlot().getStartTime())
-                        .endTime(apm.getTimeSlot().getEndTime())
+                        .slotId(matchingTimeSlot.getSlotId())
+                        .startTime(matchingTimeSlot.getStartTime())
+                        .endTime(matchingTimeSlot.getEndTime())
                         .build();
             }
+
             AppointmentResponse aprs = AppointmentResponse.builder()
                     .appointmentId(appointment.getAppointmentId())
                     .doctor(doctor)
@@ -88,6 +102,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .addressDetail(doctor.getClinicAddress())
                     .hasPredict(hasPredictCondition)
                     .build();
+
             appointmentEventPublisher.publishBookingAppointmentEvent(aprs);
             return aprs;
         } catch (Exception e) {
@@ -329,6 +344,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<AppointmentResponse> getAppointmentWithFilterPagination(String type, AppointmentStatus status, int page, int size, String sortBy, String sortDir) {
         try {
             if (sortBy == null || sortBy.isEmpty()) {
@@ -379,6 +395,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AppointmentWeekFilterResponse> getAppointmentWeekFilterForDoctor(String doctorId, String weekStartDate, String weekEndDate) {
         try {
             Date start = Date.valueOf(weekStartDate);

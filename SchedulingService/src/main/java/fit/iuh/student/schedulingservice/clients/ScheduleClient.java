@@ -15,9 +15,10 @@ import java.util.List;
 public interface ScheduleClient {
     @GetMapping(value = "/api/v1/health-metrics/get-health-metrics-latest/{patientId}")
     List<HealthMetricResponse> getHealthMetricsByPatientIdClient(
-            @PathVariable("patientId") String patientId,
-            @RequestHeader("Authorization") String authorization
+            @PathVariable("patientId") String patientId
+//            @RequestHeader("Authorization") String authorization
     );
+
 
     @PostMapping(value = "/api/v1/health-metrics/create-health-metrics")
     List<HealthMetricResponse> createHealthMetrics(

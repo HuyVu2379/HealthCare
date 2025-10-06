@@ -35,16 +35,17 @@ public class PredictServiceImpl implements PredictService {
     @Override
     public PredictResponse getPredictResponseByPatientId(String patientId) {
         try{
-            // Lấy Authorization header từ request
-            String authorizationHeader = getAuthorizationHeader();
-            log.debug("Retrieved authorization header for patient ID: {}", patientId);
+//            // Lấy Authorization header từ request
+//            String authorizationHeader = getAuthorizationHeader();
+//            log.debug("Retrieved authorization header for patient ID: {}", patientId);
+//
+//            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+//                log.warn("No valid authorization header found in request for patient ID: {}", patientId);
+//                throw new RuntimeException("Authorization header is required");
+//            }
 
-            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-                log.warn("No valid authorization header found in request for patient ID: {}", patientId);
-                throw new RuntimeException("Authorization header is required");
-            }
-
-            List<HealthMetricResponse> healthMetrics = scheduleClient.getHealthMetricsByPatientIdClient(patientId, authorizationHeader);
+//            List<HealthMetricResponse> healthMetrics = scheduleClient.getHealthMetricsByPatientIdClient(patientId, authorizationHeader);
+            List<HealthMetricResponse> healthMetrics = scheduleClient.getHealthMetricsByPatientIdClient(patientId);
             Predict predict = predictRepository.findLatestPredictByPatientId(patientId);
             return PredictResponse.builder()
                     .predictId(predict.getPredictId())

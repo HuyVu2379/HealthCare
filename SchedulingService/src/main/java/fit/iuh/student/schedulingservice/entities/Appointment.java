@@ -26,7 +26,8 @@ public class Appointment extends BaseEntity {
     @Column(name = "doctor_id", nullable = false)
     private String doctorId;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schedule_id")
     private DoctorSchedule doctorSchedule;
 
     @Column(name = "symptoms", length = 500)

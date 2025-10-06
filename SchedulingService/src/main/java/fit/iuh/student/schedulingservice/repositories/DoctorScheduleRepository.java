@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule,String> {
@@ -22,4 +23,6 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule,S
     @Query("SELECT ds.workDate FROM DoctorSchedule ds WHERE ds.doctorId = :doctorId")
     List<Date> findWorkDatesByDoctorId(@Param("doctorId") String doctorId);
 
+    @Query("SELECT ds FROM DoctorSchedule ds LEFT JOIN FETCH ds.timeSlots WHERE ds.scheduleId = :scheduleId")
+    Optional<DoctorSchedule> findWithSlotsById(@Param("scheduleId") String scheduleId);
 }

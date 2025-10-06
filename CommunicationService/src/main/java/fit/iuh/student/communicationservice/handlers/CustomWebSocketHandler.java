@@ -2,6 +2,8 @@ package fit.iuh.student.communicationservice.handlers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fit.iuh.student.communicationservice.consumers.ScheduleSocketConsumer;
+import fit.iuh.student.communicationservice.consumers.payload.AppointmentData;
 import fit.iuh.student.communicationservice.dtos.requests.CreateGroupRequest;
 import fit.iuh.student.communicationservice.dtos.requests.DeleteGroupRequest;
 import fit.iuh.student.communicationservice.dtos.requests.SendMessageRequest;
@@ -10,6 +12,8 @@ import fit.iuh.student.communicationservice.dtos.requests.GetGroupsRequest;
 import fit.iuh.student.communicationservice.dtos.responses.GroupResponse;
 import fit.iuh.student.communicationservice.dtos.responses.MessageResponse;
 import fit.iuh.student.communicationservice.entities.Group;
+import fit.iuh.student.communicationservice.publishers.ScheduleSocketPublisher;
+import fit.iuh.student.communicationservice.publishers.payload.ScheduleEventMessage;
 import fit.iuh.student.communicationservice.repositories.GroupRepository;
 import fit.iuh.student.communicationservice.services.GroupService;
 import fit.iuh.student.communicationservice.services.MessageService;
@@ -19,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,6 +42,7 @@ public class CustomWebSocketHandler implements WebSocketHandler {
     private final MessageService messageService;
     private final ObjectMapper objectMapper;
     private final GroupRepository groupRepository;
+    private final ScheduleSocketPublisher publisher;
     // Lưu trữ tất cả các WebSocket sessions
     private final ConcurrentHashMap<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
 
@@ -100,6 +106,9 @@ public class CustomWebSocketHandler implements WebSocketHandler {
                     break;
                 case "leave_group":
                     handleLeaveGroup(session, data);
+                    break;
+                case "schedule_appointment":
+                    handleScheduleAppointment(data);
                     break;
                 default:
                     sendError(session, "Unknown action: " + action);
@@ -276,6 +285,31 @@ public class CustomWebSocketHandler implements WebSocketHandler {
         }
     }
 
+    private void handleScheduleAppointment(JsonNode data) throws Exception {
+         ScheduleEventMessage request = objectMapper.treeToValue(data, ScheduleEventMessage.class);
+
+        // Chuyển tiếp dữ liệu sự kiện lịch hẹn đến RabbitMQ
+        publisher.publishScheduleEventSocket(request);
+        // Gửi thông báo WebSocket đến các session của bệnh nhân và bác sĩ
+    }
+
+    public void handlePublishScheduleToClient(AppointmentData data) throws Exception {
+        List<String> targetUserIds = new ArrayList<>();
+
+        if (data.getDoctorId() != null) {
+            targetUserIds.add(data.getDoctorId());
+        }
+
+        if (data.getPatientId() != null) {
+            targetUserIds.add(data.getPatientId());
+        }
+
+        if (!targetUserIds.isEmpty()) {
+            // Gửi thông báo đến các session của bệnh nhân và bác sĩ
+            notifyMembers(targetUserIds, "schedule_appointment_response", targetUserIds);
+            log.info("Sent schedule appointment notification to users: {}", targetUserIds);
+        }
+    }
     private void broadcastToGroup(String groupId, String action, Object data) {
         CopyOnWriteArrayList<String> sessionList = groupSessions.get(groupId);
         if (sessionList != null) {
