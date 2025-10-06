@@ -69,30 +69,30 @@ class RAGPDFChatbot:
         model_name = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
         
         try:
-            print(f"🔧 Đang thử embedding model: {model_name} (device={device})")
+            # print(f"🔧 Đang thử embedding model: {model_name} (device={device})")
             self.embeddings = HuggingFaceEmbeddings(
                 model_name=model_name,
                 model_kwargs={'device': device}
             )
-            print(f"✅ Thành công với {model_name} trên {device}")
+            # print(f"✅ Thành công với {model_name} trên {device}")
         except Exception as cuda_error:
             if "CUDA out of memory" in str(cuda_error) and device == 'cuda':
-                print(f"⚠️  GPU hết bộ nhớ, chuyển về CPU: {cuda_error}")
+                # print(f"⚠️  GPU hết bộ nhớ, chuyển về CPU: {cuda_error}")
                 try:
                     self.embeddings = HuggingFaceEmbeddings(
                         model_name=model_name,
                         model_kwargs={'device': 'cpu'}
                     )
-                    print(f"✅ Thành công với {model_name} trên CPU")
+                    # print(f"✅ Thành công với {model_name} trên CPU")
                 except Exception as cpu_error:
-                    print(f"❌ Lỗi trên CPU, thử model nhỏ hơn: {cpu_error}")
+                    # print(f"❌ Lỗi trên CPU, thử model nhỏ hơn: {cpu_error}")
                     # Fallback về model rất nhỏ
                     model_name = "sentence-transformers/paraphrase-multilingual-MiniLM-L6-v2"
                     self.embeddings = HuggingFaceEmbeddings(
                         model_name=model_name,
                         model_kwargs={'device': 'cpu'}
                     )
-                    print(f"✅ Thành công với model nhỏ: {model_name} trên CPU")
+                    # print(f"✅ Thành công với model nhỏ: {model_name} trên CPU")
             else:
                 raise cuda_error
 
@@ -101,101 +101,97 @@ class RAGPDFChatbot:
             chunk_size=self.chunk_size,
             chunk_overlap=self.chunk_overlap,
             length_function=len,
-            separators=["\n\n", "\n", ". ", " ", ""]
+            separators=["\n\n", "\n", " ", ""]
         )
         
-        # Vector store
+        # Khởi tạo các components
         self.vector_store = None
         self.retriever = None
+        self.qa_chain = None
         
-        # Tạo thư mục nếu chưa tồn tại
-        self.pdf_directory.mkdir(exist_ok=True)
-        self.vector_store_path.mkdir(exist_ok=True)
-        
-        print("✅ RAG PDF Chatbot đã được khởi tạo thành công!")
+        # Tạo thư mục vector store nếu chưa có
+        self.vector_store_path.mkdir(parents=True, exist_ok=True)
     
     def load_pdfs(self) -> List[Document]:
         """
         Đọc tất cả file PDF trong thư mục
         
         Returns:
-            List[Document]: Danh sách documents từ PDF
+            List[Document]: Danh sách documents
         """
         documents = []
         pdf_files = list(self.pdf_directory.glob("*.pdf"))
         
         if not pdf_files:
-            print(f"⚠️  Không tìm thấy file PDF nào trong thư mục {self.pdf_directory}")
+            # print(f"❌ Không tìm thấy file PDF nào trong: {self.pdf_directory}")
             return documents
         
-        print(f"📚 Đang đọc {len(pdf_files)} file PDF...")
+        # print(f"📚 Tìm thấy {len(pdf_files)} file PDF:")
+        for pdf_file in pdf_files:
+            pass  # print(f"   - {pdf_file.name}")
         
         for pdf_file in pdf_files:
             try:
-                print(f"   📄 Đang đọc: {pdf_file.name}")
+                # print(f"📖 Đang đọc: {pdf_file.name}")
                 loader = PyPDFLoader(str(pdf_file))
-                pdf_docs = loader.load()
+                docs = loader.load()
                 
-                # Thêm metadata về source file
-                for doc in pdf_docs:
+                # Thêm metadata
+                for doc in docs:
                     doc.metadata['source_file'] = pdf_file.name
-                    doc.metadata['file_path'] = str(pdf_file)
                 
-                documents.extend(pdf_docs)
-                print(f"   ✅ Đã đọc {len(pdf_docs)} trang từ {pdf_file.name}")
-                
+                documents.extend(docs)
+                # print(f"   ✅ Đã đọc {len(docs)} trang")
             except Exception as e:
-                print(f"   ❌ Lỗi khi đọc {pdf_file.name}: {str(e)}")
+                pass  # print(f"   ❌ Lỗi khi đọc {pdf_file.name}: {str(e)}")
         
-        print(f"📖 Tổng cộng đã đọc {len(documents)} trang từ {len(pdf_files)} file PDF")
+        # print(f"📄 Tổng cộng: {len(documents)} trang từ {len(pdf_files)} file")
         return documents
     
     def create_chunks(self, documents: List[Document]) -> List[Document]:
         """
-        Chia nhỏ documents thành các chunks
+        Chia documents thành chunks nhỏ hơn
         
         Args:
-            documents: List documents từ PDF
+            documents: Danh sách documents gốc
             
         Returns:
-            List[Document]: List chunks
+            List[Document]: Danh sách chunks
         """
-        print("✂️  Đang chia nhỏ documents thành chunks...")
+        if not documents:
+            return []
         
+        # print(f"✂️  Đang chia thành chunks (size={self.chunk_size}, overlap={self.chunk_overlap})...")
         chunks = self.text_splitter.split_documents(documents)
-        
-        # Thêm chunk index vào metadata
-        for i, chunk in enumerate(chunks):
-            chunk.metadata['chunk_id'] = i
-            chunk.metadata['chunk_size'] = len(chunk.page_content)
-        
-        print(f"📝 Đã tạo {len(chunks)} chunks")
+        # print(f"📝 Đã tạo {len(chunks)} chunks")
         return chunks
     
     def create_vector_store(self, chunks: List[Document]) -> FAISS:
         """
-        Tạo vector store từ chunks
+        Tạo FAISS vector store từ chunks
         
         Args:
-            chunks: List chunks để tạo embeddings
+            chunks: Danh sách text chunks
             
         Returns:
             FAISS: Vector store
         """
-        print("🔍 Đang tạo embeddings và vector store...")
+        if not chunks:
+            raise ValueError("Không có chunks để tạo vector store")
         
+        # print(f"🔮 Đang tạo embeddings cho {len(chunks)} chunks...")
         try:
             vector_store = FAISS.from_documents(chunks, self.embeddings)
-            print("✅ Vector store đã được tạo thành công!")
+            # print(f"✅ Đã tạo vector store với {vector_store.index.ntotal} vectors")
             return vector_store
         except Exception as e:
-            print(f"❌ Lỗi khi tạo vector store: {str(e)}")
-            raise e
+            # print(f"❌ Lỗi khi tạo vector store: {str(e)}")
+            raise
     
     def save_vector_store(self):
-        """Lưu vector store để tái sử dụng"""
+        """Lưu vector store ra file"""
         if self.vector_store is None:
-            print("⚠️  Chưa có vector store để lưu")
+            # print("❌ Không có vector store để lưu")
             return
         
         try:
@@ -212,9 +208,9 @@ class RAGPDFChatbot:
                     'embedding_model': self.embeddings.model_name
                 }, f)
             
-            print(f"💾 Vector store đã được lưu tại: {self.vector_store_path}")
+            # print(f"💾 Vector store đã được lưu tại: {self.vector_store_path}")
         except Exception as e:
-            print(f"❌ Lỗi khi lưu vector store: {str(e)}")
+            pass  # print(f"❌ Lỗi khi lưu vector store: {str(e)}")
     
     def load_vector_store(self) -> bool:
         """
@@ -227,7 +223,7 @@ class RAGPDFChatbot:
         metadata_path = self.vector_store_path / "metadata.pkl"
         
         if not index_path.exists() or not metadata_path.exists():
-            print("📁 Không tìm thấy vector store đã lưu")
+            # print("📁 Không tìm thấy vector store đã lưu")
             return False
         
         try:
@@ -242,10 +238,10 @@ class RAGPDFChatbot:
             with open(metadata_path, 'rb') as f:
                 metadata = pickle.load(f)
             
-            print(f"📂 Đã tải vector store với {self.vector_store.index.ntotal} vectors")
+            # print(f"📂 Đã tải vector store với {self.vector_store.index.ntotal} vectors")
             return True
         except Exception as e:
-            print(f"❌ Lỗi khi tải vector store: {str(e)}")
+            # print(f"❌ Lỗi khi tải vector store: {str(e)}")
             return False
     
     def setup_retriever(self, k: int = 5):
@@ -262,7 +258,7 @@ class RAGPDFChatbot:
             search_type="similarity",
             search_kwargs={"k": k}
         )
-        print(f"🔍 Retriever đã được thiết lập (k={k})")
+        # print(f"🔍 Retriever đã được thiết lập (k={k})")
     
     def format_docs(self, docs: List[Document]) -> str:
         """
@@ -276,15 +272,9 @@ class RAGPDFChatbot:
         """
         formatted_docs = []
         for i, doc in enumerate(docs, 1):
-            source = doc.metadata.get('source_file', 'Unknown')
-            page = doc.metadata.get('page', 'Unknown')
-            
-            formatted_docs.append(
-                f"[Tài liệu {i}] (Nguồn: {source}, Trang: {page})\n"
-                f"{doc.page_content}\n"
-            )
+            formatted_docs.append(f"{doc.page_content}")
         
-        return "\n".join(formatted_docs)
+        return "\n\n".join(formatted_docs)
     
     def create_qa_chain(self):
         """Tạo QA chain với RAG"""
@@ -296,15 +286,24 @@ NGUYÊN TẮC TRẢ LỜI:
 1. Chỉ sử dụng thông tin từ các tài liệu được cung cấp
 2. Nếu không tìm thấy thông tin liên quan, hãy nói rõ
 3. Trả lời bằng tiếng Việt, rõ ràng và dễ hiểu
-4. Cung cấp nguồn tham chiếu cụ thể
+4. Đưa ra câu trả lời trực tiếp mà không cần nêu nguồn tài liệu
 5. Nếu có nhiều quan điểm, hãy trình bày đầy đủ
+6. **QUAN TRỌNG**: Trả lời theo định dạng Markdown với:
+   - Sử dụng **text** cho phần chữ đậm quan trọng
+   - Sử dụng *text* cho phần chữ nghiêng nhấn mạnh
+   - Sử dụng ## cho tiêu đề chính
+   - Sử dụng ### cho tiêu đề phụ
+   - Sử dụng - hoặc * cho danh sách
+   - Sử dụng 1. 2. 3. cho danh sách có số thứ tự
+   - Sử dụng `code` cho thuật ngữ y khoa chính xác
+   - Sử dụng > cho phần trích dẫn quan trọng
 
 CÂU HỎI: {question}
 
 TÀI LIỆU THAM KHẢO:
 {context}
 
-TRẢ LỜI:
+TRẢ LỜI (theo định dạng Markdown):
 """)
         
         # Tạo chain
@@ -335,6 +334,44 @@ TRẢ LỜI:
         except Exception as e:
             return f"Lỗi khi gọi Gemini API: {str(e)}"
     
+    def _get_general_ai_response(self, question: str) -> str:
+        """
+        Sử dụng kiến thức chung của AI khi không tìm thấy thông tin trong tài liệu
+        
+        Args:
+            question: Câu hỏi của người dùng
+            
+        Returns:
+            str: Câu trả lời từ kiến thức chung của AI
+        """
+        try:
+            general_prompt = f"""
+Bạn là một chuyên gia y tế về bệnh thận. Câu hỏi sau không tìm thấy thông tin cụ thể trong tài liệu tham khảo.
+
+Hãy trả lời dựa trên kiến thức y khoa chung của bạn về bệnh thận, với những nguyên tắc sau:
+1. Trả lời ngắn gọn, súc tích (tối đa 3-4 câu)
+2. Sử dụng tiếng Việt
+3. Đưa ra thông tin cơ bản và đáng tin cậy
+4. Nếu là vấn đề nghiêm trọng, khuyên nên tham khảo bác sĩ
+5. Bắt đầu bằng "**Dựa trên kiến thức y khoa chung:**"
+6. **QUAN TRỌNG**: Trả lời theo định dạng Markdown với:
+   - Sử dụng **text** cho phần chữ đậm quan trọng
+   - Sử dụng *text* cho phần chữ nghiêng nhấn mạnh
+   - Sử dụng - hoặc * cho danh sách
+   - Sử dụng `thuật ngữ` cho thuật ngữ y khoa
+   - Sử dụng > cho phần cảnh báo quan trọng
+
+Câu hỏi: {question}
+
+Trả lời (theo định dạng Markdown):
+"""
+            
+            response = self.model.generate_content(general_prompt)
+            return response.text
+            
+        except Exception as e:
+            return f"Xin lỗi, tôi không thể trả lời câu hỏi này. Vui lòng tham khảo ý kiến bác sĩ chuyên khoa."
+
     def initialize_system(self, force_rebuild: bool = False) -> bool:
         """
         Khởi tạo toàn bộ hệ thống RAG
@@ -348,20 +385,20 @@ TRẢ LỜI:
         try:
             # Kiểm tra xem có vector store đã lưu không
             if not force_rebuild and self.load_vector_store():
-                print("✅ Sử dụng vector store đã có")
+                pass  # print("✅ Sử dụng vector store đã có")
             else:
-                print("🔄 Tạo mới vector store...")
+                pass  # print("🔄 Tạo mới vector store...")
                 
                 # Đọc PDF files
                 documents = self.load_pdfs()
                 if not documents:
-                    print("❌ Không có documents để xử lý")
+                    pass  # print("❌ Không có documents để xử lý")
                     return False
                 
                 # Tạo chunks
                 chunks = self.create_chunks(documents)
                 if not chunks:
-                    print("❌ Không tạo được chunks")
+                    pass  # print("❌ Không tạo được chunks")
                     return False
                 
                 # Tạo vector store
@@ -376,11 +413,11 @@ TRẢ LỜI:
             # Tạo QA chain
             self.qa_chain = self.create_qa_chain()
             
-            print("🎉 Hệ thống RAG đã sẵn sàng!")
+            # print("🎉 Hệ thống RAG đã sẵn sàng!")
             return True
             
         except Exception as e:
-            print(f"❌ Lỗi khởi tạo hệ thống: {str(e)}")
+            # print(f"❌ Lỗi khởi tạo hệ thống: {str(e)}")
             return False
     
     def ask_question(self, question: str) -> Dict[str, Any]:
@@ -391,7 +428,7 @@ TRẢ LỜI:
             question: Câu hỏi của người dùng
             
         Returns:
-            Dict: Kết quả bao gồm answer và metadata
+            Dict: Kết quả chỉ bao gồm response và confidence
         """
         if not hasattr(self, 'qa_chain'):
             raise ValueError("Hệ thống chưa được khởi tạo. Hãy gọi initialize_system() trước.")
@@ -400,85 +437,139 @@ TRẢ LỜI:
             # Lấy relevant documents
             relevant_docs = self.retriever.get_relevant_documents(question)
             
-            # Tạo answer
+            # Kiểm tra xem có documents liên quan không
+            if not relevant_docs or len(relevant_docs) == 0:
+                # Không tìm thấy tài liệu liên quan, sử dụng kiến thức chung của AI
+                general_answer = self._get_general_ai_response(question)
+                return {
+                    'response': general_answer,
+                    'confidence': 0.3  # Confidence thấp hơn vì không dựa trên tài liệu
+                }
+            
+            # Tính confidence dựa trên số lượng documents tìm được
+            confidence = self._calculate_confidence(question, relevant_docs)
+            
+            # Nếu confidence quá thấp (< 0.2), cũng fallback sang general AI
+            if confidence < 0.2:
+                general_answer = self._get_general_ai_response(question)
+                return {
+                    'response': general_answer,
+                    'confidence': 0.3
+                }
+            
+            # Tạo answer từ RAG
             answer = self.qa_chain.invoke(question)
             
-            # Chuẩn bị metadata về sources
-            sources = []
-            for doc in relevant_docs:
-                sources.append({
-                    'file': doc.metadata.get('source_file', 'Unknown'),
-                    'page': doc.metadata.get('page', 'Unknown'),
-                    'content_preview': doc.page_content[:200] + "..." if len(doc.page_content) > 200 else doc.page_content
-                })
+            # Kiểm tra xem câu trả lời có chứa các cụm từ "không tìm thấy" hay không
+            no_info_phrases = [
+                "không tìm thấy thông tin",
+                "không có thông tin",
+                "không được đề cập",
+                "không có dữ liệu",
+                "không tìm được",
+                "không được cung cấp"
+            ]
+            
+            answer_lower = answer.lower()
+            if any(phrase in answer_lower for phrase in no_info_phrases):
+                # RAG answer cho biết không có thông tin, fallback sang general AI
+                general_answer = self._get_general_ai_response(question)
+                return {
+                    'response': general_answer,
+                    'confidence': 0.3
+                }
             
             return {
-                'question': question,
-                'answer': answer,
-                'sources': sources,
-                'num_sources': len(sources)
+                'response': answer,
+                'confidence': confidence
             }
         
         except Exception as e:
             return {
-                'question': question,
-                'answer': f"Lỗi khi xử lý câu hỏi: {str(e)}",
-                'sources': [],
-                'num_sources': 0
+                'response': f"Lỗi khi xử lý câu hỏi: {str(e)}",
+                'confidence': 0.0
             }
+    
+    def _calculate_confidence(self, question: str, relevant_docs: List[Document]) -> float:
+        """
+        Tính toán confidence score dựa trên số lượng documents và độ liên quan
+        
+        Args:
+            question: Câu hỏi của người dùng
+            relevant_docs: Danh sách documents liên quan
+            
+        Returns:
+            float: Confidence score từ 0.0 đến 1.0
+        """
+        if not relevant_docs:
+            return 0.0
+        
+        # Base confidence dựa trên số lượng documents tìm được
+        num_docs = len(relevant_docs)
+        base_confidence = min(num_docs / 5.0, 1.0)  # Tối đa 1.0 khi có >=5 docs
+        
+        # Kiểm tra độ dài của documents (documents dài hơn thường chứa nhiều thông tin hơn)
+        avg_doc_length = sum(len(doc.page_content) for doc in relevant_docs) / num_docs
+        length_factor = min(avg_doc_length / 1000.0, 1.0)  # Chuẩn hóa theo 1000 ký tự
+        
+        # Confidence cuối cùng (trọng số: 70% base, 30% length)
+        final_confidence = (base_confidence * 0.7) + (length_factor * 0.3)
+        
+        return round(final_confidence, 2)
     
     def start_chat_session(self):
         """Bắt đầu phiên chat tương tác"""
-        print("\n" + "="*60)
-        print("🤖 RAG PDF CHATBOT - CHUYÊN GIA BỆNH THẬN")
-        print("="*60)
-        print("💡 Hướng dẫn:")
-        print("   - Gõ câu hỏi và nhấn Enter")
-        print("   - Gõ 'quit' hoặc 'exit' để thoát")
-        print("   - Gõ 'rebuild' để tái tạo vector store")
-        print("="*60)
+        # print("\n" + "="*60)
+        # print("🤖 RAG PDF CHATBOT - CHUYÊN GIA BỆNH THẬN")
+        # print("="*60)
+        # print("💡 Hướng dẫn:")
+        # print("   - Gõ câu hỏi và nhấn Enter")
+        # print("   - Gõ 'quit' hoặc 'exit' để thoát")
+        # print("   - Gõ 'rebuild' để tái tạo vector store")
+        # print("="*60)
         
         while True:
             try:
                 question = input("\n❓ Câu hỏi của bạn: ").strip()
                 
                 if question.lower() in ['quit', 'exit', 'q']:
-                    print("👋 Cảm ơn bạn đã sử dụng RAG PDF Chatbot!")
+                    # print("👋 Cảm ơn bạn đã sử dụng RAG PDF Chatbot!")
                     break
                 
                 if question.lower() == 'rebuild':
-                    print("🔄 Đang tái tạo vector store...")
+                    # print("🔄 Đang tái tạo vector store...")
                     if self.initialize_system(force_rebuild=True):
-                        print("✅ Đã tái tạo thành công!")
+                        pass  # print("✅ Đã tái tạo thành công!")
                     else:
-                        print("❌ Lỗi khi tái tạo vector store")
+                        pass  # print("❌ Lỗi khi tái tạo vector store")
                     continue
                 
                 if not question:
-                    print("⚠️  Vui lòng nhập câu hỏi")
+                    pass  # print("⚠️  Vui lòng nhập câu hỏi")
                     continue
                 
-                print("\n🔍 Đang tìm kiếm thông tin liên quan...")
+                # print("\n🔍 Đang tìm kiếm thông tin liên quan...")
                 result = self.ask_question(question)
                 
-                print(f"\n💬 **Trả lời:**")
-                print(result['answer'])
+                # print(f"\n💬 **Trả lời (Markdown format):**")
+                # print(result['response'])
                 
-                if result['sources']:
-                    print(f"\n📚 **Nguồn tham khảo ({result['num_sources']} tài liệu):**")
-                    for i, source in enumerate(result['sources'], 1):
-                        print(f"   {i}. {source['file']} (Trang {source['page']})")
+                # Hiển thị nguồn thông tin
+                if result['confidence'] >= 0.4:
+                    pass  # print(f"\n📊 **Độ tin cậy:** {result['confidence']:.0%} (Từ tài liệu PDF)")
+                else:
+                    pass  # print(f"\n📊 **Độ tin cậy:** {result['confidence']:.0%} (Từ kiến thức chung)")
                 
             except KeyboardInterrupt:
-                print("\n\n👋 Cảm ơn bạn đã sử dụng RAG PDF Chatbot!")
+                pass  # print("\n\n👋 Cảm ơn bạn đã sử dụng RAG PDF Chatbot!")
                 break
             except Exception as e:
-                print(f"\n❌ Lỗi: {str(e)}")
+                pass  # print(f"\n❌ Lỗi: {str(e)}")
 
 
 def main():
     """Hàm main để chạy chatbot"""
-    print("🚀 Khởi động RAG PDF Chatbot...")
+    # print("🚀 Khởi động RAG PDF Chatbot...")
     
     # Thiết lập đường dẫn
     current_dir = Path(__file__).parent
@@ -496,17 +587,17 @@ def main():
         
         # Khởi tạo hệ thống
         if not chatbot.initialize_system():
-            print("❌ Không thể khởi tạo hệ thống. Vui lòng kiểm tra:")
-            print("   1. Đã đặt file PDF vào thư mục data/")
-            print("   2. Đã cài đặt đầy đủ thư viện")
-            print("   3. Đã cung cấp GEMINI_API_KEY")
+            # print("❌ Không thể khởi tạo hệ thống. Vui lòng kiểm tra:")
+            # print("   1. Đã đặt file PDF vào thư mục data/")
+            # print("   2. Đã cài đặt đầy đủ thư viện")
+            # print("   3. Đã cung cấp GEMINI_API_KEY")
             return
         
         # Bắt đầu chat session
         chatbot.start_chat_session()
         
     except Exception as e:
-        print(f"❌ Lỗi khởi tạo: {str(e)}")
+        pass  # print(f"❌ Lỗi khởi tạo: {str(e)}")
 
 
 if __name__ == "__main__":

@@ -22,7 +22,8 @@ public class SecurityConfig {
     private final HeaderAuthenticationFilter headerAuthenticationFilter;
 
     private List<String> publicEndpoints = Arrays.asList(
-            "/api/v1/health-metrics/getEGFRMetric/**"
+            "/api/v1/health-metrics/getEGFRMetric/**",
+            "/api/v1/health-metrics/get-health-metrics-latest/**"
     );
 
     @Bean
@@ -31,7 +32,6 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(publicEndpoints.toArray(new String[0])).permitAll()
-                        .requestMatchers("/api/v1/products/**").hasAnyRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

@@ -49,12 +49,14 @@ public class SummaryServiceImpl implements SummaryService {
         try {
             Summary existSum = summaryRepository.findByGroupId(summary.getGroupId());
             if (existSum != null) {
-                String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + gemini_api_key;
+                String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + gemini_api_key;
                 // Prompt
                 String prompt = "Bạn là AI tóm tắt hội thoại.\n"
                         + "Summary cũ:\n" + existSum.getContentSummary() + "\n"
                         + "Tin nhắn mới:\n" + summary.getContentSummary() + "\n"
-                        + "Hãy trả về summary mới, ngắn gọn và đủ ý.";
+                        + "Hãy trả về summary mới, ngắn gọn và đủ ý.\n"
+                        + "Quan trọng: Chỉ trả về đoạn văn summary, không thêm tiêu đề, không thêm chữ 'Summary mới:' hay bất kỳ giải thích nào.";
+
                 Map<String, Object> body = Map.of(
                         "contents", List.of(
                                 Map.of(
@@ -112,8 +114,8 @@ public class SummaryServiceImpl implements SummaryService {
     public GetSummaryResponse getSummaryByGroupId(String groupId) {
         try {
             Summary existSum = summaryRepository.findByGroupId(groupId);
-            Pageable pageable = PageRequest.of(0, 10);
-            List<String> messages = messageService.findByGroup_idOrderByCreatedAtDesc(groupId, pageable).stream()
+            Pageable pageable = PageRequest.of(0, 5);
+            List<String> messages = messageService.findByGroup_idOrderBySendAtDesc(groupId, pageable).stream()
                     .map(Message::getContent)
                     .toList();
             return GetSummaryResponse.builder()

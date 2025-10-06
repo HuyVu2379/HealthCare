@@ -1,7 +1,9 @@
 package fit.iuh.student.schedulingservice.publishers;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fit.iuh.student.schedulingservice.dtos.responses.AppointmentResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.RescheduleAppointmentResponse;
+import fit.iuh.student.schedulingservice.publishers.payload.AppointmentData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -97,11 +99,14 @@ public class AppointmentEventPublisher {
     // Inner class để wrap message với eventType
     public static class AppointmentEventMessage {
         private AppointmentResponse payload;
-        private String eventType;
         private RescheduleAppointmentResponse rescheduleAppointmentResponse;
-
+        private String eventType;
+        private AppointmentData data;
+        public AppointmentEventMessage(AppointmentData data, String eventType) {
+            this.data = data;
+            this.eventType = eventType;
+        }
         public AppointmentEventMessage() {}
-
         public AppointmentEventMessage(AppointmentResponse payload, String eventType) {
             this.payload = payload;
             this.eventType = eventType;
@@ -110,6 +115,7 @@ public class AppointmentEventPublisher {
             this.rescheduleAppointmentResponse = rescheduleAppointmentResponse;
             this.eventType = eventType;
         }
+        public AppointmentData getData() { return data; }
         public AppointmentResponse getPayload() { return payload; }
         public RescheduleAppointmentResponse getReSchedulePayload() { return rescheduleAppointmentResponse; }
         public void setPayload(AppointmentResponse payload) { this.payload = payload; }

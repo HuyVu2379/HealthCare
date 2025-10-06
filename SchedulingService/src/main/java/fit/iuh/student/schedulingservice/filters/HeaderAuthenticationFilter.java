@@ -26,7 +26,8 @@ public class HeaderAuthenticationFilter extends OncePerRequestFilter {
         String username = request.getHeader("X-Auth-User");
         String role = request.getHeader("X-Auth-Role");
         String userId = request.getHeader("X-Auth-UserId");
-        log.debug("Received headers - X-Auth-User: {}, X-Auth-Role: {}", username, role);
+        String accessToken = request.getHeader("X-Auth-Token");
+        log.debug("Received headers - X-Auth-User: {}, X-Auth-Role: {}, Token: {}", username, role, accessToken);
 
         // Nếu không có username hoặc role, chuyển tiếp request mà không xác thực
         if (username == null || role == null) {

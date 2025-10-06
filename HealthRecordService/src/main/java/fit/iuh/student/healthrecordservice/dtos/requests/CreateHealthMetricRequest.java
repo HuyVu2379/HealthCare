@@ -19,5 +19,4 @@ public class CreateHealthMetricRequest {
     private String unit;
     private String recordId;
     private Date measuredAt;
-    private List<String> imageAttachments;
 }

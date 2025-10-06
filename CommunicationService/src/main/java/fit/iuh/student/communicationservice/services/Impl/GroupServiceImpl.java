@@ -1,6 +1,7 @@
 package fit.iuh.student.communicationservice.services.Impl;
 
 import fit.iuh.student.communicationservice.dtos.requests.CreateGroupRequest;
+import fit.iuh.student.communicationservice.dtos.requests.DeleteGroupRequest;
 import fit.iuh.student.communicationservice.dtos.responses.GroupResponse;
 import fit.iuh.student.communicationservice.dtos.responses.MessageResponse;
 import fit.iuh.student.communicationservice.entities.Group;
@@ -158,4 +159,33 @@ public class GroupServiceImpl implements GroupService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public boolean deleteGroup(DeleteGroupRequest request) {
+        try {
+            // Kiểm tra group có tồn tại không
+            Group group = groupRepository.findByGroupId(request.getGroupId());
+            if (group == null) {
+                return false;
+            }
+
+            // Kiểm tra quyền xóa group (chỉ member của group mới có thể xóa)
+            boolean isUserInGroup = group.getMembers().stream()
+                    .anyMatch(member -> member.getUserId().equals(request.getUserId()));
+
+            if (!isUserInGroup) {
+                return false;
+            }
+
+            // Xóa tất cả messages trong group trước
+            messageRepository.deleteAllByGroup_id(request.getGroupId());
+
+            // Xóa group
+            groupRepository.deleteByGroupId(request.getGroupId());
+
+            return true;
+        } catch (Exception e) {
+            // Log error nếu cần
+            return false;
+        }
+    }
 }

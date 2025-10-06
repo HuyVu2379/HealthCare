@@ -75,4 +75,16 @@ public class HealthMetricController {
            @RequestParam java.sql.Date measuredAt) {
         return SuccessEntityResponse.ok("Get health metric panels by date successfully !",healthMetricService.getPanelsByPatientAndDate(patientId, measuredAt));
     }
+
+    @GetMapping("/get-health-metrics-latest/{patientId}")
+    public List<HealthMetricResponse> getMetricLatestByPatientId(
+            @PathVariable String patientId) {
+        return healthMetricService.getMetricByPatientId(patientId);
+    }
+
+    @PostMapping("/create-health-metrics")
+    public List<HealthMetricResponse> createHealthMetrics(
+            @RequestBody List<CreateHealthMetricRequest> healthMetrics) {
+        return healthMetricService.createHealthMetrics(healthMetrics);
+    }
 }

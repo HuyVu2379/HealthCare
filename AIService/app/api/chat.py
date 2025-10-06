@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException, Request
-from app.models.ai_models import ChatMessage, ChatResponse
+from app.models.ai_models import ChatMessage, ChatResponse, SimpleChatResponse
 from app.services.chat_service import ChatService
 from datetime import datetime
 import uuid
 
 router = APIRouter()
-@router.post("/ask", response_model=ChatResponse)
+@router.post("/ask", response_model=SimpleChatResponse)
 async def chat_with_ai(message: ChatMessage, request: Request):
     """
     Chat with AI assistant for health-related queries
@@ -19,15 +19,12 @@ async def chat_with_ai(message: ChatMessage, request: Request):
         ai_response = await chat_service.get_ai_response(
             message.message,
             user_id=message.user_id,
+            group_id=message.group_id,
         )
         
-        return ChatResponse(
+        return SimpleChatResponse(
             response=ai_response["response"],
-            timestamp=datetime.now(),
-            confidence=ai_response.get("confidence"),
-            sources=ai_response.get("sources"),
-            num_sources=ai_response.get("num_sources"),
-            is_rag_response=ai_response.get("is_rag_response", False)
+            confidence=ai_response.get("confidence")
         )
         
     except Exception as e:

@@ -13,7 +13,10 @@ public interface GroupRepository extends MongoRepository<Group,String> {
     List<Group> findByMembersUserId(String userId);
     boolean existsGroupByGroupName(String groupName);
 
-    // Tìm group 1-1 chỉ theo 2 user (không phụ thuộc thứ tự), bất kể appointment_id
-    @Query("{ 'members.userId': { $all: [?0, ?1] }, 'members': { $size: 2 } }")
-    Optional<Group> findOneToOneGroupByMembers(String userId1, String userId2);
+    @Query("{ 'members.userId': { $all: ?0 } }")
+    Optional<Group> findGroupByMemberIds(List<String> memberIds);
+
+    Group findByGroupId(String groupId);
+
+    void deleteByGroupId(String groupId);
 }

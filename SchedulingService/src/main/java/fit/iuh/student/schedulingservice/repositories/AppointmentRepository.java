@@ -33,11 +33,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment,String>
     List<Appointment> findAppointmentsForReminder();
 
     @Query("SELECT a FROM Appointment a " +
+            "LEFT JOIN FETCH a.timeSlot " +
             "WHERE (:type IS NULL OR a.consultationType = :type) " +
             "AND (:status IS NULL OR a.status = :status)")
     Page<Appointment> findAppointmentFilterWithPagination(@Param("type") String type, @Param("status") AppointmentStatus status, Pageable pageable);
 
     @Query("SELECT a FROM Appointment a " +
+            "LEFT JOIN FETCH a.timeSlot " +
             "WHERE a.doctorId = :doctorId AND (a.appointmentDate BETWEEN :weekStartDate AND :weekEndDate)")
     List<Appointment> findAppointmentsInWeek(@Param("doctorId") String doctorId,@Param("weekStartDate") Date weekStartDate, @Param("weekEndDate") Date weekEndDate);
 

@@ -22,6 +22,6 @@ public class HealthMetricResponse {
     private String metricName;
     private double metricValue;
     private String unit;
-    private String medicalRecordId;
+    private String medicalRecordId = null;
     private Date measuredAt;
 }
