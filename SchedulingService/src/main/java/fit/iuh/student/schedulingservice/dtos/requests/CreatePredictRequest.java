@@ -13,7 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 public class CreatePredictRequest {
     private String patientId;
-    private int state;
-    private String recommended;
+    private int stage;
+    private List<String> recommendations;
+    private double confidence;
     private List<CreateHealthMetricRequest> healthMetrics;
 }

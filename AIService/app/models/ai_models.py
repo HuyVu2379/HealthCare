@@ -64,19 +64,17 @@ class CKDPredictionRequest(BaseModel):
     # Essential numerical features (luôn bắt buộc cho primary model, có thể thiếu cho enhanced model)
     serum_creatinine: Optional[float] = None
     gfr: Optional[float] = None
-    
-    # Optional num= None
-    hematuria: Optioerical features (có thể thiếu)
+
+    # Optional numerical features (có thể thiếu)
+    hematuria: Optional[int] = None  # 0 or 1
     bun: Optional[float] = None
     serum_calcium: Optional[float] = None
     ana: Optional[int] = None  # 0 or 1
-    c3_c4: Optional[float] nal[int] = None  # 0 or 1
+    c3_c4: Optional[float] = None  # 0 or 1
     oxalate_levels: Optional[float] = None
     urine_ph: Optional[float] = None
     blood_pressure: Optional[float] = None
     water_intake: Optional[float] = None
-    months: Optional[int] = None
-    cluster: Optional[int] = None
     
     # Essential categorical features (luôn bắt buộc cho primary model, có thể thiếu cho enhanced model)
     physical_activity: Optional[str] = None  # 'daily', 'weekly', 'rarely'

@@ -3,6 +3,8 @@ package fit.iuh.student.schedulingservice.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -15,6 +17,7 @@ public class Predict extends BaseEntity{
     @Column(nullable = false, name = "predict_id")
     private String predictId;
     private String patientId;
-    private int state;
-    private String recommended;
+    private int stage;
+    private List<String> recommendations;
+    private double confidence;
 }

@@ -50,9 +50,10 @@ public class PredictServiceImpl implements PredictService {
             return PredictResponse.builder()
                     .predictId(predict.getPredictId())
                     .patientId(predict.getPatientId())
-                    .state(predict.getState())
-                    .recommended(predict.getRecommended())
+                    .stage(predict.getStage())
+                    .recommendations(predict.getRecommendations())
                     .healthMetrics(healthMetrics)
+                    .confidence(predict.getConfidence())
                     .build();
         } catch (Exception e) {
             log.error("Error getting predict response for patient ID: {}", patientId, e);
@@ -75,15 +76,19 @@ public class PredictServiceImpl implements PredictService {
             List<HealthMetricResponse> healthMetrics = scheduleClient.createHealthMetrics(request.getHealthMetrics(), authorizationHeader);
             Predict predict = Predict.builder()
                     .patientId(request.getPatientId())
-                    .state(request.getState())
-                    .recommended(request.getRecommended()).build();
+                    .stage(request.getStage())
+                    .recommendations(request.getRecommendations())
+                    .confidence(request.getConfidence())
+                    .build();
             Predict savedPredict = predictRepository.save(predict);
             return PredictResponse.builder()
                     .predictId(savedPredict.getPredictId())
                     .patientId(savedPredict.getPatientId())
-                    .state(savedPredict.getState())
-                    .recommended(savedPredict.getRecommended())
-                    .healthMetrics(healthMetrics).build();
+                    .stage(savedPredict.getStage())
+                    .recommendations(savedPredict.getRecommendations())
+                    .confidence(savedPredict.getConfidence())
+                    .healthMetrics(healthMetrics)
+                    .build();
         }catch (Exception e){
             log.error("Error creating predict for patient ID: {}", request.getPatientId(), e);
             throw e;

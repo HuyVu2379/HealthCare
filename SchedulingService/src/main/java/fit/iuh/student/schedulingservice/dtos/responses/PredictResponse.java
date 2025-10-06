@@ -15,7 +15,8 @@ import java.util.List;
 public class PredictResponse {
     private String predictId;
     private String patientId;
-    private int state;
-    private String recommended;
+    private int stage;
+    private List<String> recommendations;
+    private double confidence;
     private List<HealthMetricResponse> healthMetrics;
 }
