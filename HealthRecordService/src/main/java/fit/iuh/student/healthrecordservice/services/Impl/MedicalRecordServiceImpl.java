@@ -2,6 +2,7 @@ package fit.iuh.student.healthrecordservice.services.Impl;
 
 import fit.iuh.student.healthrecordservice.clients.UserClient;
 import fit.iuh.student.healthrecordservice.clients.dtos.DoctorClientResponse;
+import fit.iuh.student.healthrecordservice.clients.dtos.PatientClientResponse;
 import fit.iuh.student.healthrecordservice.dtos.requests.CreateMedicalRecordRequest;
 import fit.iuh.student.healthrecordservice.dtos.responses.*;
 import fit.iuh.student.healthrecordservice.entities.MedicalRecord;
@@ -198,6 +199,14 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             System.err.println("Error fetching doctor info: " + e.getMessage());
         }
 
+        // Get patient info from UserClient
+        PatientClientResponse patient = null;
+        try {
+            patient = userClient.getPatientForClient(medicalRecord.getPatientId());
+        } catch (Exception e) {
+            System.err.println("Error fetching patient info: " + e.getMessage());
+        }
+
         // Convert prescriptions
         List<PrescriptionResponse> prescriptions = medicalRecord.getPrescriptions().stream()
                 .map(this::convertToPrescriptionResponse)
@@ -209,6 +218,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .patientId(medicalRecord.getPatientId())
                 .doctorId(medicalRecord.getDoctorId())
                 .doctorName(doctorName)
+                .patient(patient) 
                 .serviceName(medicalRecord.getServiceName())
                 .diagnosis(medicalRecord.getDiagnosis())
                 .symptoms(medicalRecord.getSymptoms())

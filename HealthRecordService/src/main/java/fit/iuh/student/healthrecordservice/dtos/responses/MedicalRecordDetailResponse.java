@@ -1,5 +1,6 @@
 package fit.iuh.student.healthrecordservice.dtos.responses;
 
+import fit.iuh.student.healthrecordservice.clients.dtos.PatientClientResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class MedicalRecordDetailResponse {
     private String patientId;
     private String doctorId;
     private String doctorName;
+    private PatientClientResponse patient;  // Thông tin bệnh nhân (fullName, email, phone, avatarUrl)
     private String serviceName;
     private String diagnosis;
     private String symptoms;
