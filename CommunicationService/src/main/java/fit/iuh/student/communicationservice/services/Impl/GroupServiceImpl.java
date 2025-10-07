@@ -42,7 +42,8 @@ public class GroupServiceImpl implements GroupService {
             String u1 = request.getMembers().get(0).getUserId();
             String u2 = request.getMembers().get(1).getUserId();
 
-            var existingOpt = groupRepository.findOneToOneGroupByMembers(u1, u2);
+        //     var existingOpt = groupRepository.findOneToOneGroupByMembers(u1, u2);
+        var existingOpt = groupRepository.findGroupByMemberIds(java.util.List.of(u1, u2));
 
             if (existingOpt.isPresent()) {
                 Group existing = existingOpt.get();

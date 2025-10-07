@@ -47,6 +47,13 @@ public class PredictServiceImpl implements PredictService {
 //            List<HealthMetricResponse> healthMetrics = scheduleClient.getHealthMetricsByPatientIdClient(patientId, authorizationHeader);
             List<HealthMetricResponse> healthMetrics = scheduleClient.getHealthMetricsByPatientIdClient(patientId);
             Predict predict = predictRepository.findLatestPredictByPatientId(patientId);
+            
+            // Check null before accessing
+            if (predict == null) {
+                log.info("No predict data found for patient ID: {}", patientId);
+                return null; // Return null when no predict data exists
+            }
+            
             return PredictResponse.builder()
                     .predictId(predict.getPredictId())
                     .patientId(predict.getPatientId())
