@@ -25,6 +25,7 @@ public class MedicalRecordDetailResponse {
     private String doctorNote;
     private Date followUpDate;
     private List<String> imageAttachments;
+    private String signatureUrl;
     private Integer stage;
     private String statusHealth;
     private Date createdAt;

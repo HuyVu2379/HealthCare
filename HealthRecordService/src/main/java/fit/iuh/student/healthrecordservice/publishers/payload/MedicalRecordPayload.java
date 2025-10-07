@@ -18,6 +18,7 @@ public class MedicalRecordPayload {
     private String symptoms; // Triệu chứng
     private Date dateDiagnosis; // Ngày chẩn đoán
     private String doctorNote;
+    private String signatureUrl;
     private int stage;
     private PatientClientResponse patient;
     private String statusHealth;

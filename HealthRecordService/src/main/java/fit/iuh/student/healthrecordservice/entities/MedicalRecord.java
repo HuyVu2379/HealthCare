@@ -44,7 +44,10 @@ public class MedicalRecord extends BaseEntity {
 
     @Column(name = "image_path")
     private List<String> imageAttachments = new ArrayList<>();
-    
+
+    @Column(name = "signature_url", columnDefinition = "TEXT")
+    private String signatureUrl; // URL chữ ký bác sĩ
+
     @OneToMany(mappedBy = "medicalRecord", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<HealthMetric> healthMetrics = new ArrayList<>();

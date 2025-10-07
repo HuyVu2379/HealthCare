@@ -49,6 +49,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 medicalRecord.setSymptoms(request.getSymptoms());
                 medicalRecord.setTreatment(request.getTreatment());
                 medicalRecord.setServiceName(request.getServiceName());
+                medicalRecord.setSignatureUrl(request.getSignatureUrl());
             } else {
                 // Tạo record mới
                 medicalRecord = MedicalRecord.builder()
@@ -68,6 +69,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                         .symptoms(request.getSymptoms())
                         .treatment(request.getTreatment())
                         .serviceName(request.getServiceName())
+                        .signatureUrl(request.getSignatureUrl())
                         .build();
             }
             medicalRecord = medicalRecordRepository.save(medicalRecord);
@@ -80,6 +82,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                                 .serviceName(medicalRecord.getServiceName())
                                 .diagnosis(medicalRecord.getDiagnosis())
                                 .doctorNote(medicalRecord.getDoctorNote())
+                                .signatureUrl(medicalRecord.getSignatureUrl())
                                 .dateDiagnosis(Date.valueOf(medicalRecord.getCreatedAt().toLocalDate()))
                                 .stage(request.getStage())
                                 .symptoms(medicalRecord.getSymptoms())
@@ -106,6 +109,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                     .symptoms(medicalRecord.getSymptoms())
                     .treatment(medicalRecord.getTreatment())
                     .serviceName(medicalRecord.getServiceName())
+                    .signatureUrl(medicalRecord.getSignatureUrl())
                     .build();
         } catch (Exception e) {
             throw e;
@@ -132,6 +136,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                     .symptoms(medicalRecord.getSymptoms())
                     .treatment(medicalRecord.getTreatment())
                     .serviceName(medicalRecord.getServiceName())
+                    .signatureUrl(medicalRecord.getSignatureUrl())
                     .build();
         } catch (Exception e) {
             System.err.println("Error finding medical record by appointmentId: " + e.getMessage());
@@ -211,6 +216,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .doctorNote(medicalRecord.getDoctorNote())
                 .followUpDate(medicalRecord.getFollowUpDate())
                 .imageAttachments(medicalRecord.getImageAttachments())
+                .signatureUrl(medicalRecord.getSignatureUrl())
                 .stage(null)
                 .statusHealth(null)
                 .createdAt(medicalRecord.getCreatedAt() != null ?
