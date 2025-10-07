@@ -81,4 +81,34 @@ public class PrescriptionServiceImpl implements PrescriptionService {
             throw e;
         }
     }
+
+    @Override
+    public List<PrescriptionResponse> getPrescriptionsByMedicalRecordId(String medicalRecordId) {
+        try {
+            List<Prescription> prescriptions = prescriptionRepository.findByMedicalRecordId(medicalRecordId);
+
+            return prescriptions.stream()
+                    .map(prescription -> {
+                        // Calculate duration properly
+                        long durationInDays = 0;
+                        if (prescription.getEndDate() != null && prescription.getStartDate() != null) {
+                            long diffInMillies = prescription.getEndDate().getTime() - prescription.getStartDate().getTime();
+                            durationInDays = diffInMillies / (24 * 60 * 60 * 1000);
+                        }
+                        return PrescriptionResponse.builder()
+                                .prescriptionId(prescription.getPrescriptionId())
+                                .dosage(prescription.getDosage())
+                                .startDate(prescription.getStartDate())
+                                .endDate(prescription.getEndDate())
+                                .duration(durationInDays + " ngày")
+                                .frequency(prescription.getFrequency())
+                                .medicalName(prescription.getMedicalName())
+                                .notes(prescription.getNotes())
+                                .build();
+                    })
+                    .toList();
+        } catch (Exception e) {
+            throw new RuntimeException("Error getting prescriptions by medical record ID: " + e.getMessage(), e);
+        }
+    }
 }

@@ -8,4 +8,5 @@ import java.util.List;
 public interface PrescriptionService {
     PrescriptionResponse createPrescription(CreatePrescriptionRequest request);
     List<PrescriptionResponse> getPrescriptionUsing(String patientId);
+    List<PrescriptionResponse> getPrescriptionsByMedicalRecordId(String medicalRecordId);
 }
