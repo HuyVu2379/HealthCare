@@ -38,10 +38,20 @@ public class SocketController {
     public ResponseEntity<GroupResponse> createGroup(@Valid @RequestBody CreateGroupRequest request) {
         GroupResponse response = groupService.createGroup(request);
         try {
-            customWebSocketHandler.broadcastToAll("group_created", response);
-            log.info("Broadcasted group_created event for group: {}", response.getGroupId());
+            // Extract memberIds từ response
+            List<String> memberIds = response.getMembers().stream()
+                    .map(member -> member.getUserId())
+                    .collect(java.util.stream.Collectors.toList());
+
+            // Notify members và auto-join sessions vào group (giống WebSocket flow)
+            customWebSocketHandler.notifyGroupCreated(
+                    response.getGroupId(),
+                    memberIds,
+                    response
+            );
+            log.info("Notified and auto-joined members for group: {}", response.getGroupId());
         } catch (Exception e) {
-            log.error("Failed to broadcast group_created event for group: {}", response.getGroupId(), e);
+            log.error("Failed to notify members for group: {}", response.getGroupId(), e);
         }
         return ResponseEntity.ok(response);
     }

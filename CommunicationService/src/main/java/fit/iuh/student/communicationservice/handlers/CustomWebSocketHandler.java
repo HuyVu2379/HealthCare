@@ -341,6 +341,17 @@ public class CustomWebSocketHandler implements WebSocketHandler {
     }
 
     /**
+     * Public method to notify group members and auto-join their sessions
+     * Used by REST API endpoints
+     * @param groupId Group ID to join sessions to
+     * @param memberIds List of userId to notify
+     * @param response GroupResponse data to send
+     */
+    public void notifyGroupCreated(String groupId, List<String> memberIds, GroupResponse response) {
+        notifyMembersAndJoinGroup(memberIds, groupId, "group_created", response);
+    }
+
+    /**
      * Helper method to notify group members and auto-join their sessions to the group
      * @param memberIds List of userId to notify
      * @param groupId Group ID to join sessions to
