@@ -19,8 +19,24 @@ public class RabbitMQConfig {
         template.setMessageConverter(messageConverter());
         return template;
     }
+
+    /**
+     * Queue for sending appointment schedule requests from CommunicationService to SchedulingService
+     * CommunicationService publishes ScheduleEventMessage to this queue
+     * SchedulingService consumes from this queue
+     */
     @Bean
-    public Queue scheduleSocketQueue() {
-        return QueueBuilder.durable("SCHEDULE_SOCKET_QUEUE").build();
+    public Queue scheduleSocketRequestQueue() {
+        return QueueBuilder.durable("SCHEDULE_SOCKET_REQUEST_QUEUE").build();
+    }
+
+    /**
+     * Queue for receiving appointment notification responses from SchedulingService to CommunicationService
+     * SchedulingService publishes AppointmentEventMessage (with AppointmentData) to this queue
+     * CommunicationService consumes from this queue to send WebSocket notifications
+     */
+    @Bean
+    public Queue scheduleSocketResponseQueue() {
+        return QueueBuilder.durable("SCHEDULE_SOCKET_RESPONSE_QUEUE").build();
     }
 }

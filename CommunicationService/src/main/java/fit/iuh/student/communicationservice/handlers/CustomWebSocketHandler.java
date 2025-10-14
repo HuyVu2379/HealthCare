@@ -305,9 +305,25 @@ public class CustomWebSocketHandler implements WebSocketHandler {
         }
 
         if (!targetUserIds.isEmpty()) {
+            // Log thông tin chi tiết trước khi gửi notification
+            log.info("Preparing to send appointment notification - UserIDs: {}, AppointmentData: {}", targetUserIds, data);
+
+            // Kiểm tra xem các user có active WebSocket session không
+            targetUserIds.forEach(userId -> {
+                CopyOnWriteArrayList<String> sessions = userSessions.get(userId);
+                if (sessions == null || sessions.isEmpty()) {
+                    log.warn("User {} has no active WebSocket sessions - notification will not be delivered", userId);
+                } else {
+                    log.info("User {} has {} active session(s)", userId, sessions.size());
+                }
+            });
+
             // Gửi thông báo đến các session của bệnh nhân và bác sĩ
-            notifyMembers(targetUserIds, "schedule_appointment_response", targetUserIds);
-            log.info("Sent schedule appointment notification to users: {}", targetUserIds);
+            // Fix: Gửi AppointmentData object thay vì List<String> targetUserIds
+            notifyMembers(targetUserIds, "schedule_appointment_response", data);
+            log.info("Successfully sent schedule appointment notification to {} user(s)", targetUserIds.size());
+        } else {
+            log.warn("No target users found for appointment notification. AppointmentData: {}", data);
         }
     }
     private void broadcastToGroup(String groupId, String action, Object data) {
