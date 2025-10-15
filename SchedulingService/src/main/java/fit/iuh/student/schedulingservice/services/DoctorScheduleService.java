@@ -1,5 +1,6 @@
 package fit.iuh.student.schedulingservice.services;
 
+import fit.iuh.student.schedulingservice.clients.dtos.DoctorClientResponse;
 import fit.iuh.student.schedulingservice.dtos.requests.BulkCreateScheduleRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.CreateDoctorScheduleRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.UpdateDoctorSchedule;
@@ -17,4 +18,5 @@ public interface DoctorScheduleService {
     // Lấy danh sách bác sĩ có lịch làm việc trong ngày
     List<String> getDoctorIdsByDate(Date date);
     boolean updateDoctorSchedule(UpdateDoctorSchedule request);
+    List<DoctorClientResponse> getDoctorByDateAndTimeSlot(Date date, int slotId);
 }

@@ -7,6 +7,7 @@ import fit.iuh.student.schedulingservice.dtos.responses.AppointmentResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.AppointmentWeekFilterResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.RescheduleAppointmentResponse;
 import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
+import fit.iuh.student.schedulingservice.enums.ConsultationType;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public interface AppointmentService {
     AppointmentResponse updateAppointmentStatus(String appointmentId,AppointmentStatus status);
     AppointmentResponse getAppointmentDetailById(String appointmentId);
     Page<AppointmentResponse> getAppointmentWithFilterPagination(String type, AppointmentStatus status, int page, int size, String sortBy, String sortDir);
+    Page<AppointmentResponse> getAppointmentWithFilterPaginationForPatient(String patientId,ConsultationType consultationType,int page, int size,String startTime, String endTime);
     List<AppointmentWeekFilterResponse> getAppointmentWeekFilterForDoctor(String doctorId,String weekStartDate, String weekEndDate);
     AppointmentClientResponse getAppointmentDetailForClientById(String appointmentId);
 //    void cancelAppointment(String appointmentId, String userId);

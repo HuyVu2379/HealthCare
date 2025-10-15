@@ -4,6 +4,7 @@ import fit.iuh.student.schedulingservice.dtos.requests.CreateAppointmentRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.UpdateAppointmentRequest;
 import fit.iuh.student.schedulingservice.dtos.responses.*;
 import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
+import fit.iuh.student.schedulingservice.enums.ConsultationType;
 import fit.iuh.student.schedulingservice.services.AppointmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -106,5 +107,18 @@ public class AppointmentController {
             @PathVariable String appointmentId
     ) {
         return appointmentService.getAppointmentDetailForClientById(appointmentId);
+    }
+
+    @GetMapping("/get-appointment-for-patient-with-filter")
+    public ResponseEntity<MessageResponse<Page<AppointmentResponse>>> getAppointmentByPatientIdWithFilter(
+            @RequestParam String patientId,
+            @RequestParam String consultationType,
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime
+    ){
+        return SuccessEntityResponse.ok("Get appointment by patient id with filter successfully",
+                appointmentService.getAppointmentWithFilterPaginationForPatient(patientId, Enum.valueOf(ConsultationType.class, consultationType), page, size, startTime, endTime));
     }
 }

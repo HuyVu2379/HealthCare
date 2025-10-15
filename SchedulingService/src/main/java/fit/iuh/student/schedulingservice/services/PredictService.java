@@ -5,5 +5,5 @@ import fit.iuh.student.schedulingservice.dtos.responses.PredictResponse;
 
 public interface PredictService {
     PredictResponse getPredictResponseByPatientId(String patientId);
-    PredictResponse createPredictForPatient(CreatePredictRequest request);
+    Boolean createPredictForPatient(CreatePredictRequest request);
 }

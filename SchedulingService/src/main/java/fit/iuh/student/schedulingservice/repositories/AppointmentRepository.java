@@ -2,6 +2,7 @@ package fit.iuh.student.schedulingservice.repositories;
 
 import fit.iuh.student.schedulingservice.entities.Appointment;
 import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
+import fit.iuh.student.schedulingservice.enums.ConsultationType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -37,6 +38,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment,String>
             "WHERE (:type IS NULL OR a.consultationType = :type) " +
             "AND (:status IS NULL OR a.status = :status)")
     Page<Appointment> findAppointmentFilterWithPagination(@Param("type") String type, @Param("status") AppointmentStatus status, Pageable pageable);
+
+    @Query("SELECT a from Appointment a where (:type = 'ALL' OR a.consultationType = :type) and a.patientId = :patientId and (COALESCE(:startTime, a.appointmentDate) = a.appointmentDate OR a.appointmentDate >= :startTime) and (COALESCE(:endTime, a.appointmentDate) = a.appointmentDate OR a.appointmentDate <= :endTime)")
+    Page<Appointment> findAppointmentFilterWithPaginationForPatient(@Param("type") ConsultationType type, @Param("patientId") String patientId, @Param("startTime") Date startTime, @Param("endTime") Date endTime, Pageable pageable);
 
     @Query("SELECT a FROM Appointment a " +
             "LEFT JOIN FETCH a.timeSlot " +

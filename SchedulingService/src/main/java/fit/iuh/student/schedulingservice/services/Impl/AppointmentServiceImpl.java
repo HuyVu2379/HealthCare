@@ -9,6 +9,7 @@ import fit.iuh.student.schedulingservice.entities.Appointment;
 import fit.iuh.student.schedulingservice.entities.DoctorSchedule;
 import fit.iuh.student.schedulingservice.entities.TimeSlot;
 import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
+import fit.iuh.student.schedulingservice.enums.ConsultationType;
 import fit.iuh.student.schedulingservice.exceptions.errors.NotFoundException;
 import fit.iuh.student.schedulingservice.mappers.TimeSlotMapper;
 import fit.iuh.student.schedulingservice.publishers.AppointmentEventPublisher;
@@ -395,6 +396,61 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    public Page<AppointmentResponse> getAppointmentWithFilterPaginationForPatient(String patientId,ConsultationType consultationType,int page, int size,String startTime, String endTime) {
+        try {
+            Sort.Direction direction = Sort.Direction.DESC; // default
+
+            Sort sort = Sort.by(direction, "createdAt");
+            Pageable pageable = PageRequest.of(page, size, sort);
+
+            // Convert String to Date
+            Date startDate = null;
+            Date endDate = null;
+            if (startTime != null && !startTime.isEmpty()) {
+                startDate = Date.valueOf(startTime);
+            }
+            if (endTime != null && !endTime.isEmpty()) {
+                endDate = Date.valueOf(endTime);
+            }
+
+            Page<Appointment> app = appointmentRepository.findAppointmentFilterWithPaginationForPatient(consultationType,patientId, startDate, endDate, pageable);
+
+            // Check if there are any appointments before proceeding
+            if (app.getContent().isEmpty()) {
+                return Page.empty(pageable);
+            }
+
+            return app.map(appointment -> {
+                // Map TimeSlot to TimeSlotDTO
+                TimeSlotDTO timeSlotDTO = null;
+                if (appointment.getTimeSlot() != null) {
+                    timeSlotDTO = TimeSlotDTO.builder()
+                            .slotId(appointment.getTimeSlot().getSlotId())
+                            .startTime(appointment.getTimeSlot().getStartTime())
+                            .endTime(appointment.getTimeSlot().getEndTime())
+                            .build();
+                }
+
+                return AppointmentResponse.builder()
+                        .appointmentId(appointment.getAppointmentId())
+                        .doctor(userClient.getDoctorForClient(appointment.getDoctorId()))
+                        .patient(userClient.getPatientForClient(appointment.getPatientId()))
+                        .symptoms(appointment.getSymptoms())
+                        .note(appointment.getNote())
+                        .status(appointment.getStatus())
+                        .timeSlot(timeSlotDTO)
+                        .appointmentDate(appointment.getAppointmentDate())
+                        .consultationType(appointment.getConsultationType())
+                        .addressDetail(appointment.getAddressDetail())
+                        .hasPredict(appointment.isHasPredict())
+                        .build();
+            });
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<AppointmentWeekFilterResponse> getAppointmentWeekFilterForDoctor(String doctorId, String weekStartDate, String weekEndDate) {
         try {
@@ -445,3 +501,4 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 }
+

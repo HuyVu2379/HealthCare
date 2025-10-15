@@ -62,7 +62,7 @@ public class PredictServiceImpl implements PredictService {
     }
 
     @Override
-    public PredictResponse createPredictForPatient(CreatePredictRequest request) {
+    public Boolean createPredictForPatient(CreatePredictRequest request) {
         try{
             // Lấy Authorization header từ request
             String authorizationHeader = getAuthorizationHeader();
@@ -74,21 +74,19 @@ public class PredictServiceImpl implements PredictService {
             }
 
             List<HealthMetricResponse> healthMetrics = scheduleClient.createHealthMetrics(request.getHealthMetrics(), authorizationHeader);
+            if(healthMetrics == null || healthMetrics.isEmpty()){
+                log.error("Failed to create health metrics for patient ID: {}", request.getPatientId());
+                throw new RuntimeException("Failed to create health metrics");
+            }
             Predict predict = Predict.builder()
                     .patientId(request.getPatientId())
                     .stage(request.getStage())
                     .recommendations(request.getRecommendations())
                     .confidence(request.getConfidence())
                     .build();
-            Predict savedPredict = predictRepository.save(predict);
-            return PredictResponse.builder()
-                    .predictId(savedPredict.getPredictId())
-                    .patientId(savedPredict.getPatientId())
-                    .stage(savedPredict.getStage())
-                    .recommendations(savedPredict.getRecommendations())
-                    .confidence(savedPredict.getConfidence())
-                    .healthMetrics(healthMetrics)
-                    .build();
+            predictRepository.save(predict);
+            log.info("Successfully created predict for patient ID: {}", request.getPatientId());
+            return true;
         }catch (Exception e){
             log.error("Error creating predict for patient ID: {}", request.getPatientId(), e);
             throw e;

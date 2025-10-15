@@ -1,5 +1,7 @@
 package fit.iuh.student.schedulingservice.services.Impl;
 
+import fit.iuh.student.schedulingservice.clients.UserClient;
+import fit.iuh.student.schedulingservice.clients.dtos.DoctorClientResponse;
 import fit.iuh.student.schedulingservice.dtos.requests.BulkCreateScheduleRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.CreateDoctorScheduleRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.UpdateDoctorSchedule;
@@ -14,6 +16,8 @@ import fit.iuh.student.schedulingservice.mappers.DoctorScheduleMapper;
 import fit.iuh.student.schedulingservice.repositories.DoctorScheduleRepository;
 import fit.iuh.student.schedulingservice.repositories.TimeSlotRepository;
 import fit.iuh.student.schedulingservice.services.DoctorScheduleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,11 +31,13 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
     private final DoctorScheduleRepository doctorScheduleRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final DoctorScheduleMapper doctorScheduleMapper;
-
-    public DoctorScheduleServiceImpl(DoctorScheduleRepository doctorScheduleRepository, TimeSlotRepository timeSlotRepository, DoctorScheduleMapper doctorScheduleMapper) {
+    private final UserClient userClient;
+    private final Logger Log = LoggerFactory.getLogger(DoctorScheduleServiceImpl.class);
+    public DoctorScheduleServiceImpl(DoctorScheduleRepository doctorScheduleRepository, TimeSlotRepository timeSlotRepository, DoctorScheduleMapper doctorScheduleMapper, UserClient userClient) {
         this.doctorScheduleRepository = doctorScheduleRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.doctorScheduleMapper = doctorScheduleMapper;
+        this.userClient = userClient;
     }
 
     @Override
@@ -151,5 +157,22 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
         }catch (Exception e){
             throw e;
         }
+    }
+
+    @Override
+    public List<DoctorClientResponse> getDoctorByDateAndTimeSlot(Date date, int slotId) {
+        List<DoctorSchedule> doctorSchedules = doctorScheduleRepository.findDoctorScheduleByWorkDate(date);
+        Log.debug("get schedules by doctorIds: {}", doctorSchedules);
+        List<DoctorClientResponse> doctors = new ArrayList<>();
+        for(DoctorSchedule schedule : doctorSchedules){
+            for(TimeSlot timeSlot : schedule.getTimeSlots()){
+                if(timeSlot.getSlotId() == slotId){
+                    DoctorClientResponse doctor = userClient.getDoctorForClient(schedule.getDoctorId());
+                    doctors.add(doctor);
+                    break;
+                }
+            }
+        }
+        return doctors;
     }
 }

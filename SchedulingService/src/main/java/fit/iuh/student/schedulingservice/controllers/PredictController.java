@@ -16,7 +16,7 @@ public class PredictController {
     private final PredictService predictService;
 
     @PostMapping("/create-predict")
-    public ResponseEntity<MessageResponse<PredictResponse>> createPredict(
+    public ResponseEntity<MessageResponse<Boolean>> createPredict(
             @RequestBody CreatePredictRequest request
             ) {
         return SuccessEntityResponse.created("create predict success!",predictService.createPredictForPatient(request));

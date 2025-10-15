@@ -1,6 +1,7 @@
 package fit.iuh.student.schedulingservice.services.Impl;
 
 import fit.iuh.student.schedulingservice.dtos.requests.TimeSlotRequest;
+import fit.iuh.student.schedulingservice.dtos.responses.TimeSlotDTO;
 import fit.iuh.student.schedulingservice.dtos.responses.TimeSlotResponse;
 import fit.iuh.student.schedulingservice.entities.TimeSlot;
 import fit.iuh.student.schedulingservice.mappers.TimeSlotMapper;
@@ -43,6 +44,14 @@ public class TimeSlotServiceImpl implements TimeSlotService {
                         .map(this::convertToDto)
                         .collect(Collectors.toList()))
                 .build();
+    }
+
+    @Override
+    public List<TimeSlotDTO> getTimeSlots() {
+        List<TimeSlot> timeSlots = timeSlotRepository.findAll();
+        return timeSlots.stream()
+                .map(this::convertToTimeSlotDTO)
+                .collect(Collectors.toList());
     }
 
     private void validateTimeSlots(List<TimeSlotRequest.TimeSlotDto> timeSlots) {
@@ -93,5 +102,7 @@ public class TimeSlotServiceImpl implements TimeSlotService {
         return timeSlotMapper.toDto(timeSlot);
     }
 
-
+    private TimeSlotDTO convertToTimeSlotDTO(TimeSlot timeSlot) {
+        return timeSlotMapper.toTimeSlotDTO(timeSlot);
+    }
 }

@@ -25,4 +25,7 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule,S
 
     @Query("SELECT ds FROM DoctorSchedule ds LEFT JOIN FETCH ds.timeSlots WHERE ds.scheduleId = :scheduleId")
     Optional<DoctorSchedule> findWithSlotsById(@Param("scheduleId") String scheduleId);
+
+    @Query("SELECT ds FROM DoctorSchedule ds WHERE ds.workDate = ?1")
+    List<DoctorSchedule> findDoctorScheduleByWorkDate(Date workDate);
 }
