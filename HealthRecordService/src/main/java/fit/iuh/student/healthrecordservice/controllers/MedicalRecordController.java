@@ -1,9 +1,7 @@
 package fit.iuh.student.healthrecordservice.controllers;
 
 import fit.iuh.student.healthrecordservice.dtos.requests.CreateMedicalRecordRequest;
-import fit.iuh.student.healthrecordservice.dtos.responses.CreateMedicalRecordResponse;
-import fit.iuh.student.healthrecordservice.dtos.responses.MessageResponse;
-import fit.iuh.student.healthrecordservice.dtos.responses.SuccessEntityResponse;
+import fit.iuh.student.healthrecordservice.dtos.responses.*;
 import fit.iuh.student.healthrecordservice.services.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -49,5 +47,39 @@ public class MedicalRecordController {
                 new MessageResponse<>(500, "Failed to create medical record: " + e.getMessage(), false, null)
             );
         }
-    };
+    }
+
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<MessageResponse<MedicalRecordListResponse>> getMedicalRecordsByPatientId(
+            @PathVariable String patientId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String order
+    ) {
+        try {
+            MedicalRecordListResponse response = medicalRecordService.getMedicalRecordsByPatientId(
+                    patientId, page, size, sortBy, order
+            );
+            return SuccessEntityResponse.ok("Lấy danh sách hồ sơ khám thành công", response);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                new MessageResponse<>(500, "Không thể tải hồ sơ khám: " + e.getMessage(), false, null)
+            );
+        }
+    }
+
+    @GetMapping("/{recordId}")
+    public ResponseEntity<MessageResponse<MedicalRecordDetailResponse>> getMedicalRecordById(
+            @PathVariable String recordId
+    ) {
+        try {
+            MedicalRecordDetailResponse response = medicalRecordService.getMedicalRecordById(recordId);
+            return SuccessEntityResponse.ok("Lấy thông tin hồ sơ khám thành công", response);
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body(
+                new MessageResponse<>(404, "Không tìm thấy hồ sơ khám: " + e.getMessage(), false, null)
+            );
+        }
+    }
 }

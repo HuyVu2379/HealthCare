@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-    
+
     @Bean
     public Queue appointmentQueue() {
         return QueueBuilder.durable("APPOINTMENT_NOTIFICATION_QUEUE").build();
@@ -18,6 +18,26 @@ public class RabbitMQConfig {
     @Bean
     public Queue scheduleQueue() {
         return QueueBuilder.durable("SCHEDULE_HEALTH_RECORD_QUEUE").build();
+    }
+
+    /**
+     * Queue for receiving appointment schedule requests from CommunicationService
+     * CommunicationService publishes ScheduleEventMessage to this queue
+     * SchedulingService (this service) consumes from this queue to process appointment bookings
+     */
+    @Bean
+    public Queue scheduleSocketRequestQueue() {
+        return QueueBuilder.durable("SCHEDULE_SOCKET_REQUEST_QUEUE").build();
+    }
+
+    /**
+     * Queue for sending appointment notification responses to CommunicationService
+     * SchedulingService (this service) publishes AppointmentEventMessage (with AppointmentData) to this queue
+     * CommunicationService consumes from this queue to send WebSocket notifications
+     */
+    @Bean
+    public Queue scheduleSocketResponseQueue() {
+        return QueueBuilder.durable("SCHEDULE_SOCKET_RESPONSE_QUEUE").build();
     }
 
     @Bean

@@ -11,10 +11,17 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ScheduleSocketPublisher {
     private final RabbitTemplate rabbitTemplate;
-    private static final String SCHEDULE_SOCKET_QUEUE = "SCHEDULE_SOCKET_QUEUE";
+
+    /**
+     * Queue name for sending appointment schedule requests to SchedulingService
+     * CommunicationService (this service) publishes ScheduleEventMessage to this queue
+     * SchedulingService will consume and process the appointment booking request
+     */
+    private static final String SCHEDULE_SOCKET_REQUEST_QUEUE = "SCHEDULE_SOCKET_REQUEST_QUEUE";
 
     public void publishScheduleEventSocket(ScheduleEventMessage scheduleEventMessage) {
-        log.info("Publishing schedule socket event: {}", scheduleEventMessage);
-        rabbitTemplate.convertAndSend(SCHEDULE_SOCKET_QUEUE, scheduleEventMessage);
+        log.info("Publishing schedule event to REQUEST queue: {}", scheduleEventMessage);
+        rabbitTemplate.convertAndSend(SCHEDULE_SOCKET_REQUEST_QUEUE, scheduleEventMessage);
+        log.info("Successfully published to queue: {}", SCHEDULE_SOCKET_REQUEST_QUEUE);
     }
 }

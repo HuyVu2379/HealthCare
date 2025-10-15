@@ -5,6 +5,8 @@ import fit.iuh.student.communicationservice.dtos.requests.SendMessageRequest;
 import fit.iuh.student.communicationservice.dtos.responses.GroupResponse;
 import fit.iuh.student.communicationservice.dtos.responses.MessageResponse;
 import fit.iuh.student.communicationservice.services.GroupService;
+import fit.iuh.student.communicationservice.handlers.CustomWebSocketHandler;
+import lombok.extern.slf4j.Slf4j;
 import fit.iuh.student.communicationservice.services.MessageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +24,12 @@ import java.util.List;
 @RequestMapping("/api/communication")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@Slf4j
 public class SocketController {
 
     private final GroupService groupService;
     private final MessageService messageService;
+    private final CustomWebSocketHandler customWebSocketHandler;
 
     /**
      * REST API để tạo Group
@@ -33,6 +37,22 @@ public class SocketController {
     @PostMapping("/groups")
     public ResponseEntity<GroupResponse> createGroup(@Valid @RequestBody CreateGroupRequest request) {
         GroupResponse response = groupService.createGroup(request);
+        try {
+            // Extract memberIds từ response
+            List<String> memberIds = response.getMembers().stream()
+                    .map(member -> member.getUserId())
+                    .collect(java.util.stream.Collectors.toList());
+
+            // Notify members và auto-join sessions vào group (giống WebSocket flow)
+            customWebSocketHandler.notifyGroupCreated(
+                    response.getGroupId(),
+                    memberIds,
+                    response
+            );
+            log.info("Notified and auto-joined members for group: {}", response.getGroupId());
+        } catch (Exception e) {
+            log.error("Failed to notify members for group: {}", response.getGroupId(), e);
+        }
         return ResponseEntity.ok(response);
     }
 

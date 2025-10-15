@@ -1,5 +1,6 @@
 package fit.iuh.student.healthrecordservice.dtos.responses;
 
+import fit.iuh.student.healthrecordservice.clients.dtos.PatientClientResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,17 +13,24 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateMedicalRecordResponse {
+public class MedicalRecordDetailResponse {
     private String recordId;
+    private String appointmentId;
     private String patientId;
     private String doctorId;
+    private String doctorName;
+    private PatientClientResponse patient;  // Thông tin bệnh nhân (fullName, email, phone, avatarUrl)
     private String serviceName;
-    private String appointmentId;
     private String diagnosis;
-    private String treatment;
     private String symptoms;
+    private String treatment;
+    private String doctorNote;
     private Date followUpDate;
     private List<String> imageAttachments;
-    private String doctorNote;
     private String signatureUrl;
+    private Integer stage;
+    private String statusHealth;
+    private Date createdAt;
+    private Date updatedAt;
+    private List<PrescriptionResponse> prescriptions;
 }

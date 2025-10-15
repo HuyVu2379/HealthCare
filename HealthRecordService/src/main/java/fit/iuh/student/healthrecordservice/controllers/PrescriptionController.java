@@ -29,4 +29,18 @@ public class PrescriptionController {
     ){
         return SuccessEntityResponse.ok("Get prescription using successfully", prescriptionService.getPrescriptionUsing(patientId));
     }
+
+    @GetMapping("/medical-record/{medicalRecordId}")
+    public ResponseEntity<MessageResponse<List<PrescriptionResponse>>> getPrescriptionsByMedicalRecordId(
+            @PathVariable String medicalRecordId
+    ) {
+        try {
+            List<PrescriptionResponse> prescriptions = prescriptionService.getPrescriptionsByMedicalRecordId(medicalRecordId);
+            return SuccessEntityResponse.ok("Lấy danh sách đơn thuốc thành công", prescriptions);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                new MessageResponse<>(500, "Không thể tải đơn thuốc: " + e.getMessage(), false, null)
+            );
+        }
+    }
 }
