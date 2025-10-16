@@ -25,4 +25,5 @@ public class CreateAppointmentRequest {
     private AppointmentStatus status = AppointmentStatus.PENDING;
     private ConsultationType consultationType;
     private String addressDetail;
+    private Boolean hasPredict;
 }
