@@ -14,4 +14,7 @@ public interface PrescriptionRepository extends JpaRepository<Prescription,Strin
 
     @Query("SELECT p FROM Prescription p WHERE p.medicalRecord.recordId = ?1")
     List<Prescription> findByMedicalRecordId(String recordId);
+
+    @Query("SELECT p FROM Prescription p WHERE p.medicalRecord.patientId = ?1 ORDER BY p.medicalRecord.createdAt DESC")
+    List<Prescription> findAllByPatientIdOrderByCreatedDateDesc(String patientId);
 }

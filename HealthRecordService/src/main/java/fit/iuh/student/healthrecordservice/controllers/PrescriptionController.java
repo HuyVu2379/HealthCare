@@ -2,6 +2,7 @@ package fit.iuh.student.healthrecordservice.controllers;
 
 import fit.iuh.student.healthrecordservice.dtos.requests.CreatePrescriptionRequest;
 import fit.iuh.student.healthrecordservice.dtos.responses.MessageResponse;
+import fit.iuh.student.healthrecordservice.dtos.responses.PrescriptionGroupResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.PrescriptionResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.SuccessEntityResponse;
 import fit.iuh.student.healthrecordservice.services.PrescriptionService;
@@ -40,6 +41,20 @@ public class PrescriptionController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body(
                 new MessageResponse<>(500, "Không thể tải đơn thuốc: " + e.getMessage(), false, null)
+            );
+        }
+    }
+
+    @GetMapping("/groups/{patientId}")
+    public ResponseEntity<MessageResponse<List<PrescriptionGroupResponse>>> getPrescriptionGroups(
+            @PathVariable String patientId
+    ) {
+        try {
+            List<PrescriptionGroupResponse> groups = prescriptionService.getPrescriptionGroups(patientId);
+            return SuccessEntityResponse.ok("Lấy danh sách toa thuốc thành công", groups);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                new MessageResponse<>(500, "Không thể tải danh sách toa thuốc: " + e.getMessage(), false, null)
             );
         }
     }
