@@ -482,6 +482,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                         .date(appointment.getAppointmentDate())
                         .dayOfWeek(appointment.getDoctorSchedule().getWeekDay())
                         .hasPredict(appointment.isHasPredict())
+                        .symptoms(appointment.getSymptoms())
                         .build();
             }).toList();
         } catch (Exception e) {
