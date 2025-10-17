@@ -23,4 +23,5 @@ public class AppointmentWeekFilterResponse {
     private TimeSlotDTO timeSlot;
     private boolean hasPredict;
     private String note;
+    private String symptoms;
 }

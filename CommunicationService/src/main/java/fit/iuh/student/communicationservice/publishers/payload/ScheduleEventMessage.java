@@ -16,6 +16,7 @@ public class ScheduleEventMessage {
     private String doctorId = null;
     private ScheduleSocketEvent event = null;
     private AppointmentStatus status = null;
+    private Boolean hasPredict = null;
     private CreateAppointmentRequest createAppointmentRequest = null;
     private UpdateAppointmentRequest updateAppointmentRequest = null;
 }

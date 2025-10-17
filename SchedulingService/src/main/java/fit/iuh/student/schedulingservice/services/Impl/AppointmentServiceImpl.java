@@ -55,8 +55,13 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .findFirst()
                     .orElseThrow(() -> new NotFoundException("Time slot not found in the doctor's schedule"));
 
-            PredictResponse hasPredict = predictService.getPredictResponseByPatientId(request.getPatientId());
-            boolean hasPredictCondition = hasPredict != null;
+            boolean hasPredictCondition;
+            if (request.getHasPredict() != null) {
+                hasPredictCondition = request.getHasPredict();
+            } else {
+                PredictResponse hasPredict = predictService.getPredictResponseByPatientId(request.getPatientId());
+                hasPredictCondition = hasPredict != null;
+            }
 
             Appointment apm = Appointment.builder()
                     .patientId(request.getPatientId())
@@ -477,6 +482,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                         .date(appointment.getAppointmentDate())
                         .dayOfWeek(appointment.getDoctorSchedule().getWeekDay())
                         .hasPredict(appointment.isHasPredict())
+                        .symptoms(appointment.getSymptoms())
                         .build();
             }).toList();
         } catch (Exception e) {
