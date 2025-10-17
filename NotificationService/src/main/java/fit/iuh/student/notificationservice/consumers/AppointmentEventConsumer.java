@@ -28,44 +28,69 @@ public class AppointmentEventConsumer {
             
             switch (eventType) {
                 case "BOOKING_APPOINTMENT":
-                    payload.setEventType(AppointmentEvent.BOOKING_APPOINTMENT);
-                    log.info("Processing booking appointment event for patient: {}", payload.getPatient().getFullName());
-                    emailService.sendEmailBookingAppointment(payload);
-                    log.info("Booking appointment email sent successfully for appointment: {}", payload.getAppointmentId());
+                    try {
+                        payload.setEventType(AppointmentEvent.BOOKING_APPOINTMENT);
+                        log.info("Processing booking appointment event for patient: {}", payload.getPatient().getFullName());
+                        emailService.sendEmailBookingAppointment(payload);
+                        log.info("Booking appointment email sent successfully for appointment: {}", payload.getAppointmentId());
+                    } catch (Exception e) {
+                        log.error("Error sending booking appointment email for appointment: {}", payload.getAppointmentId(), e);
+                    }
                     break;
                     
                 case "CANCEL_APPOINTMENT":
-                    payload.setEventType(AppointmentEvent.CANCEL_APPOINTMENT);
-                    log.info("Processing cancelled appointment event for patient: {}", payload.getPatient().getFullName());
-                    emailService.sendEmailCancelAppointment(payload);
-                    log.info("Cancel appointment email sent successfully for appointment: {}", payload.getAppointmentId());
+                    try {
+                        payload.setEventType(AppointmentEvent.CANCEL_APPOINTMENT);
+                        log.info("Processing cancelled appointment event for patient: {}", payload.getPatient().getFullName());
+                        emailService.sendEmailCancelAppointment(payload);
+                        log.info("Cancel appointment email sent successfully for appointment: {}", payload.getAppointmentId());
+                    } catch (Exception e) {
+                        log.error("Error sending cancel appointment email for appointment: {}", payload.getAppointmentId(), e);
+                    }
                     break;
                     
                 case "APPOINTMENT_REMINDER":
-                    payload.setEventType(AppointmentEvent.APPOINTMENT_REMINDER);
-                    log.info("Processing appointment reminder event for patient: {}", payload.getPatient().getFullName());
-                    emailService.sendEmailRemindAppointment(payload);
-                    log.info("Appointment reminder email sent successfully for appointment: {}", payload.getAppointmentId());
+                    try {
+                        payload.setEventType(AppointmentEvent.APPOINTMENT_REMINDER);
+                        log.info("Processing appointment reminder event for patient: {}", payload.getPatient().getFullName());
+                        emailService.sendEmailRemindAppointment(payload);
+                        log.info("Appointment reminder email sent successfully for appointment: {}", payload.getAppointmentId());
+                    } catch (Exception e) {
+                        log.error("Error sending appointment reminder email for appointment: {}", payload.getAppointmentId(), e);
+                    }
                     break;
                     
                 case "CONFIRM_APPOINTMENT":
-                    payload.setEventType(AppointmentEvent.CONFIRM_APPOINTMENT);
-                    log.info("Processing confirm appointment event for patient: {}", payload.getPatient().getFullName());
-                    emailService.sendEmailConfirmAppointmentStatus(payload);
-                    log.info("Confirm appointment email sent successfully for appointment: {}", payload.getAppointmentId());
+                    try {
+                        payload.setEventType(AppointmentEvent.CONFIRM_APPOINTMENT);
+                        log.info("Processing confirm appointment event for patient: {}", payload.getPatient().getFullName());
+                        emailService.sendEmailConfirmAppointmentStatus(payload);
+                        log.info("Confirm appointment email sent successfully for appointment: {}", payload.getAppointmentId());
+                    } catch (Exception e) {
+                        log.error("Error sending confirm appointment email for appointment: {}", payload.getAppointmentId(), e);
+                    }
                     break;
 
                 case "NO_SHOW_APPOINTMENT":
-                    payload.setEventType(AppointmentEvent.NO_SHOW_APPOINTMENT);
-                    log.info("Processing no-show appointment event for patient: {}", payload.getPatient().getFullName());
-                    emailService.sendEmailRejectAppointmentStatus(payload);
-                    log.info("No-show appointment email sent successfully for appointment: {}", payload.getAppointmentId());
+                    try {
+                        payload.setEventType(AppointmentEvent.NO_SHOW_APPOINTMENT);
+                        log.info("Processing no-show appointment event for patient: {}", payload.getPatient().getFullName());
+                        emailService.sendEmailRejectAppointmentStatus(payload);
+                        log.info("No-show appointment email sent successfully for appointment: {}", payload.getAppointmentId());
+                    } catch (Exception e) {
+                        log.error("Error sending no-show appointment email for appointment: {}", payload.getAppointmentId(), e);
+                    }
                     break;
                 case "RESCHEDULE_APPOINTMENT":
+                    try {
                         RescheduleAppointmentResponse reschedulePayload = message.getReschedulePayload();
                         log.info("Processing reschedule appointment event for patient: {}", payload.getPatient().getFullName());
                         emailService.sendEmailRescheduleAppointment(reschedulePayload);
                         log.info("Reschedule appointment email sent successfully for appointment: {}", payload.getAppointmentId());
+                    } catch (Exception e) {
+                        log.error("Error sending reschedule appointment email for appointment: {}", payload.getAppointmentId(), e);
+                    }
+                    break;
                 default:
                     log.warn("Unknown appointment event type: {}", eventType);
                     break;

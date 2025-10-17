@@ -6,6 +6,7 @@ import fit.iuh.student.schedulingservice.dtos.requests.BulkCreateScheduleRequest
 import fit.iuh.student.schedulingservice.dtos.requests.CreateDoctorScheduleRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.UpdateDoctorSchedule;
 import fit.iuh.student.schedulingservice.dtos.responses.BulkCreateDoctorScheduleResponse;
+import fit.iuh.student.schedulingservice.dtos.responses.DoctorScheduleClientResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.DoctorScheduleResponse;
 import fit.iuh.student.schedulingservice.entities.DoctorSchedule;
 import fit.iuh.student.schedulingservice.entities.TimeSlot;
@@ -33,6 +34,7 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
     private final DoctorScheduleMapper doctorScheduleMapper;
     private final UserClient userClient;
     private final Logger Log = LoggerFactory.getLogger(DoctorScheduleServiceImpl.class);
+
     public DoctorScheduleServiceImpl(DoctorScheduleRepository doctorScheduleRepository, TimeSlotRepository timeSlotRepository, DoctorScheduleMapper doctorScheduleMapper, UserClient userClient) {
         this.doctorScheduleRepository = doctorScheduleRepository;
         this.timeSlotRepository = timeSlotRepository;
@@ -43,7 +45,7 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
     @Override
     @Transactional
     public DoctorScheduleResponse createDoctorSchedule(CreateDoctorScheduleRequest request) {
-        if(request.getWorkDate().toLocalDate().isBefore(LocalDate.now())){
+        if (request.getWorkDate().toLocalDate().isBefore(LocalDate.now())) {
             throw new BadRequestException("Work date cannot be in the past");
         }
         // Kiểm tra xem doctor đã có schedule cho workDate này chưa
@@ -69,7 +71,7 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
             List<TimeSlot> existingTimeSlots = timeSlotRepository.findAllById(timeSlots);
             // thêm time slot vào doctorSchedule
             for (TimeSlot timeSlot : existingTimeSlots) {
-                    doctorSchedule.addTimeSlot(timeSlot);
+                doctorSchedule.addTimeSlot(timeSlot);
             }
         }
 
@@ -135,7 +137,7 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
 
     @Override
     public DoctorScheduleResponse getDoctorScheduleByDate(String doctorId, Date date) {
-        return doctorScheduleMapper.doctorScheduleToResponse(doctorScheduleRepository.getDoctorScheduleByDate(doctorId,date));
+        return doctorScheduleMapper.doctorScheduleToResponse(doctorScheduleRepository.getDoctorScheduleByDate(doctorId, date));
     }
 
     @Override
@@ -145,7 +147,7 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
 
     @Override
     public boolean updateDoctorSchedule(UpdateDoctorSchedule request) {
-        try{
+        try {
             DoctorSchedule doctorSchedule = doctorScheduleRepository.findById(request.getScheduleId())
                     .orElseThrow(() -> new UserNotFoundException("Doctor schedule not found"));
             List<TimeSlot> timeSlotList = timeSlotRepository.findAllById(request.getTimeSlotIds());
@@ -154,21 +156,32 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
             }
             doctorScheduleRepository.save(doctorSchedule);
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw e;
         }
     }
 
     @Override
-    public List<DoctorClientResponse> getDoctorByDateAndTimeSlot(Date date, int slotId) {
+    public List<DoctorScheduleClientResponse> getDoctorByDateAndTimeSlot(Date date, int slotId) {
         List<DoctorSchedule> doctorSchedules = doctorScheduleRepository.findDoctorScheduleByWorkDate(date);
         Log.debug("get schedules by doctorIds: {}", doctorSchedules);
-        List<DoctorClientResponse> doctors = new ArrayList<>();
-        for(DoctorSchedule schedule : doctorSchedules){
-            for(TimeSlot timeSlot : schedule.getTimeSlots()){
-                if(timeSlot.getSlotId() == slotId){
+        List<DoctorScheduleClientResponse> doctors = new ArrayList<>();
+        for (DoctorSchedule schedule : doctorSchedules) {
+            for (TimeSlot timeSlot : schedule.getTimeSlots()) {
+                if (timeSlot.getSlotId() == slotId) {
                     DoctorClientResponse doctor = userClient.getDoctorForClient(schedule.getDoctorId());
-                    doctors.add(doctor);
+                    doctors.add(
+                            DoctorScheduleClientResponse.builder()
+                                    .doctorId(doctor.getDoctorId())
+                                    .fullName(doctor.getFullName())
+                                    .email(doctor.getEmail())
+                                    .phoneNumber(doctor.getPhoneNumber())
+                                    .experienceYears(doctor.getExperienceYears())
+                                    .clinicAddress(doctor.getClinicAddress())
+                                    .specialty(doctor.getSpecialty())
+                                    .avatarUrl(doctor.getAvatarUrl())
+                                    .scheduleId(schedule.getScheduleId())
+                                    .build());
                     break;
                 }
             }

@@ -2,6 +2,8 @@ package fit.iuh.student.schedulingservice.consumers;
 
 import fit.iuh.student.schedulingservice.consumers.payload.ScheduleEventMessage;
 import fit.iuh.student.schedulingservice.consumers.payload.ScheduleSocketEvent;
+import fit.iuh.student.schedulingservice.dtos.responses.AppointmentResponse;
+import fit.iuh.student.schedulingservice.dtos.responses.RescheduleAppointmentResponse;
 import fit.iuh.student.schedulingservice.publishers.ScheduleSocketPublisher;
 import fit.iuh.student.schedulingservice.publishers.payload.AppointmentData;
 import fit.iuh.student.schedulingservice.services.AppointmentService;
@@ -49,13 +51,13 @@ public class SocketEventConsumer {
         log.info("Handling booking appointment event: {}", scheduleEventMessage);
         try {
             // Try to book appointment
-            appointmentService.bookingAppointment(scheduleEventMessage.getCreateAppointmentRequest());
+            AppointmentResponse apt = appointmentService.bookingAppointment(scheduleEventMessage.getCreateAppointmentRequest());
 
             // Success - publish success notification
             scheduleSocketPublisher.publishAppointmentList(AppointmentData.builder()
                     .eventType("BOOKING_APPOINTMENT")
                     .doctorId(scheduleEventMessage.getDoctorId())
-                    .appointmentId(scheduleEventMessage.getAppointmentId())
+                    .appointmentId(apt.getAppointmentId())
                     .patientId(scheduleEventMessage.getPatientId())
                     .success(true)
                     .build());
@@ -79,12 +81,12 @@ public class SocketEventConsumer {
     private void handleUpdateAppointmentStatus(ScheduleEventMessage scheduleEventMessage) {
         log.info("Handling update appointment event: {}", scheduleEventMessage);
         try {
-            appointmentService.updateAppointmentStatus(scheduleEventMessage.getAppointmentId(), scheduleEventMessage.getStatus());
+            AppointmentResponse apt = appointmentService.updateAppointmentStatus(scheduleEventMessage.getAppointmentId(), scheduleEventMessage.getStatus());
 
             scheduleSocketPublisher.publishAppointmentList(AppointmentData.builder()
                     .eventType("UPDATE_APPOINTMENT_STATUS")
                     .doctorId(scheduleEventMessage.getDoctorId())
-                    .appointmentId(scheduleEventMessage.getAppointmentId())
+                    .appointmentId(apt.getAppointmentId())
                     .patientId(scheduleEventMessage.getPatientId())
                     .success(true)
                     .build());
@@ -105,12 +107,12 @@ public class SocketEventConsumer {
     private void handleRescheduleAppointment(ScheduleEventMessage scheduleEventMessage) {
         log.info("Handling reschedule appointment event: {}", scheduleEventMessage);
         try {
-            appointmentService.rescheduleAppointment(scheduleEventMessage.getUpdateAppointmentRequest());
+            RescheduleAppointmentResponse apt=appointmentService.rescheduleAppointment(scheduleEventMessage.getUpdateAppointmentRequest());
 
             scheduleSocketPublisher.publishAppointmentList(AppointmentData.builder()
                     .eventType("RESCHEDULE_APPOINTMENT")
                     .doctorId(scheduleEventMessage.getDoctorId())
-                    .appointmentId(scheduleEventMessage.getAppointmentId())
+                    .appointmentId(apt.getAppointmentId())
                     .patientId(scheduleEventMessage.getPatientId())
                     .success(true)
                     .build());

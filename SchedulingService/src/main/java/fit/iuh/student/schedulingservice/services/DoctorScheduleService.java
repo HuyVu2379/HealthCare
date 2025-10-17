@@ -5,6 +5,7 @@ import fit.iuh.student.schedulingservice.dtos.requests.BulkCreateScheduleRequest
 import fit.iuh.student.schedulingservice.dtos.requests.CreateDoctorScheduleRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.UpdateDoctorSchedule;
 import fit.iuh.student.schedulingservice.dtos.responses.BulkCreateDoctorScheduleResponse;
+import fit.iuh.student.schedulingservice.dtos.responses.DoctorScheduleClientResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.DoctorScheduleResponse;
 
 import java.sql.Date;
@@ -18,5 +19,5 @@ public interface DoctorScheduleService {
     // Lấy danh sách bác sĩ có lịch làm việc trong ngày
     List<String> getDoctorIdsByDate(Date date);
     boolean updateDoctorSchedule(UpdateDoctorSchedule request);
-    List<DoctorClientResponse> getDoctorByDateAndTimeSlot(Date date, int slotId);
+    List<DoctorScheduleClientResponse> getDoctorByDateAndTimeSlot(Date date, int slotId);
 }

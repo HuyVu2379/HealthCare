@@ -4,10 +4,7 @@ import fit.iuh.student.schedulingservice.clients.dtos.DoctorClientResponse;
 import fit.iuh.student.schedulingservice.dtos.requests.BulkCreateScheduleRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.CreateDoctorScheduleRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.UpdateDoctorSchedule;
-import fit.iuh.student.schedulingservice.dtos.responses.BulkCreateDoctorScheduleResponse;
-import fit.iuh.student.schedulingservice.dtos.responses.DoctorScheduleResponse;
-import fit.iuh.student.schedulingservice.dtos.responses.MessageResponse;
-import fit.iuh.student.schedulingservice.dtos.responses.SuccessEntityResponse;
+import fit.iuh.student.schedulingservice.dtos.responses.*;
 import fit.iuh.student.schedulingservice.exceptions.errors.BadRequestException;
 import fit.iuh.student.schedulingservice.repositories.DoctorScheduleRepository;
 import fit.iuh.student.schedulingservice.services.DoctorScheduleService;
@@ -66,7 +63,7 @@ public class DoctorScheduleController {
     }
 
     @GetMapping("/getDoctorByDateAndTimeSlot")
-    public ResponseEntity<MessageResponse<List<DoctorClientResponse>>> getDoctorByDateAndTimeSlot(
+    public ResponseEntity<MessageResponse<List<DoctorScheduleClientResponse>>> getDoctorByDateAndTimeSlot(
             @RequestParam String date,
             @RequestParam int slotId
     ) {
@@ -74,7 +71,7 @@ public class DoctorScheduleController {
         if(date1.before(Date.valueOf(LocalDate.now().minusDays(1)))) {
             throw new BadRequestException("Date must be today or later");
         }
-        List<DoctorClientResponse> doctors = doctorScheduleService.getDoctorByDateAndTimeSlot(date1, slotId);
+        List<DoctorScheduleClientResponse> doctors = doctorScheduleService.getDoctorByDateAndTimeSlot(date1, slotId);
         return SuccessEntityResponse.ok("Get doctors by date and time slot successfully", doctors);
     }
 }
