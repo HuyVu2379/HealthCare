@@ -5,6 +5,7 @@ import fit.iuh.student.healthrecordservice.dtos.requests.ImportHealthMetricsRequ
 import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricClientResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricPanelResponse;
+import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricResponseWithBatch;
 
 import java.util.List;
 
@@ -16,4 +17,5 @@ public interface HealthMetricService {
     List<HealthMetricPanelResponse> getPanelsByPatientAndDate(String patientId, java.sql.Date measuredAt);
     List<HealthMetricResponse> getMetricByPatientId(String patientId);
     List<HealthMetricResponse> createHealthMetrics(List<CreateHealthMetricRequest> healthMetrics);
+    List<HealthMetricResponseWithBatch> getHealthMetricsWithBatch(String patientId);
 }

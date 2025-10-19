@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/predicts")
 @RequiredArgsConstructor
@@ -27,5 +29,12 @@ public class PredictController {
             @PathVariable String patientId
     ){
         return SuccessEntityResponse.ok("get predict success!",predictService.getPredictResponseByPatientId(patientId));
+    }
+
+    @GetMapping("/get-predict-history/{patientId}")
+    public ResponseEntity<MessageResponse<List<PredictResponse>>> getPredictHistoryByPatientId(
+            @PathVariable String patientId
+    ){
+        return SuccessEntityResponse.ok("get predict history success!",predictService.getPredictHistoryByPatientId(patientId));
     }
 }

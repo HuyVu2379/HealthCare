@@ -5,6 +5,7 @@ import fit.iuh.student.healthrecordservice.dtos.requests.ImportHealthMetricsRequ
 import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricClientResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricPanelResponse;
+import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricResponseWithBatch;
 import fit.iuh.student.healthrecordservice.entities.HealthMetric;
 import fit.iuh.student.healthrecordservice.mappers.HealthMetricMapper;
 import fit.iuh.student.healthrecordservice.repositories.HealthMetricRepository;
@@ -165,6 +166,27 @@ public class HealthMetricServiceImpl implements HealthMetricService {
             List<HealthMetric> savedMetrics = healthMetricRepository.saveAll(metrics);
             return savedMetrics.stream().map(healthMetricMapper::toHealthMetricResponse).toList();
         }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public List<HealthMetricResponseWithBatch> getHealthMetricsWithBatch(String patientId) {
+        try{
+            List<HealthMetric> metrics = healthMetricRepository.findByPatientIdOrderByMeasuredAtDesc(patientId);
+            Map<Date, List<HealthMetric>> grouped = metrics.stream()
+                    .collect(Collectors.groupingBy(HealthMetric::getMeasuredAt));
+            return grouped.entrySet().stream()
+                    .sorted((a,b) -> b.getKey().compareTo(a.getKey()))
+                    .limit(2)
+                    .map(e -> HealthMetricResponseWithBatch.builder()
+                            .measuredAt(e.getKey().toLocalDate().atStartOfDay())
+                            .healthMetrics(e.getValue().stream()
+                                    .map(healthMetricMapper::toHealthMetricResponse)
+                                    .toList())
+                            .build())
+                    .toList();
+        } catch (Exception e) {
             throw e;
         }
     }

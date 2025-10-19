@@ -3,11 +3,7 @@ package fit.iuh.student.healthrecordservice.controllers;
 import fit.iuh.student.healthrecordservice.dtos.requests.CreateHealthMetricRequest;
 import fit.iuh.student.healthrecordservice.dtos.requests.ImportHealthMetricsRequest;
 import fit.iuh.student.healthrecordservice.dtos.requests.CreateHealthMetricPanelRequest;
-import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricPanelResponse;
-import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricClientResponse;
-import fit.iuh.student.healthrecordservice.dtos.responses.HealthMetricResponse;
-import fit.iuh.student.healthrecordservice.dtos.responses.MessageResponse;
-import fit.iuh.student.healthrecordservice.dtos.responses.SuccessEntityResponse;
+import fit.iuh.student.healthrecordservice.dtos.responses.*;
 import fit.iuh.student.healthrecordservice.services.HealthMetricService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -86,5 +82,11 @@ public class HealthMetricController {
     public List<HealthMetricResponse> createHealthMetrics(
             @RequestBody List<CreateHealthMetricRequest> healthMetrics) {
         return healthMetricService.createHealthMetrics(healthMetrics);
+    }
+
+    @GetMapping("/get-health-metrics-with-batch/{patientId}")
+    public List<HealthMetricResponseWithBatch> getHealthMetricsWithBatch(
+            @PathVariable String patientId) {
+        return healthMetricService.getHealthMetricsWithBatch(patientId);
     }
 }

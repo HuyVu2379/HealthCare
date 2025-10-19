@@ -1,5 +1,6 @@
 package fit.iuh.student.schedulingservice.clients;
 
+import fit.iuh.student.schedulingservice.clients.dtos.HealthMetricResponseWithBatch;
 import fit.iuh.student.schedulingservice.dtos.requests.CreateHealthMetricRequest;
 import fit.iuh.student.schedulingservice.dtos.responses.HealthMetricResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -16,9 +17,12 @@ public interface ScheduleClient {
     @GetMapping(value = "/api/v1/health-metrics/get-health-metrics-latest/{patientId}")
     List<HealthMetricResponse> getHealthMetricsByPatientIdClient(
             @PathVariable("patientId") String patientId
-//            @RequestHeader("Authorization") String authorization
     );
 
+    @GetMapping(value = "/api/v1/health-metrics/get-health-metrics-with-batch/{patientId}")
+    List<HealthMetricResponseWithBatch> getHealthMetricsByPatientIdWithBatch(
+            @PathVariable("patientId") String patientId
+    );
 
     @PostMapping(value = "/api/v1/health-metrics/create-health-metrics")
     List<HealthMetricResponse> createHealthMetrics(

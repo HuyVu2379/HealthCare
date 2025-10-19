@@ -23,7 +23,8 @@ public class SecurityConfig {
 
     private List<String> publicEndpoints = Arrays.asList(
             "/api/v1/health-metrics/getEGFRMetric/**",
-            "/api/v1/health-metrics/get-health-metrics-latest/**"
+            "/api/v1/health-metrics/get-health-metrics-latest/**",
+            "/api/v1/health-metrics/get-health-metrics-with-batch/**"
     );
 
     @Bean

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.models.ai_models import (
+    DetailedTrendResponse,
     HealthAnalysisRequest, 
     HealthAnalysisResponse,
     MedicalImageAnalysisRequest,
@@ -11,11 +12,11 @@ from app.models.ai_models import (
 )
 from app.services.analysis_service import AnalysisService
 from app.services.ckd_service import CKDPredictionService
-
+from app.services.predict_service import PredictService
 router = APIRouter()
 analysis_service = AnalysisService()
 ckd_service = CKDPredictionService()
-
+predict = PredictService()
 @router.post("/symptoms", response_model=HealthAnalysisResponse)
 async def analyze_symptoms(request: HealthAnalysisRequest):
     """
@@ -24,6 +25,17 @@ async def analyze_symptoms(request: HealthAnalysisRequest):
     try:
         analysis = await analysis_service.analyze_symptoms(request)
         return analysis
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/predict-current-trends/{patient_id}", response_model=DetailedTrendResponse)
+async def predict_current_trends(patient_id: str):
+    """
+    Predict current health trends for a patient
+    """
+    try:
+        trends = await predict.get_latest_trend(patient_id)
+        return trends
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

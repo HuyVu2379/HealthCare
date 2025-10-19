@@ -1,6 +1,7 @@
 package fit.iuh.student.schedulingservice.services.Impl;
 
 import fit.iuh.student.schedulingservice.clients.ScheduleClient;
+import fit.iuh.student.schedulingservice.clients.dtos.HealthMetricResponseWithBatch;
 import fit.iuh.student.schedulingservice.dtos.requests.CreatePredictRequest;
 import fit.iuh.student.schedulingservice.dtos.responses.HealthMetricResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.PredictResponse;
@@ -61,6 +62,8 @@ public class PredictServiceImpl implements PredictService {
                     .recommendations(predict.getRecommendations())
                     .healthMetrics(healthMetrics)
                     .confidence(predict.getConfidence())
+                    .createdAt(predict.getCreatedAt())
+                    .updatedAt(predict.getUpdatedAt())
                     .build();
         } catch (Exception e) {
             log.error("Error getting predict response for patient ID: {}", patientId, e);
@@ -96,6 +99,36 @@ public class PredictServiceImpl implements PredictService {
             return true;
         }catch (Exception e){
             log.error("Error creating predict for patient ID: {}", request.getPatientId(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    public List<PredictResponse> getPredictHistoryByPatientId(String patientId) {
+        try{
+            List<HealthMetricResponseWithBatch> healthMetricsResponseWithBatch = scheduleClient.getHealthMetricsByPatientIdWithBatch(patientId);
+            List<Predict> predicts = predictRepository.findPredictByPatientId(patientId);
+            return predicts.stream().map(pre ->{
+                HealthMetricResponseWithBatch matchedHealthMetrics = healthMetricsResponseWithBatch.stream()
+                        .filter(hm -> hm.getMeasuredAt().equals(pre.getCreatedAt().toLocalDate().atStartOfDay()))
+                        .findFirst()
+                        .orElse(null);
+
+                List<HealthMetricResponse> healthMetrics = matchedHealthMetrics != null ? matchedHealthMetrics.getHealthMetrics() : List.of();
+
+                return PredictResponse.builder()
+                        .predictId(pre.getPredictId())
+                        .patientId(pre.getPatientId())
+                        .stage(pre.getStage())
+                        .recommendations(pre.getRecommendations())
+                        .healthMetrics(healthMetrics)
+                        .confidence(pre.getConfidence())
+                        .createdAt(pre.getCreatedAt())
+                        .updatedAt(pre.getUpdatedAt())
+                        .build();
+            })
+            .toList();
+        } catch (Exception e) {
             throw e;
         }
     }

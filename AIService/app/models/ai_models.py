@@ -1,7 +1,6 @@
-from pydantic import BaseModel
-from typing import Optional, List, Dict, Any
+from pydantic import BaseModel,Field
+from typing import Optional, List, Dict, Any, Literal
 from datetime import datetime
-
 class ChatMessage(BaseModel):
     message: str
     user_id: Optional[str] = None
@@ -95,3 +94,70 @@ class CKDPredictionResponse(BaseModel):
     stage_description: str
     recommendations: List[str]
     risk_level: str  # 'low', 'moderate', 'high', 'critical'
+
+class HealthMetricResponse(BaseModel):
+    metricId: str
+    patientId: str
+    metricName: str
+    metricValue: float
+    unit: str
+    medicalRecordId: Optional[str] = None
+    measuredAt: str
+class PredictResponse(BaseModel):
+    predictId: str
+    patientId: str
+    stage: int
+    recommendations: List[str]
+    confidence: float
+    healthMetrics: List[HealthMetricResponse] = []
+    createdAt: str
+    updatedAt: str
+
+class GetPredictHistoryResponse(BaseModel):
+    statusCode: int
+    message: str
+    success: bool
+    data: List[PredictResponse] = []
+
+
+Classification = Literal["IMPROVING", "STABLE", "WORSENING", "INSUFFICIENT_HISTORY"]
+Status = Literal["WARNING", "NORMAL", "IMPROVING"]
+
+class TrendResponse(BaseModel):
+    classification: Classification
+    stage_previous: Optional[int] = Field(None, alias="stagePrevious")
+    stage_current: Optional[int] = Field(None, alias="stageCurrent")
+    confidence_change: Optional[float] = Field(None, alias="confidenceChange")
+
+    # “Metric” tổng hợp dùng để tóm tắt (không bắt buộc phải là GFR)
+    metric_previous: Optional[float] = Field(None, alias="metricPrevious")
+    metric_current: Optional[float] = Field(None, alias="metricCurrent")
+    metric_change_pct: Optional[float] = Field(None, alias="metricChangePct")
+    metric_name: Optional[str] = Field(None, alias="metricName")
+
+    summary: str
+
+    class Config:
+        allow_population_by_field_name = True  # cho phép dùng snake_case khi tạo model
+        populate_by_name = True                # (Pydantic v2)
+
+class MetricComparison(BaseModel):
+    metric: str
+    previous_value: Optional[float] = Field(None, alias="previousValue")
+    current_value: Optional[float] = Field(None, alias="currentValue")
+    unit: Optional[str] = ""
+    change_pct: Optional[float] = Field(None, alias="changePct")
+    status: Status
+    message: str
+
+    class Config:
+        allow_population_by_field_name = True
+        populate_by_name = True
+
+class DetailedTrendResponse(BaseModel):
+    trend: TrendResponse
+    metric_comparisons: List[MetricComparison] = Field(alias="metricComparisons")
+
+    class Config:
+        allow_population_by_field_name = True
+        populate_by_name = True

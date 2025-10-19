@@ -2,7 +2,6 @@ from typing import Dict, Any, List, Optional
 
 import httpx
 import asyncio
-import json
 from datetime import datetime
 from app.models.ai_models import GetSummaryResponse
 class ChatService:

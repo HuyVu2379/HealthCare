@@ -2,8 +2,6 @@ from fastapi import APIRouter, HTTPException, Request
 from app.models.ai_models import ChatMessage, ChatResponse, SimpleChatResponse
 from app.services.chat_service import ChatService
 from datetime import datetime
-import uuid
-
 router = APIRouter()
 @router.post("/ask", response_model=SimpleChatResponse)
 async def chat_with_ai(message: ChatMessage, request: Request):

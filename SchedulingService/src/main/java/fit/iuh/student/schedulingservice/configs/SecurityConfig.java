@@ -22,7 +22,8 @@ public class SecurityConfig {
     private final HeaderAuthenticationFilter headerAuthenticationFilter;
 
     private List<String> publicEndpoints = Arrays.asList(
-            "/api/v1/appointments/client/**"
+            "/api/v1/appointments/client/**",
+            "/api/v1/predicts/get-predict-history/**"
     );
 
     @Bean
