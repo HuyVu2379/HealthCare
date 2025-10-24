@@ -26,4 +26,5 @@ public class AppointmentResponse {
     private ConsultationType consultationType;
     private String addressDetail;
     private boolean hasPredict = false;
+    private String relatedRecordId; // Medical Record ID mà lịch tái khám này đến từ
 }

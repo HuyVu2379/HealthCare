@@ -2,7 +2,9 @@ package fit.iuh.student.schedulingservice.services.Impl;
 
 import fit.iuh.student.schedulingservice.clients.UserClient;
 import fit.iuh.student.schedulingservice.clients.dtos.DoctorClientResponse;
+import fit.iuh.student.schedulingservice.clients.dtos.PatientClientResponse;
 import fit.iuh.student.schedulingservice.dtos.requests.CreateAppointmentRequest;
+import fit.iuh.student.schedulingservice.dtos.requests.ScheduleFollowUpByDoctorRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.UpdateAppointmentRequest;
 import fit.iuh.student.schedulingservice.dtos.responses.*;
 import fit.iuh.student.schedulingservice.entities.Appointment;
@@ -493,17 +495,91 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public AppointmentClientResponse getAppointmentDetailForClientById(String appointmentId) {
         try {
-            Appointment appointment = appointmentRepository.findById(appointmentId).orElse(null);
-            if (appointment == null) {
-                throw new NotFoundException("Appointment not found");
-            } else {
-                return AppointmentClientResponse.builder()
-                        .doctorId(appointment.getDoctorId())
-                        .patientId(appointment.getPatientId())
-                        .build();
-            }
+            Appointment appointment = appointmentRepository.findById(appointmentId)
+                    .orElseThrow(() -> new NotFoundException("Appointment not found"));
+
+            return AppointmentClientResponse.builder()
+                    .appointmentId(appointment.getAppointmentId())
+                    .doctorId(appointment.getDoctorId())
+                    .patientId(appointment.getPatientId())
+                    .consultationType(appointment.getConsultationType() != null ?
+                            appointment.getConsultationType().name() : null)
+                    .relatedRecordId(appointment.getRelatedRecordId())
+                    .build();
         } catch (Exception e) {
             throw e;
+        }
+    }
+
+    @Override
+    @Transactional
+    public AppointmentResponse scheduleFollowUpByDoctor(ScheduleFollowUpByDoctorRequest request) {
+        try {
+            // 1. Load doctor schedule with time slots
+            DoctorSchedule doctorSchedule = doctorScheduleRepository
+                    .findWithSlotsById(request.getScheduleId())
+                    .orElseThrow(() -> new NotFoundException("Doctor schedule not found"));
+
+            // 2. Find matching time slot
+            TimeSlot matchingTimeSlot = doctorSchedule.getTimeSlots().stream()
+                    .filter(ts -> Objects.equals(ts.getSlotId(), request.getSlotId()))
+                    .findFirst()
+                    .orElseThrow(() -> new NotFoundException("Time slot not found"));
+
+            // 3. Create appointment with FOLLOW_UP and CONFIRMED status
+            Appointment appointment = Appointment.builder()
+                    .patientId(request.getPatientId())
+                    .doctorId(request.getDoctorId())
+                    .slotId(request.getSlotId())
+                    .timeSlot(matchingTimeSlot)
+                    .appointmentDate(Date.valueOf(request.getAppointmentDate()))
+                    .consultationType(ConsultationType.FOLLOW_UP)  // Force FOLLOW_UP
+                    .status(AppointmentStatus.CONFIRMED)            // Auto CONFIRMED
+                    .relatedRecordId(request.getMedicalRecordId()) // Link to medical record
+                    .note(request.getNote() != null ? request.getNote() : "Tái khám theo chỉ định của bác sĩ")
+                    .doctorSchedule(doctorSchedule)
+                    .hasPredict(false)
+                    .build();
+
+            // 4. Save appointment
+            appointment = appointmentRepository.save(appointment);
+
+            // 5. Remove time slot from schedule
+            doctorSchedule.removeTimeSlot(matchingTimeSlot);
+            doctorScheduleRepository.save(doctorSchedule);
+
+            // 6. Build response
+            DoctorClientResponse doctor = userClient.getDoctorForClient(appointment.getDoctorId());
+            PatientClientResponse patient = userClient.getPatientForClient(appointment.getPatientId());
+
+            TimeSlotDTO timeSlotDTO = TimeSlotDTO.builder()
+                    .slotId(matchingTimeSlot.getSlotId())
+                    .startTime(matchingTimeSlot.getStartTime())
+                    .endTime(matchingTimeSlot.getEndTime())
+                    .build();
+
+            AppointmentResponse response = AppointmentResponse.builder()
+                    .appointmentId(appointment.getAppointmentId())
+                    .doctor(doctor)
+                    .patient(patient)
+                    .symptoms(appointment.getSymptoms())
+                    .note(appointment.getNote())
+                    .status(appointment.getStatus())
+                    .timeSlot(timeSlotDTO)
+                    .appointmentDate(appointment.getAppointmentDate())
+                    .consultationType(appointment.getConsultationType())
+                    .addressDetail(doctor.getClinicAddress())
+                    .relatedRecordId(appointment.getRelatedRecordId())
+                    .hasPredict(appointment.isHasPredict())
+                    .build();
+
+            // 7. Publish event
+            appointmentEventPublisher.publishBookingAppointmentEvent(response);
+
+            return response;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to schedule follow-up: " + e.getMessage(), e);
         }
     }
 }

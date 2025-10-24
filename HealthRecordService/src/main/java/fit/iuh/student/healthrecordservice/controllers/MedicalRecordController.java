@@ -82,4 +82,40 @@ public class MedicalRecordController {
             );
         }
     }
+
+    // ========== NEW ENDPOINTS FOR FOLLOW-UP SYSTEM ==========
+
+    @GetMapping("/{recordId}/timeline")
+    public ResponseEntity<MessageResponse<MedicalRecordTimelineResponse>> getMedicalRecordTimeline(
+            @PathVariable String recordId
+    ) {
+        try {
+            MedicalRecordTimelineResponse response = medicalRecordService.getMedicalRecordTimeline(recordId);
+            return SuccessEntityResponse.ok("Lấy lịch sử khám thành công", response);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                    new MessageResponse<>(500, "Không thể tải lịch sử: " + e.getMessage(), false, null)
+            );
+        }
+    }
+
+    @GetMapping("/patient/{patientId}/episodes")
+    public ResponseEntity<MessageResponse<MedicalRecordListResponse>> getPatientEpisodes(
+            @PathVariable String patientId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String order
+    ) {
+        try {
+            MedicalRecordListResponse response = medicalRecordService.getPatientEpisodes(
+                    patientId, page, size, sortBy, order
+            );
+            return SuccessEntityResponse.ok("Lấy danh sách đợt khám thành công", response);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                    new MessageResponse<>(500, "Không thể tải danh sách: " + e.getMessage(), false, null)
+            );
+        }
+    }
 }

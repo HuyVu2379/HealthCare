@@ -58,4 +58,7 @@ public class Appointment extends BaseEntity {
     private String addressDetail;
 
     private boolean hasPredict = false;
+
+    @Column(name = "related_record_id")
+    private String relatedRecordId; // Medical Record ID mà lịch tái khám này đến từ
 }

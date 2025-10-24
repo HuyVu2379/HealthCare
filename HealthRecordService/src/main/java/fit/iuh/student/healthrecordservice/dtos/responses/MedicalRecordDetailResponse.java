@@ -33,4 +33,8 @@ public class MedicalRecordDetailResponse {
     private Date createdAt;
     private Date updatedAt;
     private List<PrescriptionResponse> prescriptions;
+
+    // ========== NEW FIELDS FOR FOLLOW-UP SYSTEM ==========
+    private String parentRecordId;        // Link to parent medical record
+    private String episodeType;           // INITIAL or FOLLOW_UP
 }

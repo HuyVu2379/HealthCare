@@ -1,12 +1,15 @@
 package fit.iuh.student.healthrecordservice.services.Impl;
 
+import fit.iuh.student.healthrecordservice.clients.AppointmentClient;
 import fit.iuh.student.healthrecordservice.clients.UserClient;
+import fit.iuh.student.healthrecordservice.clients.dtos.AppointmentClientResponse;
 import fit.iuh.student.healthrecordservice.clients.dtos.DoctorClientResponse;
 import fit.iuh.student.healthrecordservice.clients.dtos.PatientClientResponse;
 import fit.iuh.student.healthrecordservice.dtos.requests.CreateMedicalRecordRequest;
 import fit.iuh.student.healthrecordservice.dtos.responses.*;
 import fit.iuh.student.healthrecordservice.entities.MedicalRecord;
 import fit.iuh.student.healthrecordservice.entities.Prescription;
+import fit.iuh.student.healthrecordservice.enums.EpisodeType;
 import fit.iuh.student.healthrecordservice.exceptions.errors.DuplicationObjectException;
 import fit.iuh.student.healthrecordservice.exceptions.errors.NotFoundException;
 import fit.iuh.student.healthrecordservice.publishers.MedicalRecordEventPublisher;
@@ -30,12 +33,21 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final MedicalRecordRepository medicalRecordRepository;
     private final MedicalRecordEventPublisher medicalRecordEventPublisher;
     private final UserClient userClient;
+    private final AppointmentClient appointmentClient; // NEW: Inject AppointmentClient
     @Override
     public CreateMedicalRecordResponse createMedicalRecord(CreateMedicalRecordRequest request) {
         try{
             boolean isExist = medicalRecordRepository.existsAppointmentId(request.getAppointmentId());
             MedicalRecord medicalRecord;
-            
+
+            // ========== NEW: Get appointment info to check if it's FOLLOW_UP ==========
+            AppointmentClientResponse appointmentInfo = null;
+            try {
+                appointmentInfo = appointmentClient.getAppointmentForClient(request.getAppointmentId());
+            } catch (Exception e) {
+                System.err.println("Failed to get appointment info: " + e.getMessage());
+            }
+
             if(isExist){
                 // Cập nhật record hiện có
                 medicalRecord = medicalRecordRepository.findByAppointmentId(request.getAppointmentId());
@@ -72,6 +84,15 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                         .serviceName(request.getServiceName())
                         .signatureUrl(request.getSignatureUrl())
                         .build();
+
+                // ========== AUTO-DETECT EPISODE TYPE ==========
+                if (appointmentInfo != null && "FOLLOW_UP".equals(appointmentInfo.getConsultationType())) {
+                    medicalRecord.setEpisodeType(EpisodeType.FOLLOW_UP);
+                    medicalRecord.setParentRecordId(appointmentInfo.getRelatedRecordId());
+                } else {
+                    medicalRecord.setEpisodeType(EpisodeType.INITIAL);
+                    medicalRecord.setParentRecordId(null);
+                }
             }
             medicalRecord = medicalRecordRepository.save(medicalRecord);
             
@@ -218,7 +239,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .patientId(medicalRecord.getPatientId())
                 .doctorId(medicalRecord.getDoctorId())
                 .doctorName(doctorName)
-                .patient(patient) 
+                .patient(patient)
                 .serviceName(medicalRecord.getServiceName())
                 .diagnosis(medicalRecord.getDiagnosis())
                 .symptoms(medicalRecord.getSymptoms())
@@ -234,6 +255,9 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .updatedAt(medicalRecord.getUpdatedAt() != null ?
                         java.util.Date.from(medicalRecord.getUpdatedAt().atZone(ZoneId.systemDefault()).toInstant()) : null)
                 .prescriptions(prescriptions)
+                // ========== NEW FIELDS ==========
+                .parentRecordId(medicalRecord.getParentRecordId())
+                .episodeType(medicalRecord.getEpisodeType() != null ? medicalRecord.getEpisodeType().name() : null)
                 .build();
     }
 
@@ -254,5 +278,68 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .startDate(prescription.getStartDate())
                 .endDate(prescription.getEndDate())
                 .build();
+    }
+
+    // ========== NEW METHODS FOR FOLLOW-UP SYSTEM ==========
+
+    @Override
+    public MedicalRecordTimelineResponse getMedicalRecordTimeline(String recordId) {
+        try {
+            // 1. Get the record
+            MedicalRecord record = medicalRecordRepository.findById(recordId)
+                    .orElseThrow(() -> new NotFoundException("Medical record not found"));
+
+            // 2. Find root record (trace back if this is a follow-up)
+            MedicalRecord rootRecord = record;
+            while (rootRecord.getParentRecordId() != null) {
+                rootRecord = medicalRecordRepository.findById(rootRecord.getParentRecordId())
+                        .orElseThrow(() -> new NotFoundException("Parent record not found"));
+            }
+
+            // 3. Get all follow-ups of root record
+            List<MedicalRecord> followUps = medicalRecordRepository.findFollowUpRecords(rootRecord.getRecordId());
+
+            // 4. Convert to response
+            return MedicalRecordTimelineResponse.builder()
+                    .rootRecord(convertToDetailResponse(rootRecord))
+                    .followUpRecords(followUps.stream()
+                            .map(this::convertToDetailResponse)
+                            .collect(Collectors.toList()))
+                    .build();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error getting timeline: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public MedicalRecordListResponse getPatientEpisodes(String patientId, int page, int size, String sortBy, String order) {
+        try {
+            Sort sort = order.equalsIgnoreCase("ASC") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+            Pageable pageable = PageRequest.of(page, size, sort);
+
+            // Get only INITIAL records (not follow-ups)
+            Page<MedicalRecord> recordPage = medicalRecordRepository.findInitialRecordsByPatientId(patientId, pageable);
+
+            // Convert to response
+            List<MedicalRecordDetailResponse> records = recordPage.getContent().stream()
+                    .map(this::convertToDetailResponse)
+                    .collect(Collectors.toList());
+
+            PaginationResponse pagination = PaginationResponse.builder()
+                    .currentPage(recordPage.getNumber())
+                    .totalPages(recordPage.getTotalPages())
+                    .totalRecords(recordPage.getTotalElements())
+                    .pageSize(recordPage.getSize())
+                    .build();
+
+            return MedicalRecordListResponse.builder()
+                    .records(records)
+                    .pagination(pagination)
+                    .build();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error getting episodes: " + e.getMessage(), e);
+        }
     }
 }

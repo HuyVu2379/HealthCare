@@ -1,4 +1,4 @@
-package fit.iuh.student.schedulingservice.dtos.responses;
+package fit.iuh.student.healthrecordservice.clients.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
