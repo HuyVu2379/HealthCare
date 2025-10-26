@@ -39,7 +39,9 @@ public class HealthRecordEventConsumer {
                         .doctor(doctor)
                         .serviceName(message.getServiceName())
                         .stage(message.getStage())
-                        .statusHealth(StatusHealth.valueOf(message.getStatusHealth()))
+                        .statusHealth(message.getStatusHealth() != null
+                                ? StatusHealth.valueOf(message.getStatusHealth().toUpperCase())
+                                : null)
                         .diagnosis(message.getDiagnosis())
                         .diagnosisDate(message.getDateDiagnosis().toLocalDate())
                         .notes(message.getDoctorNote())
