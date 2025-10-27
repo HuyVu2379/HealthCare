@@ -1,11 +1,13 @@
 package fit.iuh.student.schedulingservice.controllers;
 
 import fit.iuh.student.schedulingservice.dtos.requests.CreateAppointmentRequest;
+import fit.iuh.student.schedulingservice.dtos.requests.ScheduleFollowUpByDoctorRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.UpdateAppointmentRequest;
 import fit.iuh.student.schedulingservice.dtos.responses.*;
 import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
 import fit.iuh.student.schedulingservice.enums.ConsultationType;
 import fit.iuh.student.schedulingservice.services.AppointmentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,20 @@ public class AppointmentController {
     ) {
         return SuccessEntityResponse.created("Booking appointment successfully",
                 appointmentService.bookingAppointment(request));
+    }
+
+    @PostMapping("/schedule-follow-up-by-doctor")
+    public ResponseEntity<MessageResponse<AppointmentResponse>> scheduleFollowUpByDoctor(
+            @Valid @RequestBody ScheduleFollowUpByDoctorRequest request
+    ) {
+        try {
+            AppointmentResponse response = appointmentService.scheduleFollowUpByDoctor(request);
+            return SuccessEntityResponse.created("Đặt lịch tái khám thành công", response);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                    new MessageResponse<>(500, "Không thể đặt lịch tái khám: " + e.getMessage(), false, null)
+            );
+        }
     }
 
     @DeleteMapping("/{appointmentId}/cancel")

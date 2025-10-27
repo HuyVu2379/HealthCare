@@ -1,6 +1,7 @@
 package fit.iuh.student.schedulingservice.services;
 
 import fit.iuh.student.schedulingservice.dtos.requests.CreateAppointmentRequest;
+import fit.iuh.student.schedulingservice.dtos.requests.ScheduleFollowUpByDoctorRequest;
 import fit.iuh.student.schedulingservice.dtos.requests.UpdateAppointmentRequest;
 import fit.iuh.student.schedulingservice.dtos.responses.AppointmentClientResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.AppointmentResponse;
@@ -33,6 +34,7 @@ public interface AppointmentService {
     Page<AppointmentResponse> getAppointmentWithFilterPaginationForPatient(String patientId,ConsultationType consultationType,int page, int size,String startTime, String endTime);
     List<AppointmentWeekFilterResponse> getAppointmentWeekFilterForDoctor(String doctorId,String weekStartDate, String weekEndDate);
     AppointmentClientResponse getAppointmentDetailForClientById(String appointmentId);
+    AppointmentResponse scheduleFollowUpByDoctor(ScheduleFollowUpByDoctorRequest request);
 //    void cancelAppointment(String appointmentId, String userId);
 //    void getAppointmentByPatientId();
 //    void getAppointmentDetailById(String appointmentId);

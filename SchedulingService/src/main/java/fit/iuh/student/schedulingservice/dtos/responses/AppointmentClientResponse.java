@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AppointmentClientResponse {
+    private String appointmentId;
     private String patientId;
     private String doctorId;
+    private String consultationType;
+    private String relatedRecordId;
 }

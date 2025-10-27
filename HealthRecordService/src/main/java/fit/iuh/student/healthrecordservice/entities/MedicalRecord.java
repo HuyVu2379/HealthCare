@@ -1,5 +1,6 @@
 package fit.iuh.student.healthrecordservice.entities;
 
+import fit.iuh.student.healthrecordservice.enums.EpisodeType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -58,7 +59,14 @@ public class MedicalRecord extends BaseEntity {
     
     @Column(name = "doctor_note", length = 2000)
     private String doctorNote;
-    
+
+    @Column(name = "parent_record_id")
+    private String parentRecordId; // Link đến medical record trước đó
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "episode_type", length = 20)
+    private EpisodeType episodeType; // INITIAL, FOLLOW_UP
+
     // Helper methods to maintain bidirectional relationships
     public void addHealthMetric(HealthMetric healthMetric) {
         healthMetrics.add(healthMetric);
