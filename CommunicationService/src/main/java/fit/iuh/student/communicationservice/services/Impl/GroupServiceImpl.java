@@ -32,7 +32,7 @@ public class GroupServiceImpl implements GroupService {
                     String fn  = mem.getFullName() != null ? mem.getFullName() : "";
                     String s1 = uid.toLowerCase();
                     String s2 = fn.toLowerCase();
-                    return s1.contains("ai") || s2.contains("ai");
+                    return s1.contains("AI") || s2.contains("AI");
                 });
 
         // Chỉ check trùng cho chat 2 người KHÔNG có AI (bất kể appointment)

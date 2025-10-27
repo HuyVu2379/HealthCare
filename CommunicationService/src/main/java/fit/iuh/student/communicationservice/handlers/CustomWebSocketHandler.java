@@ -2,27 +2,26 @@ package fit.iuh.student.communicationservice.handlers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fit.iuh.student.communicationservice.consumers.ScheduleSocketConsumer;
 import fit.iuh.student.communicationservice.consumers.payload.AppointmentData;
-import fit.iuh.student.communicationservice.dtos.requests.CreateGroupRequest;
-import fit.iuh.student.communicationservice.dtos.requests.DeleteGroupRequest;
-import fit.iuh.student.communicationservice.dtos.requests.SendMessageRequest;
-import fit.iuh.student.communicationservice.dtos.requests.GetMessagesRequest;
-import fit.iuh.student.communicationservice.dtos.requests.GetGroupsRequest;
+import fit.iuh.student.communicationservice.dtos.requests.*;
 import fit.iuh.student.communicationservice.dtos.responses.GroupResponse;
 import fit.iuh.student.communicationservice.dtos.responses.MessageResponse;
 import fit.iuh.student.communicationservice.entities.Group;
+import fit.iuh.student.communicationservice.entities.Room;
+import fit.iuh.student.communicationservice.enums.RoomStatus;
 import fit.iuh.student.communicationservice.publishers.ScheduleSocketPublisher;
 import fit.iuh.student.communicationservice.publishers.payload.ScheduleEventMessage;
 import fit.iuh.student.communicationservice.repositories.GroupRepository;
 import fit.iuh.student.communicationservice.services.GroupService;
 import fit.iuh.student.communicationservice.services.MessageService;
+import fit.iuh.student.communicationservice.services.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +42,7 @@ public class CustomWebSocketHandler implements WebSocketHandler {
     private final ObjectMapper objectMapper;
     private final GroupRepository groupRepository;
     private final ScheduleSocketPublisher publisher;
+    private final RoomService roomService;
     // Lưu trữ tất cả các WebSocket sessions
     private final ConcurrentHashMap<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
 
@@ -110,6 +110,15 @@ public class CustomWebSocketHandler implements WebSocketHandler {
                 case "schedule_appointment":
                     handleScheduleAppointment(data);
                     break;
+                case "create_room":
+                    handleCreateRoom(session,data);
+                    break;
+                case "get_rooms_by_date":
+                    handleGetRoomsByDate(session,data);
+                    break;
+                case "update_room_status":
+                    handleUpdateRoomStatus(session,data);
+                    break;
                 default:
                     sendError(session, "Unknown action: " + action);
             }
@@ -155,7 +164,26 @@ public class CustomWebSocketHandler implements WebSocketHandler {
 
         sendMessage(session, createResponse("authenticate", "success", "User authenticated: " + userId));
     }
+    private void handleCreateRoom(WebSocketSession session, JsonNode data) throws Exception {
+        CreateRoomRequest request = objectMapper.treeToValue(data, CreateRoomRequest.class);
+        Room roomCreated = roomService.createRoomIfNotExists(request);
+        sendMessage(session, createResponse("create_room_response", "success", roomCreated));
+    }
 
+    private void handleGetRoomsByDate(WebSocketSession session, JsonNode data) throws Exception {
+        String dateStr = data.get("date").asText();
+        LocalDateTime date = LocalDateTime.parse(dateStr);
+        List<Room> rooms = roomService.getRoomByDate(date);
+        sendMessage(session, createResponse("get_rooms_by_date_response", "success", rooms));
+    }
+
+    private void handleUpdateRoomStatus(WebSocketSession session, JsonNode data) throws Exception {
+        String roomId = data.get("roomId").asText();
+        String statusStr = data.get("status").asText();
+        RoomStatus status = RoomStatus.valueOf(statusStr);
+        Room updatedRoom = roomService.updateRoomStatus(roomId, status);
+        sendMessage(session, createResponse("update_room_status_response", "success", updatedRoom));
+    }
     private void handleCreateGroup(WebSocketSession session, JsonNode data) throws Exception {
         CreateGroupRequest request = objectMapper.treeToValue(data, CreateGroupRequest.class);
 
