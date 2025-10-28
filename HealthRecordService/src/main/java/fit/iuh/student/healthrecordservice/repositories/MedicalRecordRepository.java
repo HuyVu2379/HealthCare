@@ -33,4 +33,14 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord,Str
     // Find INITIAL records only (for episodes list)
     @Query("SELECT m FROM MedicalRecord m WHERE m.patientId = ?1 AND (m.episodeType = 'INITIAL' OR m.episodeType IS NULL)")
     Page<MedicalRecord> findInitialRecordsByPatientId(String patientId, Pageable pageable);
+
+    // ========== NEW QUERIES FOR FULL TIMELINE ==========
+
+    // Lấy TẤT CẢ records của patient với doctor, sorted by created date DESC
+    @Query("SELECT m FROM MedicalRecord m WHERE m.patientId = ?1 AND m.doctorId = ?2 ORDER BY m.createdAt DESC")
+    List<MedicalRecord> findByPatientIdAndDoctorIdOrderByCreatedAtDesc(String patientId, String doctorId);
+
+    // Count total records of patient with doctor
+    @Query("SELECT COUNT(m) FROM MedicalRecord m WHERE m.patientId = ?1 AND m.doctorId = ?2")
+    Long countByPatientIdAndDoctorId(String patientId, String doctorId);
 }
