@@ -1,5 +1,7 @@
 package fit.iuh.student.healthrecordservice.services.Impl;
 
+import fit.iuh.student.healthrecordservice.clients.AppointmentClient;
+import fit.iuh.student.healthrecordservice.clients.dtos.AppointmentClientResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.MedicalResultsResponse;
 import fit.iuh.student.healthrecordservice.entities.MedicalRecord;
 import fit.iuh.student.healthrecordservice.entities.Prescription;
@@ -17,6 +19,7 @@ import java.util.List;
 public class MedicalResultsServiceImpl implements MedicalResultsService {
     private final MedicalRecordRepository medicalRecordRepository;
     private final PrescriptionRepository prescriptionRepository;
+    private final AppointmentClient appointmentClient;  // NEW: Inject AppointmentClient
 
     @Override
     public MedicalResultsResponse getResultsByAppointmentId(String appointmentId, String currentUserId, String currentUserRole) {
@@ -38,11 +41,15 @@ public class MedicalResultsServiceImpl implements MedicalResultsService {
             throw new SecurityException("Access denied. Only the patient or assigned doctor can view results");
         }
 
+        // Fetch appointment date from AppointmentService
+        AppointmentClientResponse appointment = appointmentClient.getAppointmentForClient(appointmentId);
+
         List<Prescription> prescriptions = prescriptionRepository.findByMedicalRecordId(mr.getRecordId());
 
         MedicalResultsResponse.MedicalRecordItem mrItem = MedicalResultsResponse.MedicalRecordItem.builder()
                 .recordId(mr.getRecordId())
                 .appointmentId(mr.getAppointmentId())
+                .appointmentDate(appointment.getAppointmentDate())  // NEW: Set appointment date from appointment service
                 .diagnosis(mr.getDiagnosis())
                 .symptoms(mr.getSymptoms())
                 .treatment(mr.getTreatment())

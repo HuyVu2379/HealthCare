@@ -502,6 +502,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .appointmentId(appointment.getAppointmentId())
                     .doctorId(appointment.getDoctorId())
                     .patientId(appointment.getPatientId())
+                    .appointmentDate(appointment.getAppointmentDate()) 
                     .consultationType(appointment.getConsultationType() != null ?
                             appointment.getConsultationType().name() : null)
                     .relatedRecordId(appointment.getRelatedRecordId())
@@ -533,9 +534,9 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .slotId(request.getSlotId())
                     .timeSlot(matchingTimeSlot)
                     .appointmentDate(Date.valueOf(request.getAppointmentDate()))
-                    .consultationType(ConsultationType.FOLLOW_UP)  // Force FOLLOW_UP
-                    .status(AppointmentStatus.CONFIRMED)            // Auto CONFIRMED
-                    .relatedRecordId(request.getMedicalRecordId()) // Link to medical record
+                    .consultationType(ConsultationType.FOLLOW_UP)  
+                    .status(AppointmentStatus.CONFIRMED)            
+                    .relatedRecordId(request.getMedicalRecordId()) 
                     .note(request.getNote() != null ? request.getNote() : "Tái khám theo chỉ định của bác sĩ")
                     .doctorSchedule(doctorSchedule)
                     .hasPredict(false)

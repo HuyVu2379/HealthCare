@@ -44,8 +44,19 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             AppointmentClientResponse appointmentInfo = null;
             try {
                 appointmentInfo = appointmentClient.getAppointmentForClient(request.getAppointmentId());
+                System.out.println("✅ Successfully retrieved appointment info - ID: " + request.getAppointmentId() +
+                                   ", ConsultationType: " + (appointmentInfo != null ? appointmentInfo.getConsultationType() : "null") +
+                                   ", RelatedRecordId: " + (appointmentInfo != null ? appointmentInfo.getRelatedRecordId() : "null"));
             } catch (Exception e) {
-                System.err.println("Failed to get appointment info: " + e.getMessage());
+                System.err.println("❌ CRITICAL ERROR: Failed to get appointment info for appointmentId: " + request.getAppointmentId());
+                System.err.println("Error Type: " + e.getClass().getName());
+                System.err.println("Error Message: " + e.getMessage());
+                e.printStackTrace();
+
+                // FAIL FAST: Không tạo medical record với episode type sai
+                throw new RuntimeException("Cannot create medical record: Failed to retrieve appointment details. " +
+                        "This is required to determine if this is an initial visit or follow-up. " +
+                        "Error: " + e.getMessage(), e);
             }
 
             if(isExist){
@@ -228,6 +239,14 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             System.err.println("Error fetching patient info: " + e.getMessage());
         }
 
+        // Get appointment date from AppointmentClient
+        AppointmentClientResponse appointment = null;
+        try {
+            appointment = appointmentClient.getAppointmentForClient(medicalRecord.getAppointmentId());
+        } catch (Exception e) {
+            System.err.println("Error fetching appointment info: " + e.getMessage());
+        }
+
         // Convert prescriptions
         List<PrescriptionResponse> prescriptions = medicalRecord.getPrescriptions().stream()
                 .map(this::convertToPrescriptionResponse)
@@ -254,6 +273,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                         java.util.Date.from(medicalRecord.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant()) : null)
                 .updatedAt(medicalRecord.getUpdatedAt() != null ?
                         java.util.Date.from(medicalRecord.getUpdatedAt().atZone(ZoneId.systemDefault()).toInstant()) : null)
+                .appointmentDate(appointment != null ? appointment.getAppointmentDate() : null)
                 .prescriptions(prescriptions)
                 // ========== NEW FIELDS ==========
                 .parentRecordId(medicalRecord.getParentRecordId())

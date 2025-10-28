@@ -32,6 +32,7 @@ public class MedicalRecordDetailResponse {
     private String statusHealth;
     private Date createdAt;
     private Date updatedAt;
+    private Date appointmentDate;         // Appointment date from SchedulingService
     private List<PrescriptionResponse> prescriptions;
 
     // ========== NEW FIELDS FOR FOLLOW-UP SYSTEM ==========
