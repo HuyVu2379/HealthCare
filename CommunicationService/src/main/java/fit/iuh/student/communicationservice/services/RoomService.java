@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface RoomService {
     Room createRoomIfNotExists(CreateRoomRequest request);
-    List<Room> getRoomByDate(LocalDateTime date);
+    List<Room> getRoomByDate(String userId,LocalDateTime date);
     Room updateRoomStatus(String roomId, RoomStatus status);
 }

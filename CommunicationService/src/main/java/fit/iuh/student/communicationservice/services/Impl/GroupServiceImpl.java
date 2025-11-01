@@ -26,46 +26,47 @@ public class GroupServiceImpl implements GroupService {
     private final MessageRepository messageRepository;
     private final MessageMapper messageMapper;
     public GroupResponse createGroup(CreateGroupRequest request) {
-        boolean hasAI = request.getMembers() != null && request.getMembers().stream()
-                .anyMatch(mem -> {
-                    String uid = mem.getUserId() != null ? mem.getUserId() : "";
-                    String fn  = mem.getFullName() != null ? mem.getFullName() : "";
-                    String s1 = uid.toLowerCase();
-                    String s2 = fn.toLowerCase();
-                    return s1.contains("AI") || s2.contains("AI");
-                });
-
-        // Chỉ check trùng cho chat 2 người KHÔNG có AI (bất kể appointment)
-        if (!hasAI
-                && request.getMembers() != null && request.getMembers().size() == 2) {
-
-            String u1 = request.getMembers().get(0).getUserId();
-            String u2 = request.getMembers().get(1).getUserId();
-
-        //     var existingOpt = groupRepository.findOneToOneGroupByMembers(u1, u2);
-        var existingOpt = groupRepository.findGroupByMemberIds(java.util.List.of(u1, u2));
-
-            if (existingOpt.isPresent()) {
-                Group existing = existingOpt.get();
-                MessageResponse lastMessage = messageRepository
-                        .findLatestMessageByGroupId(existing.getGroupId(), org.springframework.data.domain.PageRequest.of(0, 1))
-                        .stream()
-                        .findFirst()
-                        .map(messageMapper::toMessageResponse)
-                        .orElse(null);
-
-                return GroupResponse.builder()
-                        .groupId(existing.getGroupId())
-                        .groupName(existing.getGroupName())
-                        .appointmentId(existing.getAppointment_id())
-                        .members(existing.getMembers())
-                        .createdAt(existing.getCreatedAt())
-                        .updatedAt(existing.getUpdatedAt())
-                        .lastMessageContent(lastMessage != null ? lastMessage.getContent() : "")
-                        .timeLastMessage(lastMessage != null ? lastMessage.getSendAt() : null)
-                        .build();
-            }
-        }
+//        boolean hasAI = request.getMembers() != null && request.getMembers().stream()
+//                .anyMatch(mem -> {
+//                    String uid = mem.getUserId() != null ? mem.getUserId() : "";
+//                    String fn  = mem.getFullName() != null ? mem.getFullName() : "";
+//                    String s1 = uid.toLowerCase();
+//                    String s2 = fn.toLowerCase();
+//                    return s1.contains("AI") || s2.contains("AI");
+//                });
+//
+//        // Chỉ check trùng cho chat 2 người KHÔNG có AI (bất kể appointment)
+//        if (!hasAI
+//                && request.getMembers() != null && request.getMembers().size() == 2) {
+//
+//            String u1 = request.getMembers().get(0).getUserId();
+//            String u2 = request.getMembers().get(1).getUserId();
+//
+//        //     var existingOpt = groupRepository.findOneToOneGroupByMembers(u1, u2);
+//        var existingOpt = groupRepository.findGroupByMemberIds(java.util.List.of(u1, u2));
+//
+//            if (existingOpt.isPresent()) {
+//                Group existing = existingOpt.get();
+//                MessageResponse lastMessage = messageRepository
+//                        .findLatestMessageByGroupId(existing.getGroupId(), org.springframework.data.domain.PageRequest.of(0, 1))
+//                        .stream()
+//                        .findFirst()
+//                        .map(messageMapper::toMessageResponse)
+//                        .orElse(null);
+//
+//                return GroupResponse.builder()
+//                        .groupId(existing.getGroupId())
+//                        .groupName(existing.getGroupName())
+//                        .appointmentId(existing.getAppointment_id())
+//                        .members(existing.getMembers())
+//                        .createdAt(existing.getCreatedAt())
+//                        .updatedAt(existing.getUpdatedAt())
+//                        .lastMessageContent(lastMessage != null ? lastMessage.getContent() : "")
+//                        .timeLastMessage(lastMessage != null ? lastMessage.getSendAt() : null)
+//                        .build();
+//            }
+//        }
+        boolean hasAI = request.getMembers() != null && request.getMembers().stream().anyMatch(mem-> "AI".equals(mem.getUserId()));
         Group savedGroup = groupRepository.insert(Group.builder()
                 .groupId(hasAI ? UUID.randomUUID() + "-AI" : UUID.randomUUID().toString())
                         .groupName(request.getGroupName() != null ? request.getGroupName() : "Chat with AI"

@@ -548,11 +548,11 @@ Trả lời (theo định dạng Markdown):
                     pass  # print("⚠️  Vui lòng nhập câu hỏi")
                     continue
                 
-                # print("\n🔍 Đang tìm kiếm thông tin liên quan...")
+                print("\n🔍 Đang tìm kiếm thông tin liên quan...")
                 result = self.ask_question(question)
                 
-                # print(f"\n💬 **Trả lời (Markdown format):**")
-                # print(result['response'])
+                print(f"\n💬 **Trả lời (Markdown format):**")
+                print(result['response'])
                 
                 # Hiển thị nguồn thông tin
                 if result['confidence'] >= 0.4:

@@ -37,9 +37,9 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public List<Room> getRoomByDate(LocalDateTime date) {
+    public List<Room> getRoomByDate(String userId, LocalDateTime date) {
         try{
-            return roomRepository.findAllByCreatedAtBetween(date.toLocalDate().atStartOfDay(), date.toLocalDate().atTime(23,59,59));
+            return roomRepository.findAllByCreatedAtBetween(userId,date.toLocalDate().atStartOfDay(), date.toLocalDate().atTime(23,59,59));
         } catch (Exception e) {
             throw e;
         }

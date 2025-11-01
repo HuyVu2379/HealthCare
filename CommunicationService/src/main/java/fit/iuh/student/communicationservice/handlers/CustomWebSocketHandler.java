@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -172,8 +173,10 @@ public class CustomWebSocketHandler implements WebSocketHandler {
 
     private void handleGetRoomsByDate(WebSocketSession session, JsonNode data) throws Exception {
         String dateStr = data.get("date").asText();
-        LocalDateTime date = LocalDateTime.parse(dateStr);
-        List<Room> rooms = roomService.getRoomByDate(date);
+        String userId = data.get("userId").asText();
+        LocalDate localDate = LocalDate.parse(dateStr);
+        LocalDateTime date = localDate.atStartOfDay();
+        List<Room> rooms = roomService.getRoomByDate(userId,date);
         sendMessage(session, createResponse("get_rooms_by_date_response", "success", rooms));
     }
 
