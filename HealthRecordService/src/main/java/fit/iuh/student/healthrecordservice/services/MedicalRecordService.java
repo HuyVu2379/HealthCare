@@ -5,6 +5,7 @@ import fit.iuh.student.healthrecordservice.dtos.responses.CreateMedicalRecordRes
 import fit.iuh.student.healthrecordservice.dtos.responses.MedicalRecordDetailResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.MedicalRecordListResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.MedicalRecordTimelineResponse;
+import fit.iuh.student.healthrecordservice.dtos.responses.MedicalRecordFullTimelineResponse;
 
 public interface MedicalRecordService {
     CreateMedicalRecordResponse createMedicalRecord(CreateMedicalRecordRequest request);
@@ -15,4 +16,7 @@ public interface MedicalRecordService {
     // ========== NEW METHODS FOR FOLLOW-UP SYSTEM ==========
     MedicalRecordTimelineResponse getMedicalRecordTimeline(String recordId);
     MedicalRecordListResponse getPatientEpisodes(String patientId, int page, int size, String sortBy, String order);
+
+    // ========== NEW METHOD FOR FULL TIMELINE WITH EPISODES ==========
+    MedicalRecordFullTimelineResponse getFullTimelineWithEpisodes(String recordId);
 }

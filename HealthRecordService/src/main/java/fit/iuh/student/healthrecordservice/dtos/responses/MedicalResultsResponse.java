@@ -21,6 +21,7 @@ public class MedicalResultsResponse {
     public static class MedicalRecordItem {
         private String recordId;
         private String appointmentId;
+        private Date appointmentDate;  // NEW: Ngày hẹn thực tế từ appointment
         private String diagnosis;
         private String symptoms;
         private String treatment;

@@ -23,7 +23,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/communication")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @Slf4j
 public class SocketController {
 

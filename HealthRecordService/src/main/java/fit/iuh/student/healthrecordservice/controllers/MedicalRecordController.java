@@ -118,4 +118,20 @@ public class MedicalRecordController {
             );
         }
     }
+
+    // ========== NEW ENDPOINT: FULL TIMELINE WITH EPISODES ==========
+
+    @GetMapping("/{recordId}/full-timeline")
+    public ResponseEntity<MessageResponse<MedicalRecordFullTimelineResponse>> getFullTimeline(
+            @PathVariable String recordId
+    ) {
+        try {
+            MedicalRecordFullTimelineResponse response = medicalRecordService.getFullTimelineWithEpisodes(recordId);
+            return SuccessEntityResponse.ok("Lấy lịch sử khám đầy đủ thành công", response);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                    new MessageResponse<>(500, "Không thể tải lịch sử: " + e.getMessage(), false, null)
+            );
+        }
+    }
 }
