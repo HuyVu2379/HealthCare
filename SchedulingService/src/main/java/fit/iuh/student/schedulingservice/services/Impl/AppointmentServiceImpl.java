@@ -179,7 +179,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             if (appointment == null) {
                 return false;
             }
-            DoctorSchedule doctorSchedule = doctorScheduleRepository.findById(appointment.getDoctorId()).orElse(null);
+            DoctorSchedule doctorSchedule = doctorScheduleRepository.findById(appointment.getDoctorSchedule().getScheduleId()).orElse(null);
             if (doctorSchedule == null) {
                 return false;
             }
@@ -502,7 +502,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .appointmentId(appointment.getAppointmentId())
                     .doctorId(appointment.getDoctorId())
                     .patientId(appointment.getPatientId())
-                    .appointmentDate(appointment.getAppointmentDate()) 
+                    .appointmentDate(appointment.getAppointmentDate())
                     .consultationType(appointment.getConsultationType() != null ?
                             appointment.getConsultationType().name() : null)
                     .relatedRecordId(appointment.getRelatedRecordId())
@@ -534,9 +534,9 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .slotId(request.getSlotId())
                     .timeSlot(matchingTimeSlot)
                     .appointmentDate(Date.valueOf(request.getAppointmentDate()))
-                    .consultationType(ConsultationType.FOLLOW_UP)  
-                    .status(AppointmentStatus.CONFIRMED)            
-                    .relatedRecordId(request.getMedicalRecordId()) 
+                    .consultationType(ConsultationType.FOLLOW_UP)
+                    .status(AppointmentStatus.CONFIRMED)
+                    .relatedRecordId(request.getMedicalRecordId())
                     .note(request.getNote() != null ? request.getNote() : "Tái khám theo chỉ định của bác sĩ")
                     .doctorSchedule(doctorSchedule)
                     .hasPredict(false)
@@ -584,4 +584,3 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 }
-

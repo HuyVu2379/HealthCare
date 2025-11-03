@@ -43,7 +43,7 @@ public class Appointment extends BaseEntity {
     @Column(name = "status", length = 20, nullable = false)
     private AppointmentStatus status = AppointmentStatus.PENDING;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "slot_id", insertable = false, updatable = false)
     private TimeSlot timeSlot;
 

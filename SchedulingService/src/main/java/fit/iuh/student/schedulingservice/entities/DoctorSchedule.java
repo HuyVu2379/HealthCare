@@ -31,7 +31,7 @@ public class DoctorSchedule extends BaseEntity {
     private Date workDate;
     private boolean isAvailable;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "doctor_schedule_time_slots",
             joinColumns = @JoinColumn(name = "schedule_id"),
