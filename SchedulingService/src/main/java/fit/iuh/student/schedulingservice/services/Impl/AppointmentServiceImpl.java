@@ -213,18 +213,22 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public RescheduleAppointmentResponse rescheduleAppointment(UpdateAppointmentRequest request) {
         try {
-            Appointment appointment = appointmentRepository.findById(request.getAppointmentId()).orElse(null);
-            if (appointment == null) {
-                throw new NotFoundException("Appointment not found");
-            }
-            DoctorSchedule ds = doctorScheduleRepository.findById(request.getNewScheduleId()).orElse(null);
-            DoctorSchedule oldDs = doctorScheduleRepository.findById(request.getOldScheduleId()).orElse(null);
-            if (ds == null) {
-                throw new NotFoundException("Doctor schedule not found");
-            }
-            if (ds.getTimeSlots().stream().noneMatch(ts -> ts.getSlotId().equals(request.getNewSlotId()))) {
-                throw new NotFoundException("Time slot not found in the doctor's schedule");
-            }
+            Appointment appointment = appointmentRepository.findById(request.getAppointmentId())
+                    .orElseThrow(() -> new NotFoundException("Appointment not found"));
+
+            DoctorSchedule ds = doctorScheduleRepository.findWithSlotsById(request.getNewScheduleId())
+                    .orElseThrow(() -> new NotFoundException("New doctor schedule not found"));
+
+            DoctorSchedule oldDs = doctorScheduleRepository.findWithSlotsById(request.getOldScheduleId())
+                    .orElseThrow(() -> new NotFoundException("Old doctor schedule not found"));
+
+            TimeSlot newTimeSlot = ds.getTimeSlots().stream()
+                    .filter(ts -> ts.getSlotId().equals(request.getNewSlotId()))
+                    .findFirst()
+                    .orElseThrow(() -> new NotFoundException("New time slot not found in the doctor's schedule"));
+
+            TimeSlot oldTimeSlotFromRepo = timeSlotRepository.findById(request.getOldSlotId())
+                    .orElseThrow(() -> new NotFoundException("Old time slot not found"));
 
             // Capture old appointment details before making changes
             Date oldAppointmentDate = appointment.getAppointmentDate();
@@ -233,17 +237,20 @@ public class AppointmentServiceImpl implements AppointmentService {
             // Update appointment with new details
             appointment.setAppointmentDate(ds.getWorkDate());
             appointment.setSlotId(request.getNewSlotId());
-            TimeSlot newTimeSlot = timeSlotRepository.findById(request.getNewSlotId()).orElse(null);
             appointment.setTimeSlot(newTimeSlot);
+            appointment.setDoctorSchedule(ds);
 
-            // remove time slot after reschedule
+            // remove time slot from new schedule
             ds.removeTimeSlot(newTimeSlot);
+
             // add old time slot back to old schedule
-            oldDs.addTimeSlot(timeSlotRepository.findById(request.getOldSlotId()).orElse(null));
+            oldDs.addTimeSlot(oldTimeSlotFromRepo);
+
             // Save changes to repositories
-            doctorScheduleRepository.save(oldDs);
-            doctorScheduleRepository.save(ds);
             appointmentRepository.save(appointment);
+            doctorScheduleRepository.save(ds);
+            doctorScheduleRepository.save(oldDs);
+
 
             // Create DateAppointment objects for old and new appointment details
             RescheduleAppointmentResponse.DateAppointment oldAppointmentDetails = RescheduleAppointmentResponse.DateAppointment.builder()
@@ -584,3 +591,4 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 }
+

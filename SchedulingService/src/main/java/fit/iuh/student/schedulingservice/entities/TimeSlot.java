@@ -21,4 +21,17 @@ public class TimeSlot extends BaseEntity {
 
     private LocalTime startTime;
     private LocalTime endTime;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TimeSlot timeSlot = (TimeSlot) o;
+        return slotId != null && slotId.equals(timeSlot.slotId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
