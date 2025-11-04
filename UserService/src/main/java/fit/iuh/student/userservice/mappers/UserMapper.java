@@ -12,6 +12,7 @@ import fit.iuh.student.userservice.entities.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
+import org.mapstruct.Named;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     UserResponse toUserResponse(User user);
+    @Mapping(target = "certifications", source = "certifications", qualifiedByName = "mapCertifications")
     DoctorResponse toDoctorResponse(Doctor doctor);
     @Mappings({
             @Mapping(source = "userId", target = "doctorId"),
@@ -31,6 +33,7 @@ public interface UserMapper {
     CertificationDto toCertificationDto(Certification certification);
     
     // Custom mapping method for converting List<Certification> to List<CertificationDto>
+    @Named("mapCertifications")
     default List<CertificationDto> map(List<Certification> certifications) {
         if (certifications == null) {
             return null;
