@@ -289,8 +289,20 @@ public class AppointmentServiceImpl implements AppointmentService {
             if (appointment == null) {
                 throw new NotFoundException("Appointment not found");
             }
+            
+            // Trả lại time slot về doctor schedule nếu REJECTED hoặc CANCELED
+            if (status == AppointmentStatus.REJECTED || status == AppointmentStatus.CANCELED) {
+                DoctorSchedule doctorSchedule = doctorScheduleRepository.findById(appointment.getDoctorSchedule().getScheduleId()).orElse(null);
+                if (doctorSchedule != null) {
+                    // Trả lại time slot đã từ chối/hủy vào lịch làm việc của bác sĩ
+                    doctorSchedule.addTimeSlot(appointment.getTimeSlot());
+                    doctorScheduleRepository.save(doctorSchedule);
+                }
+            }
+            
             appointment.setStatus(status);
             appointmentRepository.save(appointment);
+            
             AppointmentResponse ap = AppointmentResponse.builder()
                     .appointmentId(appointment.getAppointmentId())
                     .doctor(userClient.getDoctorForClient(appointment.getDoctorId()))
@@ -307,10 +319,13 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .consultationType(appointment.getConsultationType())
                     .addressDetail(appointment.getAddressDetail())
                     .build();
+            
             if (status == AppointmentStatus.CONFIRMED) {
                 appointmentEventPublisher.publishConfirmStatusAppointmentEvent(ap);
             } else if (status == AppointmentStatus.NO_SHOW) {
                 appointmentEventPublisher.publishNoShowStatusAppointmentEvent(ap);
+            } else if (status == AppointmentStatus.REJECTED) {
+                appointmentEventPublisher.publishRejectStatusAppointmentEvent(ap);
             } else {
                 appointmentEventPublisher.publishConfirmStatusAppointmentEvent(ap);
             }
