@@ -1,5 +1,6 @@
 package fit.iuh.student.schedulingservice.dtos.requests;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fit.iuh.student.schedulingservice.entities.TimeSlot;
 import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
 import fit.iuh.student.schedulingservice.enums.ConsultationType;
@@ -25,5 +26,6 @@ public class CreateAppointmentRequest {
     private AppointmentStatus status = AppointmentStatus.PENDING;
     private ConsultationType consultationType;
     private String addressDetail;
+    @JsonProperty("has_predict")
     private Boolean hasPredict;
 }
