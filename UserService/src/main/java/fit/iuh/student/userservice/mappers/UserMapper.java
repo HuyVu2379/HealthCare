@@ -24,7 +24,9 @@ public interface UserMapper {
     DoctorResponse toDoctorResponse(Doctor doctor);
     @Mappings({
             @Mapping(source = "userId", target = "doctorId"),
-            @Mapping(source = "phone", target = "phoneNumber")
+            @Mapping(source = "phone", target = "phoneNumber"),
+            @Mapping(source = "rating", target = "rating"),
+            @Mapping(source = "examinationFee", target = "examinationFee")
     })
     DoctorClientResponse toDoctorClientResponse(Doctor doctor);
     PatientClientResponse toPatientClientResponse(Patient patient);

@@ -74,4 +74,16 @@ public class DoctorScheduleController {
         List<DoctorScheduleClientResponse> doctors = doctorScheduleService.getDoctorByDateAndTimeSlot(date1, slotId);
         return SuccessEntityResponse.ok("Get doctors by date and time slot successfully", doctors);
     }
+
+    @GetMapping("/getDoctorsWithDetailsByDate")
+    public ResponseEntity<MessageResponse<List<DoctorScheduleClientResponse>>> getDoctorsWithDetailsByDate(
+            @RequestParam String date
+    ) {
+        Date date1 = Date.valueOf(date);
+        if(date1.before(Date.valueOf(LocalDate.now().minusDays(1)))) {
+            throw new BadRequestException("Date must be today or later");
+        }
+        List<DoctorScheduleClientResponse> doctors = doctorScheduleService.getDoctorsWithDetailsByDate(date1);
+        return SuccessEntityResponse.ok("Get doctors by date successfully", doctors);
+    }
 }

@@ -12,4 +12,6 @@ public class DoctorClientResponse {
     private int experienceYears;
     private String avatarUrl;
     private String clinicAddress;
+    private Double rating;
+    private Integer examinationFee;
 }

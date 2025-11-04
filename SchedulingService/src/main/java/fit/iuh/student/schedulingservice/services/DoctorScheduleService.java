@@ -20,4 +20,6 @@ public interface DoctorScheduleService {
     List<String> getDoctorIdsByDate(Date date);
     boolean updateDoctorSchedule(UpdateDoctorSchedule request);
     List<DoctorScheduleClientResponse> getDoctorByDateAndTimeSlot(Date date, int slotId);
+    // Lấy danh sách bác sĩ với thông tin chi tiết theo ngày
+    List<DoctorScheduleClientResponse> getDoctorsWithDetailsByDate(Date date);
 }
