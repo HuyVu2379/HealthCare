@@ -2,10 +2,6 @@ from typing import Dict, Any, List
 from app.models.ai_models import (
     HealthAnalysisRequest,
     HealthAnalysisResponse,
-    MedicalImageAnalysisRequest,
-    MedicalImageAnalysisResponse,
-    DrugInteractionRequest,
-    DrugInteractionResponse
 )
 import asyncio
 import random
@@ -40,91 +36,6 @@ class AnalysisService:
         except Exception as e:
             raise Exception(f"Error analyzing symptoms: {str(e)}")
     
-    async def analyze_medical_image(self, request: MedicalImageAnalysisRequest) -> MedicalImageAnalysisResponse:
-        """
-        Analyze medical images
-        """
-        try:
-            # Simulate image processing
-            await asyncio.sleep(1.0)
-            
-            # Placeholder analysis (replace with actual image AI)
-            findings = self._analyze_image_type(request.image_type)
-            
-            return MedicalImageAnalysisResponse(
-                findings=findings["findings"],
-                abnormalities=findings["abnormalities"],
-                confidence_scores=findings["confidence_scores"],
-                recommendations=findings["recommendations"]
-            )
-            
-        except Exception as e:
-            raise Exception(f"Error analyzing medical image: {str(e)}")
-    
-    async def check_drug_interactions(self, request: DrugInteractionRequest) -> DrugInteractionResponse:
-        """
-        Check for drug interactions
-        """
-        try:
-            await asyncio.sleep(0.3)
-            
-            interactions = self._check_medication_interactions(request.medications)
-            
-            return DrugInteractionResponse(
-                interactions=interactions["interactions"],
-                warnings=interactions["warnings"],
-                safe_combinations=interactions["safe_combinations"],
-                recommendations=interactions["recommendations"]
-            )
-            
-        except Exception as e:
-            raise Exception(f"Error checking drug interactions: {str(e)}")
-    
-    async def calculate_health_score(self, patient_data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Calculate overall health score
-        """
-        try:
-            await asyncio.sleep(0.2)
-            
-            # Simple health score calculation
-            base_score = 75
-            age = patient_data.get("age", 30)
-            conditions = patient_data.get("conditions", [])
-            
-            # Adjust score based on age
-            if age > 65:
-                base_score -= 10
-            elif age < 25:
-                base_score += 5
-            
-            # Adjust score based on conditions
-            base_score -= len(conditions) * 5
-            
-            # Ensure score is between 0 and 100
-            final_score = max(0, min(100, base_score))
-            
-            return {
-                "score": final_score,
-                "category": self._get_health_category(final_score),
-                "recommendations": self._get_health_recommendations(final_score)
-            }
-            
-        except Exception as e:
-            raise Exception(f"Error calculating health score: {str(e)}")
-    
-    def _assess_severity(self, symptoms: List[str]) -> str:
-        """Assess symptom severity"""
-        critical_symptoms = ["chest pain", "difficulty breathing", "severe bleeding", "đau ngực", "khó thở"]
-        high_symptoms = ["high fever", "severe headache", "sốt cao", "đau đầu dữ dội"]
-        
-        for symptom in symptoms:
-            if any(critical in symptom.lower() for critical in critical_symptoms):
-                return "critical"
-            elif any(high in symptom.lower() for high in high_symptoms):
-                return "high"
-        
-        return "medium" if len(symptoms) > 3 else "low"
     
     def _generate_symptom_analysis(self, symptoms: List[str]) -> str:
         """Generate symptom analysis"""

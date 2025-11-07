@@ -23,7 +23,8 @@ public class SecurityConfig {
 
     private List<String> publicEndpoints = Arrays.asList(
             "/api/v1/appointments/client/**",
-            "/api/v1/predicts/get-predict-history/**"
+            "/api/v1/predicts/get-predict-history/**",
+            "/api/v1/predicts/get-predict/**"
     );
 
     @Bean

@@ -46,21 +46,21 @@ public class PredictServiceImpl implements PredictService {
 //            }
 
 //            List<HealthMetricResponse> healthMetrics = scheduleClient.getHealthMetricsByPatientIdClient(patientId, authorizationHeader);
-            List<HealthMetricResponse> healthMetrics = scheduleClient.getHealthMetricsByPatientIdClient(patientId);
+//            List<HealthMetricResponse> healthMetrics = scheduleClient.getHealthMetricsByPatientIdClient(patientId);
             Predict predict = predictRepository.findLatestPredictByPatientId(patientId);
-            
+
             // Check null before accessing
             if (predict == null) {
                 log.info("No predict data found for patient ID: {}", patientId);
                 return null; // Return null when no predict data exists
             }
-            
+
             return PredictResponse.builder()
                     .predictId(predict.getPredictId())
                     .patientId(predict.getPatientId())
                     .stage(predict.getStage())
                     .recommendations(predict.getRecommendations())
-                    .healthMetrics(healthMetrics)
+//                    .healthMetrics(healthMetrics)
                     .confidence(predict.getConfidence())
                     .createdAt(predict.getCreatedAt())
                     .updatedAt(predict.getUpdatedAt())
@@ -74,20 +74,20 @@ public class PredictServiceImpl implements PredictService {
     @Override
     public Boolean createPredictForPatient(CreatePredictRequest request) {
         try{
-            // Lấy Authorization header từ request
-            String authorizationHeader = getAuthorizationHeader();
-            log.debug("Retrieved authorization header for creating predict for patient ID: {}", request.getPatientId());
+//            // Lấy Authorization header từ request
+//            String authorizationHeader = getAuthorizationHeader();
+//            log.debug("Retrieved authorization header for creating predict for patient ID: {}", request.getPatientId());
+//
+//            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+//                log.warn("No valid authorization header found in request for patient ID: {}", request.getPatientId());
+//                throw new RuntimeException("Authorization header is required");
+//            }
 
-            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-                log.warn("No valid authorization header found in request for patient ID: {}", request.getPatientId());
-                throw new RuntimeException("Authorization header is required");
-            }
-
-            List<HealthMetricResponse> healthMetrics = scheduleClient.createHealthMetrics(request.getHealthMetrics(), authorizationHeader);
-            if(healthMetrics == null || healthMetrics.isEmpty()){
-                log.error("Failed to create health metrics for patient ID: {}", request.getPatientId());
-                throw new RuntimeException("Failed to create health metrics");
-            }
+//            List<HealthMetricResponse> healthMetrics = scheduleClient.createHealthMetrics(request.getHealthMetrics(), authorizationHeader);
+//            if(healthMetrics == null || healthMetrics.isEmpty()){
+//                log.error("Failed to create health metrics for patient ID: {}", request.getPatientId());
+//                throw new RuntimeException("Failed to create health metrics");
+//            }
             Predict predict = Predict.builder()
                     .patientId(request.getPatientId())
                     .stage(request.getStage())
@@ -103,33 +103,33 @@ public class PredictServiceImpl implements PredictService {
         }
     }
 
-    @Override
-    public List<PredictResponse> getPredictHistoryByPatientId(String patientId) {
-        try{
-            List<HealthMetricResponseWithBatch> healthMetricsResponseWithBatch = scheduleClient.getHealthMetricsByPatientIdWithBatch(patientId);
-            List<Predict> predicts = predictRepository.findPredictByPatientId(patientId);
-            return predicts.stream().map(pre ->{
-                HealthMetricResponseWithBatch matchedHealthMetrics = healthMetricsResponseWithBatch.stream()
-                        .filter(hm -> hm.getMeasuredAt().equals(pre.getCreatedAt().toLocalDate().atStartOfDay()))
-                        .findFirst()
-                        .orElse(null);
-
-                List<HealthMetricResponse> healthMetrics = matchedHealthMetrics != null ? matchedHealthMetrics.getHealthMetrics() : List.of();
-
-                return PredictResponse.builder()
-                        .predictId(pre.getPredictId())
-                        .patientId(pre.getPatientId())
-                        .stage(pre.getStage())
-                        .recommendations(pre.getRecommendations())
-                        .healthMetrics(healthMetrics)
-                        .confidence(pre.getConfidence())
-                        .createdAt(pre.getCreatedAt())
-                        .updatedAt(pre.getUpdatedAt())
-                        .build();
-            })
-            .toList();
-        } catch (Exception e) {
-            throw e;
-        }
-    }
+//    @Override
+//    public List<PredictResponse> getPredictHistoryByPatientId(String patientId) {
+//        try{
+//            List<HealthMetricResponseWithBatch> healthMetricsResponseWithBatch = scheduleClient.getHealthMetricsByPatientIdWithBatch(patientId);
+//            List<Predict> predicts = predictRepository.findPredictByPatientId(patientId);
+//            return predicts.stream().map(pre ->{
+//                HealthMetricResponseWithBatch matchedHealthMetrics = healthMetricsResponseWithBatch.stream()
+//                        .filter(hm -> hm.getMeasuredAt().equals(pre.getCreatedAt().toLocalDate().atStartOfDay()))
+//                        .findFirst()
+//                        .orElse(null);
+//
+//                List<HealthMetricResponse> healthMetrics = matchedHealthMetrics != null ? matchedHealthMetrics.getHealthMetrics() : List.of();
+//
+//                return PredictResponse.builder()
+//                        .predictId(pre.getPredictId())
+//                        .patientId(pre.getPatientId())
+//                        .stage(pre.getStage())
+//                        .recommendations(pre.getRecommendations())
+//                        .healthMetrics(healthMetrics)
+//                        .confidence(pre.getConfidence())
+//                        .createdAt(pre.getCreatedAt())
+//                        .updatedAt(pre.getUpdatedAt())
+//                        .build();
+//            })
+//            .toList();
+//        } catch (Exception e) {
+//            throw e;
+//        }
+//    }
 }

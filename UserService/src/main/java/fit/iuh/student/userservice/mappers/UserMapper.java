@@ -20,11 +20,7 @@ import java.util.stream.Collectors;
 public interface UserMapper {
     UserResponse toUserResponse(User user);
     DoctorResponse toDoctorResponse(Doctor doctor);
-    @Mappings({
-            @Mapping(source = "userId", target = "doctorId"),
-            @Mapping(source = "phone", target = "phoneNumber")
-    })
-    DoctorClientResponse toDoctorClientResponse(Doctor doctor);
+
     PatientClientResponse toPatientClientResponse(Patient patient);
     
     // Certification mapping
@@ -39,4 +35,9 @@ public interface UserMapper {
                 .map(this::toCertificationDto)
                 .collect(Collectors.toList());
     }
+    @Mappings({
+        @Mapping(source = "userId", target = "doctorId"),
+        @Mapping(source = "phone", target = "phoneNumber")
+    })
+    DoctorClientResponse toDoctorClientResponse(Doctor doctor);
 }

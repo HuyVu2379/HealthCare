@@ -3,12 +3,9 @@ from app.models.ai_models import (
     DetailedTrendResponse,
     HealthAnalysisRequest, 
     HealthAnalysisResponse,
-    MedicalImageAnalysisRequest,
-    MedicalImageAnalysisResponse,
-    DrugInteractionRequest,
-    DrugInteractionResponse,
     CKDPredictionRequest,
-    CKDPredictionResponse
+    CKDPredictionResponse,
+    PredictResponse
 )
 from app.services.analysis_service import AnalysisService
 from app.services.ckd_service import CKDPredictionService
@@ -28,47 +25,14 @@ async def analyze_symptoms(request: HealthAnalysisRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/predict-current-trends/{patient_id}", response_model=DetailedTrendResponse)
-async def predict_current_trends(patient_id: str):
+@router.post("/predict-current-trends", response_model=DetailedTrendResponse)
+async def predict_current_trends(predictRes: PredictResponse):
     """
     Predict current health trends for a patient
     """
     try:
-        trends = await predict.get_latest_trend(patient_id)
+        trends = await predict.get_latest_trend(predictRes)
         return trends
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.post("/medical-image", response_model=MedicalImageAnalysisResponse)
-async def analyze_medical_image(request: MedicalImageAnalysisRequest):
-    """
-    Analyze medical images (X-ray, MRI, CT-scan, etc.)
-    """
-    try:
-        analysis = await analysis_service.analyze_medical_image(request)
-        return analysis
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.post("/drug-interactions", response_model=DrugInteractionResponse)
-async def check_drug_interactions(request: DrugInteractionRequest):
-    """
-    Check for potential drug interactions and provide safety recommendations
-    """
-    try:
-        analysis = await analysis_service.check_drug_interactions(request)
-        return analysis
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.post("/health-score")
-async def calculate_health_score(patient_data: dict):
-    """
-    Calculate overall health score based on patient data
-    """
-    try:
-        score = await analysis_service.calculate_health_score(patient_data)
-        return {"health_score": score, "recommendations": score.get("recommendations", [])}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -134,89 +98,89 @@ async def predict_ckd_stage(request: CKDPredictionRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/ckd-model-info")
-async def get_ckd_model_info():
-    """
-    Get detailed information about CKD prediction models and their capabilities
-    """
-    try:
-        model_info = ckd_service.get_model_info()
-        missing_data_info = ckd_service.get_missing_data_tolerance()
+# @router.get("/ckd-model-info")
+# async def get_ckd_model_info():
+#     """
+#     Get detailed information about CKD prediction models and their capabilities
+#     """
+#     try:
+#         model_info = ckd_service.get_model_info()
+#         missing_data_info = ckd_service.get_missing_data_tolerance()
         
-        return {
-            "models": model_info,
-            "missing_data_handling": missing_data_info,
-            "usage_guidelines": {
-                "essential_fields": [
-                    "serum_creatinine",
-                    "gfr", 
-                    "physical_activity"
-                ],
-                "recommendations": [
-                    "Cung cấp đầy đủ thông tin để có kết quả chính xác nhất",
-                    "Mô hình nâng cao sẽ tự động được sử dụng khi thiếu dữ liệu",
-                    "Độ tin cậy có thể giảm khi thiếu nhiều thông tin",
-                    "Luôn cung cấp ít nhất các thông tin bắt buộc"
-                ]
-            }
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+#         return {
+#             "models": model_info,
+#             "missing_data_handling": missing_data_info,
+#             "usage_guidelines": {
+#                 "essential_fields": [
+#                     "serum_creatinine",
+#                     "gfr", 
+#                     "physical_activity"
+#                 ],
+#                 "recommendations": [
+#                     "Cung cấp đầy đủ thông tin để có kết quả chính xác nhất",
+#                     "Mô hình nâng cao sẽ tự động được sử dụng khi thiếu dữ liệu",
+#                     "Độ tin cậy có thể giảm khi thiếu nhiều thông tin",
+#                     "Luôn cung cấp ít nhất các thông tin bắt buộc"
+#                 ]
+#             }
+#         }
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/ckd-info")
-async def get_ckd_info():
-    """
-    Get information about CKD stages and required input parameters
-    """
-    return {
-        "stages": {
-            0: "Bình thường hoặc nguy cơ cao - Thận hoạt động bình thường",
-            1: "Giai đoạn 1 - Tổn thương thận với GFR bình thường (≥90)",
-            2: "Giai đoạn 2 - Giảm GFR nhẹ (60-89)",
-            3: "Giai đoạn 3 - Giảm GFR vừa (30-59)",
-            4: "Giai đoạn 4 - Giảm GFR nặng (15-29)",
-            5: "Giai đoạn 5 - Suy thận giai đoạn cuối (<15)"
-        },
-        "required_parameters": {
-            "essential": {
-                "serum_creatinine": "mg/dL - Mức creatinine trong máu",
-                "gfr": "mL/min/1.73m² - Tỷ lệ lọc cầu thận",
-                "physical_activity": "daily/weekly/rarely - Mức độ hoạt động thể chất"
-            },
-            "optional_numerical": {
-                "bun": "mg/dL - Nitơ urê trong máu",
-                "serum_calcium": "mg/dL - Canxi trong máu",
-                "ana": "0/1 - Kháng thể kháng nhân",
-                "c3_c4": "mg/dL - Bổ thể C3/C4",
-                "hematuria": "0/1 - Có máu trong nước tiểu",
-                "oxalate_levels": "mg/dL - Mức oxalate",
-                "urine_ph": "4.5-8.5 - Độ pH nước tiểu",
-                "blood_pressure": "mmHg - Huyết áp",
-                "water_intake": "liters/day - Lượng nước uống",
-                "months": "Thời gian theo dõi (tháng)",
-                "cluster": "ID cụm phân loại"
-            },
-            "optional_categorical": {
-                "diet": "balanced/high protein/low salt - Chế độ ăn",
-                "smoking": "yes/no - Hút thuốc",
-                "alcohol": "never/occasionally/daily - Sử dụng rượu",
-                "painkiller_usage": "yes/no - Sử dụng thuốc giảm đau",
-                "family_history": "yes/no - Tiền sử gia đình",
-                "weight_changes": "stable/gain/loss - Thay đổi cân nặng",
-                "stress_level": "low/moderate/high - Mức độ căng thẳng"
-            }
-        },
-        "model_info": {
-            "primary_model": "LightGBM (Optimized) - Độ chính xác cao với dữ liệu đầy đủ",
-            "enhanced_model": "Random Forest - Xử lý dữ liệu thiếu",
-            "automatic_selection": "Hệ thống tự động chọn model phù hợp",
-            "accuracy": "99% với dữ liệu đầy đủ",
-            "f1_score": 0.979
-        },
-        "features": {
-            "missing_data_handling": "Tự động xử lý dữ liệu thiếu",
-            "intelligent_model_selection": "Chọn model phù hợp tự động",
-            "confidence_adjustment": "Điều chỉnh độ tin cậy theo dữ liệu có sẵn",
-            "comprehensive_recommendations": "Khuyến nghị dựa trên tình trạng cụ thể"
-        }
-    }
+# @router.get("/ckd-info")
+# async def get_ckd_info():
+#     """
+#     Get information about CKD stages and required input parameters
+#     """
+#     return {
+#         "stages": {
+#             0: "Bình thường hoặc nguy cơ cao - Thận hoạt động bình thường",
+#             1: "Giai đoạn 1 - Tổn thương thận với GFR bình thường (≥90)",
+#             2: "Giai đoạn 2 - Giảm GFR nhẹ (60-89)",
+#             3: "Giai đoạn 3 - Giảm GFR vừa (30-59)",
+#             4: "Giai đoạn 4 - Giảm GFR nặng (15-29)",
+#             5: "Giai đoạn 5 - Suy thận giai đoạn cuối (<15)"
+#         },
+#         "required_parameters": {
+#             "essential": {
+#                 "serum_creatinine": "mg/dL - Mức creatinine trong máu",
+#                 "gfr": "mL/min/1.73m² - Tỷ lệ lọc cầu thận",
+#                 "physical_activity": "daily/weekly/rarely - Mức độ hoạt động thể chất"
+#             },
+#             "optional_numerical": {
+#                 "bun": "mg/dL - Nitơ urê trong máu",
+#                 "serum_calcium": "mg/dL - Canxi trong máu",
+#                 "ana": "0/1 - Kháng thể kháng nhân",
+#                 "c3_c4": "mg/dL - Bổ thể C3/C4",
+#                 "hematuria": "0/1 - Có máu trong nước tiểu",
+#                 "oxalate_levels": "mg/dL - Mức oxalate",
+#                 "urine_ph": "4.5-8.5 - Độ pH nước tiểu",
+#                 "blood_pressure": "mmHg - Huyết áp",
+#                 "water_intake": "liters/day - Lượng nước uống",
+#                 "months": "Thời gian theo dõi (tháng)",
+#                 "cluster": "ID cụm phân loại"
+#             },
+#             "optional_categorical": {
+#                 "diet": "balanced/high protein/low salt - Chế độ ăn",
+#                 "smoking": "yes/no - Hút thuốc",
+#                 "alcohol": "never/occasionally/daily - Sử dụng rượu",
+#                 "painkiller_usage": "yes/no - Sử dụng thuốc giảm đau",
+#                 "family_history": "yes/no - Tiền sử gia đình",
+#                 "weight_changes": "stable/gain/loss - Thay đổi cân nặng",
+#                 "stress_level": "low/moderate/high - Mức độ căng thẳng"
+#             }
+#         },
+#         "model_info": {
+#             "primary_model": "LightGBM (Optimized) - Độ chính xác cao với dữ liệu đầy đủ",
+#             "enhanced_model": "Random Forest - Xử lý dữ liệu thiếu",
+#             "automatic_selection": "Hệ thống tự động chọn model phù hợp",
+#             "accuracy": "99% với dữ liệu đầy đủ",
+#             "f1_score": 0.979
+#         },
+#         "features": {
+#             "missing_data_handling": "Tự động xử lý dữ liệu thiếu",
+#             "intelligent_model_selection": "Chọn model phù hợp tự động",
+#             "confidence_adjustment": "Điều chỉnh độ tin cậy theo dữ liệu có sẵn",
+#             "comprehensive_recommendations": "Khuyến nghị dựa trên tình trạng cụ thể"
+#         }
+#     }

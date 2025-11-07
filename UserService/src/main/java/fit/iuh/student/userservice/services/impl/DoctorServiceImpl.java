@@ -64,8 +64,23 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public DoctorClientResponse getPatientByIdForClient(String patientId) {
-        return userMapper.toDoctorClientResponse(doctorRepository.findById(patientId).get());
+    public DoctorClientResponse getDoctorIdByIdForClient(String doctorId) {
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new UserNotFoundException("Doctor not found with id: " + doctorId));;
+//        return DoctorClientResponse.builder()
+//                .doctorId(doctor.getUserId())
+//                .fullName(doctor.getFullName())
+//                .email(doctor.getEmail())
+//                .phoneNumber(doctor.getPhone())
+//                .specialty(doctor.getSpecialty())
+//                .experienceYears(doctor.getExperienceYears())
+//                .avatarUrl(doctor.getAvatarUrl())
+//                .clinicAddress(doctor.getClinicAddress())
+//                .examinationFee(doctor.getExaminationFee())
+//                .rating(doctor.getRating())
+//                .bio(doctor.getBio())
+//                .build();
+        return userMapper.toDoctorClientResponse(doctor);
     }
 
     @Override

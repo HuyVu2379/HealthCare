@@ -18,7 +18,7 @@ public interface DoctorService {
     UpdateDoctorCertificationResponse updateDoctorCertification(UpdateDoctorCertificationRequest request, String doctorId);
     DoctorResponse getDoctorById(String doctorId);
     List<DoctorResponse> getDoctorByIds(List<String> doctorIds);
-    DoctorClientResponse getPatientByIdForClient(String patientId);
+    DoctorClientResponse getDoctorIdByIdForClient(String doctorId);
     DoctorResponse createAccountForDoctor(CreateDoctorAccountRequest request);
     
     // New certification methods

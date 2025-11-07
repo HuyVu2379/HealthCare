@@ -16,5 +16,5 @@ public class CreatePredictRequest {
     private int stage;
     private List<String> recommendations;
     private double confidence;
-    private List<CreateHealthMetricRequest> healthMetrics;
+//    private List<CreateHealthMetricRequest> healthMetrics;
 }

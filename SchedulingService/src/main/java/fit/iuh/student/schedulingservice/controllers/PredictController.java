@@ -31,10 +31,10 @@ public class PredictController {
         return SuccessEntityResponse.ok("get predict success!",predictService.getPredictResponseByPatientId(patientId));
     }
 
-    @GetMapping("/get-predict-history/{patientId}")
-    public ResponseEntity<MessageResponse<List<PredictResponse>>> getPredictHistoryByPatientId(
-            @PathVariable String patientId
-    ){
-        return SuccessEntityResponse.ok("get predict history success!",predictService.getPredictHistoryByPatientId(patientId));
-    }
+//    @GetMapping("/get-predict-history/{patientId}")
+//    public ResponseEntity<MessageResponse<List<PredictResponse>>> getPredictHistoryByPatientId(
+//            @PathVariable String patientId
+//    ){
+//        return SuccessEntityResponse.ok("get predict history success!",predictService.getPredictHistoryByPatientId(patientId));
+//    }
 }

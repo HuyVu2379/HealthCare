@@ -8,5 +8,5 @@ import java.util.List;
 public interface PredictService {
     PredictResponse getPredictResponseByPatientId(String patientId);
     Boolean createPredictForPatient(CreatePredictRequest request);
-    List<PredictResponse> getPredictHistoryByPatientId(String patientId);
+//    List<PredictResponse> getPredictHistoryByPatientId(String patientId);
 }

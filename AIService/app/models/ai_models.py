@@ -37,28 +37,6 @@ class HealthAnalysisResponse(BaseModel):
     confidence_score: float
     suggested_actions: List[str]
 
-class MedicalImageAnalysisRequest(BaseModel):
-    image_url: str
-    image_type: str  # x-ray, mri, ct-scan, etc.
-    patient_info: Optional[Dict[str, Any]] = None
-
-class MedicalImageAnalysisResponse(BaseModel):
-    findings: List[str]
-    abnormalities: List[str]
-    confidence_scores: Dict[str, float]
-    recommendations: List[str]
-
-class DrugInteractionRequest(BaseModel):
-    medications: List[str]
-    patient_age: Optional[int] = None
-    patient_conditions: Optional[List[str]] = None
-
-class DrugInteractionResponse(BaseModel):
-    interactions: List[Dict[str, Any]]
-    warnings: List[str]
-    safe_combinations: List[str]
-    recommendations: List[str]
-
 class CKDPredictionRequest(BaseModel):
     # Essential numerical features (luôn bắt buộc cho primary model, có thể thiếu cho enhanced model)
     serum_creatinine: Optional[float] = None
@@ -109,7 +87,7 @@ class PredictResponse(BaseModel):
     stage: int
     recommendations: List[str]
     confidence: float
-    healthMetrics: List[HealthMetricResponse] = []
+    # healthMetrics: List[HealthMetricResponse] = []
     createdAt: str
     updatedAt: str
 
@@ -117,10 +95,10 @@ class GetPredictHistoryResponse(BaseModel):
     statusCode: int
     message: str
     success: bool
-    data: List[PredictResponse] = []
+    data: Optional[PredictResponse] = None
 
 
-Classification = Literal["IMPROVING", "STABLE", "WORSENING", "INSUFFICIENT_HISTORY"]
+Classification = Literal["IMPROVING", "STABLE", "WORSENING", "INSUFFICIENT_HISTORY", "INSUFFICIENT_DATA"]
 Status = Literal["WARNING", "NORMAL", "IMPROVING"]
 
 class TrendResponse(BaseModel):
@@ -128,36 +106,15 @@ class TrendResponse(BaseModel):
     stage_previous: Optional[int] = Field(None, alias="stagePrevious")
     stage_current: Optional[int] = Field(None, alias="stageCurrent")
     confidence_change: Optional[float] = Field(None, alias="confidenceChange")
-
-    # “Metric” tổng hợp dùng để tóm tắt (không bắt buộc phải là GFR)
-    metric_previous: Optional[float] = Field(None, alias="metricPrevious")
-    metric_current: Optional[float] = Field(None, alias="metricCurrent")
-    metric_change_pct: Optional[float] = Field(None, alias="metricChangePct")
-    metric_name: Optional[str] = Field(None, alias="metricName")
-
     summary: str
 
     class Config:
         allow_population_by_field_name = True  # cho phép dùng snake_case khi tạo model
         populate_by_name = True                # (Pydantic v2)
 
-class MetricComparison(BaseModel):
-    metric: str
-    previous_value: Optional[float] = Field(None, alias="previousValue")
-    current_value: Optional[float] = Field(None, alias="currentValue")
-    unit: Optional[str] = ""
-    change_pct: Optional[float] = Field(None, alias="changePct")
-    status: Status
-    message: str
-
-    class Config:
-        allow_population_by_field_name = True
-        populate_by_name = True
 
 class DetailedTrendResponse(BaseModel):
     trend: TrendResponse
-    metric_comparisons: List[MetricComparison] = Field(alias="metricComparisons")
-
     class Config:
         allow_population_by_field_name = True
         populate_by_name = True

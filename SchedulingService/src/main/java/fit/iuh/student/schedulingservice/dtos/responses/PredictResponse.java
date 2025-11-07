@@ -18,7 +18,7 @@ public class PredictResponse {
     private int stage;
     private List<String> recommendations;
     private double confidence;
-    private List<HealthMetricResponse> healthMetrics;
+//    private List<HealthMetricResponse> healthMetrics;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

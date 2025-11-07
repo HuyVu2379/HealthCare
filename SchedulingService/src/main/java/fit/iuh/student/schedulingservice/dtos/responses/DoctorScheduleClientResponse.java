@@ -14,4 +14,7 @@ public class DoctorScheduleClientResponse {
     private String avatarUrl;
     private String clinicAddress;
     private String scheduleId;
+    private int examinationFee;
+    private double rating;
+    private String bio;
 }

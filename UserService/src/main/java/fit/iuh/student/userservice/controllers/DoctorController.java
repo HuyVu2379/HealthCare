@@ -82,7 +82,7 @@ public class DoctorController {
             @PathVariable String doctorId
     )
     {
-        return doctorService.getPatientByIdForClient(doctorId);
+        return doctorService.getDoctorIdByIdForClient(doctorId);
     }
     
     // API thêm certification mới

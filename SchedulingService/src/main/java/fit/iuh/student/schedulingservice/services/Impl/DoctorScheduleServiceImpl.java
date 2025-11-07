@@ -181,6 +181,9 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
                                     .specialty(doctor.getSpecialty())
                                     .avatarUrl(doctor.getAvatarUrl())
                                     .scheduleId(schedule.getScheduleId())
+                                    .examinationFee(doctor.getExaminationFee())
+                                    .rating(doctor.getRating())
+                                    .bio(doctor.getBio())
                                     .build());
                     break;
                 }

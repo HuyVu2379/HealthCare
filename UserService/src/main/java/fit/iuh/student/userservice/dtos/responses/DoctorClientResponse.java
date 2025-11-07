@@ -1,8 +1,10 @@
 package fit.iuh.student.userservice.dtos.responses;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class DoctorClientResponse {
     private String doctorId;
     private String fullName;
