@@ -85,6 +85,17 @@ public class DoctorController {
         return doctorService.getDoctorIdByIdForClient(doctorId);
     }
     
+    @GetMapping("/getDoctorById/{doctorId}")
+    public ResponseEntity<MessageResponse<DoctorResponse>> getDoctorById(
+            @PathVariable String doctorId
+    ){
+        DoctorResponse response = doctorService.getDoctorById(doctorId);
+        if(response == null) {
+            throw new UserNotFoundException("Doctor not found with id: " + doctorId);
+        }
+        return SuccessEntityResponse.ok("Get doctor by id success", response);
+    }
+    
     // API thêm certification mới
     @PostMapping("/addCertification/{userId}")
     public ResponseEntity<MessageResponse<CertificationDto>> addCertification(

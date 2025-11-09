@@ -180,6 +180,8 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
                                     .clinicAddress(doctor.getClinicAddress())
                                     .specialty(doctor.getSpecialty())
                                     .avatarUrl(doctor.getAvatarUrl())
+                                    .rating(doctor.getRating())
+                                    .examinationFee(doctor.getExaminationFee())
                                     .scheduleId(schedule.getScheduleId())
                                     .examinationFee(doctor.getExaminationFee())
                                     .rating(doctor.getRating())
@@ -188,6 +190,31 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
                     break;
                 }
             }
+        }
+        return doctors;
+    }
+
+    @Override
+    public List<DoctorScheduleClientResponse> getDoctorsWithDetailsByDate(Date date) {
+        List<DoctorSchedule> doctorSchedules = doctorScheduleRepository.findDoctorScheduleByWorkDate(date);
+        Log.debug("get schedules by date: {}", doctorSchedules);
+        List<DoctorScheduleClientResponse> doctors = new ArrayList<>();
+        for (DoctorSchedule schedule : doctorSchedules) {
+            DoctorClientResponse doctor = userClient.getDoctorForClient(schedule.getDoctorId());
+            doctors.add(
+                    DoctorScheduleClientResponse.builder()
+                            .doctorId(doctor.getDoctorId())
+                            .fullName(doctor.getFullName())
+                            .email(doctor.getEmail())
+                            .phoneNumber(doctor.getPhoneNumber())
+                            .experienceYears(doctor.getExperienceYears())
+                            .clinicAddress(doctor.getClinicAddress())
+                            .specialty(doctor.getSpecialty())
+                            .avatarUrl(doctor.getAvatarUrl())
+                            .rating(doctor.getRating())
+                            .examinationFee(doctor.getExaminationFee())
+                            .scheduleId(schedule.getScheduleId())
+                            .build());
         }
         return doctors;
     }

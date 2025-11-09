@@ -20,6 +20,7 @@ import fit.iuh.student.userservice.repositories.custom.CustomDoctorRepository;
 import fit.iuh.student.userservice.services.DoctorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,8 +53,15 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DoctorResponse getDoctorById(String doctorId) {
-        return userMapper.toDoctorResponse(doctorRepository.findById(doctorId).get());
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new UserNotFoundException("Doctor not found with id: " + doctorId));
+        // Force load certifications to avoid LazyInitializationException
+        if (doctor.getCertifications() != null) {
+            doctor.getCertifications().size();
+        }
+        return userMapper.toDoctorResponse(doctor);
     }
 
     @Override

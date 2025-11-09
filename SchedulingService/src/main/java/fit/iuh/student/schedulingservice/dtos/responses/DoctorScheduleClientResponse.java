@@ -2,6 +2,7 @@ package fit.iuh.student.schedulingservice.dtos.responses;
 
 import lombok.Builder;
 import lombok.Data;
+
 @Data
 @Builder
 public class DoctorScheduleClientResponse {

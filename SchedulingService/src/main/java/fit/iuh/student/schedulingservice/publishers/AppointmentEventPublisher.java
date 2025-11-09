@@ -82,6 +82,17 @@ public class AppointmentEventPublisher {
         }
     }
     
+    public void publishRejectStatusAppointmentEvent(AppointmentResponse payload) {
+        try {
+            log.info("Publishing reject appointment event for patient: {}", payload.getPatient().getFullName());
+            // Tạo message wrapper với eventType
+            AppointmentEventMessage message = new AppointmentEventMessage(payload, "REJECT_APPOINTMENT");
+            rabbitTemplate.convertAndSend(APPOINTMENT_NOTIFICATION_QUEUE, message);
+        } catch (Exception e) {
+            log.error("Error in publishing reject appointment event", e);
+        }
+    }
+    
     /**
      * Publish appointment reminder event
      * This method is called by the AppointmentReminderJob to send reminders 12 hours before appointments

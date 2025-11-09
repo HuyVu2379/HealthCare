@@ -4,6 +4,7 @@ import fit.iuh.student.schedulingservice.consumers.payload.ScheduleEventMessage;
 import fit.iuh.student.schedulingservice.consumers.payload.ScheduleSocketEvent;
 import fit.iuh.student.schedulingservice.dtos.responses.AppointmentResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.RescheduleAppointmentResponse;
+import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
 import fit.iuh.student.schedulingservice.publishers.ScheduleSocketPublisher;
 import fit.iuh.student.schedulingservice.publishers.payload.AppointmentData;
 import fit.iuh.student.schedulingservice.services.AppointmentService;
@@ -39,6 +40,7 @@ public class SocketEventConsumer {
                 case UPDATE_APPOINTMENT_STATUS -> handleUpdateAppointmentStatus(scheduleEventMessage);
                 case RESCHEDULE_APPOINTMENT -> handleRescheduleAppointment(scheduleEventMessage);
                 case CANCEL_APPOINTMENT -> handleCancelAppointment(scheduleEventMessage);
+                case REJECT_APPOINTMENT -> handleRejectAppointment(scheduleEventMessage);
                 default -> log.warn("Unknown event type: {}", eventType);
             }
         } catch (Exception e) {
@@ -148,6 +150,36 @@ public class SocketEventConsumer {
             log.error("Cancel appointment failed - {}: {}", e.getClass().getSimpleName(), e.getMessage());
             scheduleSocketPublisher.publishAppointmentList(AppointmentData.builder()
                     .eventType("CANCEL_APPOINTMENT_FAILED")
+                    .doctorId(scheduleEventMessage.getDoctorId())
+                    .appointmentId(scheduleEventMessage.getAppointmentId())
+                    .patientId(scheduleEventMessage.getPatientId())
+                    .success(false)
+                    .build());
+        }
+    }
+
+    private void handleRejectAppointment(ScheduleEventMessage scheduleEventMessage) {
+        log.info("Handling reject appointment event: {}", scheduleEventMessage);
+        try {
+            // Gọi updateAppointmentStatus với status REJECTED
+            AppointmentResponse apt = appointmentService.updateAppointmentStatus(
+                    scheduleEventMessage.getAppointmentId(), 
+                    AppointmentStatus.REJECTED
+            );
+
+            scheduleSocketPublisher.publishAppointmentList(AppointmentData.builder()
+                    .eventType("REJECT_APPOINTMENT")
+                    .doctorId(scheduleEventMessage.getDoctorId())
+                    .appointmentId(apt.getAppointmentId())
+                    .patientId(scheduleEventMessage.getPatientId())
+                    .success(true)
+                    .build());
+            log.info("Reject appointment completed and notification sent to RESPONSE queue");
+
+        } catch (Exception e) {
+            log.error("Reject appointment failed - {}: {}", e.getClass().getSimpleName(), e.getMessage());
+            scheduleSocketPublisher.publishAppointmentList(AppointmentData.builder()
+                    .eventType("REJECT_APPOINTMENT_FAILED")
                     .doctorId(scheduleEventMessage.getDoctorId())
                     .appointmentId(scheduleEventMessage.getAppointmentId())
                     .patientId(scheduleEventMessage.getPatientId())

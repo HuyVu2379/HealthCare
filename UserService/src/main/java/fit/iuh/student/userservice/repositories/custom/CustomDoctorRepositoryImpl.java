@@ -31,11 +31,22 @@ public class CustomDoctorRepositoryImpl implements CustomDoctorRepository {
         if(doctor == null){
             throw new UserNotFoundException("Doctor not found");
         }
-        doctor.setSpecialty(request.getSpecialty());
-        doctor.setExperienceYears(request.getExperienceYears());
-        doctor.setBio(request.getBio());
-        doctor.setExaminationFee(request.getExaminationFee());
-        doctor.setClinicAddress(request.getClinicAddress());
+        
+        if (request.getSpecialty() != null) {
+            doctor.setSpecialty(request.getSpecialty());
+        }
+        if (request.getExperienceYears() != null) {
+            doctor.setExperienceYears(request.getExperienceYears());
+        }
+        if (request.getBio() != null) {
+            doctor.setBio(request.getBio());
+        }
+        if (request.getExaminationFee() != null) {
+            doctor.setExaminationFee(request.getExaminationFee());
+        }
+        if (request.getClinicAddress() != null) {
+            doctor.setClinicAddress(request.getClinicAddress());
+        }
 
         entityManager.merge(doctor);
 
