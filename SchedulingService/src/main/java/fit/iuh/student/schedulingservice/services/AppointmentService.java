@@ -35,6 +35,11 @@ public interface AppointmentService {
     List<AppointmentWeekFilterResponse> getAppointmentWeekFilterForDoctor(String doctorId,String weekStartDate, String weekEndDate);
     AppointmentClientResponse getAppointmentDetailForClientById(String appointmentId);
     AppointmentResponse scheduleFollowUpByDoctor(ScheduleFollowUpByDoctorRequest request);
+
+    // Payment-related methods
+    void updatePaymentStatus(String appointmentId, String paymentStatus);
+    AppointmentResponse confirmAppointmentByDoctor(String appointmentId, String doctorId);
+    AppointmentResponse rejectAppointmentByDoctor(String appointmentId, String doctorId, String reason);
 //    void cancelAppointment(String appointmentId, String userId);
 //    void getAppointmentByPatientId();
 //    void getAppointmentDetailById(String appointmentId);

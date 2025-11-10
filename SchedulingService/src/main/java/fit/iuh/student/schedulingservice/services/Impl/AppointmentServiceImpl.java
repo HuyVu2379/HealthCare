@@ -82,9 +82,16 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             Appointment appointment = appointmentRepository.save(apm);
 
-            // Remove the timeSlot from doctorSchedule and save
-            doctorSchedule.removeTimeSlot(matchingTimeSlot);
-            doctorScheduleRepository.save(doctorSchedule);
+            // QUAN TRỌNG: KHÔNG xóa TimeSlot ngay lập tức
+            // TimeSlot CHỈ được xóa khi bác sĩ CONFIRM appointment
+            // Điều này cho phép:
+            // 1. Bệnh nhân tạo appointment với status PENDING
+            // 2. Thanh toán (nếu cần) → paymentStatus = PAID, status vẫn PENDING
+            // 3. Bác sĩ confirm → status = CONFIRMED, XÓA TimeSlot
+            // 4. Bác sĩ reject → status = REJECTED, GIỮ TimeSlot (có thể book lại)
+            // doctorSchedule.removeTimeSlot(matchingTimeSlot);
+            // doctorScheduleRepository.save(doctorSchedule);
+
             DoctorClientResponse doctor = userClient.getDoctorForClient(request.getDoctorId());
 
             // Map TimeSlot to TimeSlotDTO using the already loaded timeSlot
@@ -604,6 +611,131 @@ public class AppointmentServiceImpl implements AppointmentService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to schedule follow-up: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    @Transactional
+    public void updatePaymentStatus(String appointmentId, String paymentStatus) {
+        try {
+            Appointment appointment = appointmentRepository.findById(appointmentId)
+                    .orElseThrow(() -> new NotFoundException("Appointment not found"));
+
+            // QUAN TRỌNG: Chỉ update paymentStatus, KHÔNG update status
+            // Appointment status VẪN LÀ PENDING chờ bác sĩ confirm
+            appointment.setPaymentStatus(
+                    fit.iuh.student.schedulingservice.enums.PaymentStatus.valueOf(paymentStatus)
+            );
+            appointmentRepository.save(appointment);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update payment status: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public AppointmentResponse confirmAppointmentByDoctor(String appointmentId, String doctorId) {
+        try {
+            Appointment appointment = appointmentRepository.findById(appointmentId)
+                    .orElseThrow(() -> new NotFoundException("Appointment not found"));
+
+            // Verify appointment belongs to this doctor
+            if (!appointment.getDoctorId().equals(doctorId)) {
+                throw new RuntimeException("Appointment does not belong to this doctor");
+            }
+
+            // Update status to CONFIRMED
+            appointment.setStatus(AppointmentStatus.CONFIRMED);
+            appointmentRepository.save(appointment);
+
+            // QUAN TRỌNG: CHỈ XÓA TimeSlot KHI BÁC SĨ CONFIRM
+            // Không xóa khi thanh toán thành công
+            DoctorSchedule doctorSchedule = doctorScheduleRepository.findWithSlotsById(appointment.getDoctorSchedule().getScheduleId())
+                    .orElseThrow(() -> new NotFoundException("Doctor schedule not found"));
+
+            TimeSlot matchingTimeSlot = doctorSchedule.getTimeSlots().stream()
+                    .filter(ts -> Objects.equals(ts.getSlotId(), appointment.getSlotId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (matchingTimeSlot != null) {
+                doctorSchedule.removeTimeSlot(matchingTimeSlot);
+                doctorScheduleRepository.save(doctorSchedule);
+            }
+
+            // TODO: Send notification to patient
+            // appointmentEventPublisher.publishAppointmentConfirmedEvent(appointment);
+
+            return mapToAppointmentResponse(appointment);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to confirm appointment: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public AppointmentResponse rejectAppointmentByDoctor(String appointmentId, String doctorId, String reason) {
+        try {
+            Appointment appointment = appointmentRepository.findById(appointmentId)
+                    .orElseThrow(() -> new NotFoundException("Appointment not found"));
+
+            // Verify appointment belongs to this doctor
+            if (!appointment.getDoctorId().equals(doctorId)) {
+                throw new RuntimeException("Appointment does not belong to this doctor");
+            }
+
+            // Update status to REJECTED
+            appointment.setStatus(AppointmentStatus.REJECTED);
+            appointment.setNote(appointment.getNote() + "\nReason for rejection: " + reason);
+            appointmentRepository.save(appointment);
+
+            // TODO: Call PaymentService to refund if payment was made
+            // if (appointment.getPaymentStatus() == PaymentStatus.PAID) {
+            //     paymentClient.refundPayment(appointmentId);
+            // }
+
+            // TODO: Send notification to patient with reason
+            // appointmentEventPublisher.publishAppointmentRejectedEvent(appointment, reason);
+
+            return mapToAppointmentResponse(appointment);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to reject appointment: " + e.getMessage(), e);
+        }
+    }
+
+    private AppointmentResponse mapToAppointmentResponse(Appointment appointment) {
+        DoctorClientResponse doctor = userClient.getDoctorForClient(appointment.getDoctorId());
+        PatientClientResponse patient = userClient.getPatientForClient(appointment.getPatientId());
+
+        TimeSlotDTO timeSlotDTO = null;
+        if (appointment.getTimeSlot() != null) {
+            timeSlotDTO = TimeSlotDTO.builder()
+                    .slotId(appointment.getTimeSlot().getSlotId())
+                    .startTime(appointment.getTimeSlot().getStartTime())
+                    .endTime(appointment.getTimeSlot().getEndTime())
+                    .build();
+        }
+
+        return AppointmentResponse.builder()
+                .appointmentId(appointment.getAppointmentId())
+                .patientId(appointment.getPatientId())
+                .patientName(patient.getFullName())
+                .doctorId(appointment.getDoctorId())
+                .doctorName(doctor.getFullName())
+                .specialty(doctor.getSpecialty())
+                .symptoms(appointment.getSymptoms())
+                .note(appointment.getNote())
+                .slotId(appointment.getSlotId())
+                .status(appointment.getStatus())
+                .paymentStatus(appointment.getPaymentStatus())
+                .timeSlot(timeSlotDTO)
+                .appointmentDate(appointment.getAppointmentDate())
+                .consultationType(appointment.getConsultationType())
+                .addressDetail(doctor.getClinicAddress())
+                .hasPredict(appointment.isHasPredict())
+                .build();
     }
 }
 

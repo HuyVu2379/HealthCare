@@ -2,6 +2,7 @@ package fit.iuh.student.schedulingservice.entities;
 
 import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
 import fit.iuh.student.schedulingservice.enums.ConsultationType;
+import fit.iuh.student.schedulingservice.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -42,6 +43,10 @@ public class Appointment extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
     private AppointmentStatus status = AppointmentStatus.PENDING;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", length = 20, nullable = false)
+    private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "slot_id", insertable = false, updatable = false)

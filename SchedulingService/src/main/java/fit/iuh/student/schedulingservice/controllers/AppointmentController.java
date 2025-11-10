@@ -137,4 +137,33 @@ public class AppointmentController {
         return SuccessEntityResponse.ok("Get appointment by patient id with filter successfully",
                 appointmentService.getAppointmentWithFilterPaginationForPatient(patientId, Enum.valueOf(ConsultationType.class, consultationType), page, size, startTime, endTime));
     }
+
+    // Payment-related endpoints
+    @PutMapping("/updatePaymentStatus/{appointmentId}")
+    public ResponseEntity<Void> updatePaymentStatus(
+            @PathVariable String appointmentId,
+            @RequestParam String paymentStatus
+    ) {
+        appointmentService.updatePaymentStatus(appointmentId, paymentStatus);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{appointmentId}/confirmByDoctor")
+    public ResponseEntity<MessageResponse<AppointmentResponse>> confirmAppointmentByDoctor(
+            @PathVariable String appointmentId,
+            @RequestParam String doctorId
+    ) {
+        return SuccessEntityResponse.ok("Appointment confirmed successfully",
+                appointmentService.confirmAppointmentByDoctor(appointmentId, doctorId));
+    }
+
+    @PutMapping("/{appointmentId}/rejectByDoctor")
+    public ResponseEntity<MessageResponse<AppointmentResponse>> rejectAppointmentByDoctor(
+            @PathVariable String appointmentId,
+            @RequestParam String doctorId,
+            @RequestParam String reason
+    ) {
+        return SuccessEntityResponse.ok("Appointment rejected successfully",
+                appointmentService.rejectAppointmentByDoctor(appointmentId, doctorId, reason));
+    }
 }
