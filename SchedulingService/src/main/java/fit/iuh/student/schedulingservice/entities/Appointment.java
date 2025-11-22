@@ -48,6 +48,9 @@ public class Appointment extends BaseEntity {
     @Column(name = "payment_status", length = 20, nullable = false)
     private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
 
+    @Column(name = "payment_method", length = 20)
+    private String paymentMethod;
+
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "slot_id", insertable = false, updatable = false)
     private TimeSlot timeSlot;
@@ -65,5 +68,5 @@ public class Appointment extends BaseEntity {
     private boolean hasPredict = false;
 
     @Column(name = "related_record_id")
-    private String relatedRecordId; // Medical Record ID mà lịch tái khám này đến từ
+    private String relatedRecordId; 
 }

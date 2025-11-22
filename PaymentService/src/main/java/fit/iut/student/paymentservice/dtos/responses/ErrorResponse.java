@@ -11,13 +11,10 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreatePaymentResponse {
-    private String paymentId;
-    private String appointmentId;
-    private Long orderCode;  
-    private String paymentUrl;
-    private Long amount; 
-    private LocalDateTime expiresAt;
-    private String status;
+public class ErrorResponse {
+    private int status;
     private String message;
+    private boolean success;
+    private LocalDateTime timestamp;
+    private String error;
 }

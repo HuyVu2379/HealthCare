@@ -18,7 +18,7 @@ public class CreatePaymentRequest {
 
     @NotNull(message = "Amount is required")
     @Positive(message = "Amount must be positive")
-    private Integer amount;
+    private Long amount; 
 
     private String description;
 

@@ -20,12 +20,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment,String>
     @Query("Select a from Appointment a where a.patientId = ?1 and a.appointmentDate between ?2 and ?3")
     Page<Appointment> findAppointmentByPatientIdWithPage(String patientId, Date startTime, Date endTime, Pageable pageable);
     
-    /**
-     * Find appointments that need reminders (12 hours before appointment time)
-     * This query finds appointments that:
-     * 1. Are scheduled within the next 12 hours
-     * 2. Have status CONFIRMED
-     */
     @Query(value = "SELECT a.* FROM appointments a " +
            "JOIN time_slots ts ON a.slot_id = ts.slot_id " +
            "WHERE (CAST(a.appointment_date AS timestamp) + ts.start_time::time) BETWEEN CURRENT_TIMESTAMP AND (CURRENT_TIMESTAMP + INTERVAL '12 hours') " +
@@ -51,4 +45,14 @@ public interface AppointmentRepository extends JpaRepository<Appointment,String>
     @Modifying
     @Transactional
     void updateAppointmentStatusById(String appointmentId, AppointmentStatus status);
+
+    @Query("SELECT a FROM Appointment a " +
+           "WHERE a.doctorSchedule.scheduleId = :scheduleId " +
+           "AND a.slotId = :slotId " +
+           "AND a.status IN :statuses")
+    List<Appointment> findByDoctorScheduleScheduleIdAndSlotIdAndStatusIn(
+            @Param("scheduleId") String scheduleId,
+            @Param("slotId") Integer slotId,
+            @Param("statuses") List<AppointmentStatus> statuses
+    );
 }

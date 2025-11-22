@@ -148,6 +148,20 @@ public class AppointmentController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Update appointment status (called by PaymentService after payment success/failure)
+     * PAYMENT_PENDING → PENDING (payment success)
+     * PAYMENT_PENDING → CANCELED (payment failed)
+     */
+    @PutMapping("/updateStatus/{appointmentId}")
+    public ResponseEntity<Void> updateStatus(
+            @PathVariable String appointmentId,
+            @RequestParam String status
+    ) {
+        appointmentService.updateAppointmentStatus(appointmentId, AppointmentStatus.valueOf(status));
+        return ResponseEntity.ok().build();
+    }
+
     @PutMapping("/{appointmentId}/confirmByDoctor")
     public ResponseEntity<MessageResponse<AppointmentResponse>> confirmAppointmentByDoctor(
             @PathVariable String appointmentId,

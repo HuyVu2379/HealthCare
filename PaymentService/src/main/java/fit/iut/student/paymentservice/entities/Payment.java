@@ -23,19 +23,19 @@ public class Payment {
     private String appointmentId;
 
     @Column(name = "amount", nullable = false)
-    private Integer amount;
+    private Long amount;  
 
-    @Column(name = "order_code", unique = true, length = 50)
-    private String orderCode;
+    @Column(name = "order_code", unique = true)
+    private Long orderCode; 
 
     @Column(name = "payment_url", length = 500)
     private String paymentUrl;
 
     @Column(name = "status", nullable = false, length = 20)
-    private String status; // PENDING, PAID, FAILED, REFUNDED, EXPIRED
+    private String status; 
 
     @Column(name = "payment_method", length = 50)
-    private String paymentMethod; // "PayOS"
+    private String paymentMethod; 
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

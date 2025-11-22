@@ -29,10 +29,11 @@ public class AppointmentResponse {
     private Integer slotId;
     private AppointmentStatus status = AppointmentStatus.PENDING;
     private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
+    private String paymentMethod; 
     private TimeSlotDTO timeSlot;
     private Date appointmentDate;
     private ConsultationType consultationType;
     private String addressDetail;
     private boolean hasPredict = false;
-    private String relatedRecordId; // Medical Record ID mà lịch tái khám này đến từ
+    private String relatedRecordId;
 }

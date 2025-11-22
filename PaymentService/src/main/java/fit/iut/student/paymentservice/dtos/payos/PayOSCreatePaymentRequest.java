@@ -5,13 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PayOSCreatePaymentRequest {
-    private String orderCode;
-    private Integer amount;
+    private Long orderCode;  
+    private Integer amount;  
     private String description;
     private String returnUrl;
     private String cancelUrl;
@@ -19,4 +21,6 @@ public class PayOSCreatePaymentRequest {
     private String buyerEmail;
     private String buyerPhone;
     private String buyerAddress;
+    
+    private List<ItemData> items;
 }

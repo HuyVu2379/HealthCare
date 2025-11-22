@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 public class PaymentStatusResponse {
     private String paymentId;
     private String appointmentId;
-    private String orderCode;
-    private Integer amount;
+    private Long orderCode;  
+    private Long amount; 
     private String status;
     private String paymentMethod;
     private LocalDateTime createdAt;
