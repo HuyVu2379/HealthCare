@@ -2,6 +2,7 @@ package fit.iuh.student.schedulingservice.entities;
 
 import fit.iuh.student.schedulingservice.enums.AppointmentStatus;
 import fit.iuh.student.schedulingservice.enums.ConsultationType;
+import fit.iuh.student.schedulingservice.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -43,6 +44,13 @@ public class Appointment extends BaseEntity {
     @Column(name = "status", length = 20, nullable = false)
     private AppointmentStatus status = AppointmentStatus.PENDING;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", length = 20, nullable = false)
+    private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
+
+    @Column(name = "payment_method", length = 20)
+    private String paymentMethod;
+
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "slot_id", insertable = false, updatable = false)
     private TimeSlot timeSlot;
@@ -60,5 +68,5 @@ public class Appointment extends BaseEntity {
     private boolean hasPredict = false;
 
     @Column(name = "related_record_id")
-    private String relatedRecordId; // Medical Record ID mà lịch tái khám này đến từ
+    private String relatedRecordId; 
 }

@@ -28,4 +28,7 @@ public class CreateAppointmentRequest {
     private String addressDetail;
     @JsonProperty("has_predict")
     private Boolean hasPredict;
+
+    @JsonProperty("payment_method")
+    private String paymentMethod;
 }

@@ -1,4 +1,5 @@
 package fit.iuh.student.communicationservice.publishers.payload;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,4 +19,7 @@ public class CreateAppointmentRequest {
     private AppointmentStatus status = AppointmentStatus.PENDING;
     private ConsultationType consultationType;
     private String addressDetail;
+
+    @JsonProperty("payment_method")
+    private String paymentMethod;
 }
