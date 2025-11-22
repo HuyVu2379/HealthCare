@@ -50,7 +50,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserDetailsService userDetailsService;
     private final DoctorRepository doctorRepository;
     private final DoctorService doctorService;
-    private final UserMapper userMapper;
+//    private final UserMapper userMapper;
     private final PatientService patientService;
     private final EmailService emailService;
     private static final Logger log = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
@@ -106,6 +106,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public boolean verifyAccount(String email, String otp) {
         try{
+            // Validate input parameters
+            if (email == null || email.trim().isEmpty()) {
+                log.error("Email parameter is null or empty");
+                throw new IllegalArgumentException("Email cannot be null or empty");
+            }
+            if (otp == null || otp.trim().isEmpty()) {
+                log.error("OTP parameter is null or empty for email: {}", email);
+                throw new IllegalArgumentException("OTP cannot be null or empty");
+            }
+
             boolean isValid = emailService.validateOTP(email,otp);
             if (!isValid) {
                 throw new UnauthorizedException("Invalid OTP");

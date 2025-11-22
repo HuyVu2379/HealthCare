@@ -13,7 +13,7 @@ spring:
     active: local
 
 gemini:
-  api-key: ${GEMINI_API_KEY:AIzaSyCSpXYJbaoIJIFgHhSlk3nK1YYGwSxceeQ}
+  api-key: ${GEMINI_API_KEY:AIzaSyDpdavcu8BAxiaFt_aehrHODvzFKUL2LUo}
 # Eureka Client Configuration
 eureka:
   client:

@@ -24,6 +24,8 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     private final List<String> publicEndpoints = Arrays.asList(
             "/api/v1/auth/login",
             "/api/v1/auth/register",
+            "/api/v1/auth/verify-account",
+            "/api/v1/auth/send-otp-register/**",
             "/api/v1/auth/refresh-token",
             "/api/v1/auth/forgot-password",
             "/api/v1/auth/register-admin",
@@ -36,7 +38,8 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             "/api/v1/health-metrics/get-health-metrics/**",
             "/api/v1/health-metrics/get-health-metrics-with-batch/**",
             "/api/v1/predicts/get-predict-history/**",
-            "/api/v1/predicts/get-predict/**");
+            "/api/v1/predicts/get-predict/**",
+            "/api/v1/doctors/updateRating/**");
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
 
     @Autowired

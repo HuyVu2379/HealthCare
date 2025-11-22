@@ -7,7 +7,6 @@ import fit.iuh.student.userservice.dtos.requests.UpdateDoctorCertificationReques
 import fit.iuh.student.userservice.dtos.requests.UpdateDoctorRequest;
 import fit.iuh.student.userservice.dtos.responses.*;
 import fit.iuh.student.userservice.exceptions.errors.UserNotFoundException;
-import fit.iuh.student.userservice.repositories.DoctorRepository;
 import fit.iuh.student.userservice.services.DoctorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,7 +20,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DoctorController {
     private final DoctorService doctorService;
-    private final DoctorRepository doctorRepository;
     @PutMapping("/update")
     public ResponseEntity<MessageResponse<UpdateDoctorResponse>> updateDoctor(
             @RequestBody UpdateDoctorRequest updateDoctorRequest
@@ -61,7 +59,7 @@ public class DoctorController {
             @PathVariable String doctorId,
             @RequestParam double rating
     ){
-        int response = doctorRepository.updateRatingForDoctorId(doctorId, rating);
+        int response = doctorService.updateDoctorRating(doctorId, rating);
         if(response == 0) {
             return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
         }
@@ -134,5 +132,15 @@ public class DoctorController {
     ){
         List<CertificationDto> response = doctorService.getCertificationsByUserId(userId);
         return SuccessEntityResponse.ok("Get certifications success", response);
+    }
+
+    // API lấy danh sách bác sĩ nổi bật
+    @GetMapping("/outstanding")
+    public ResponseEntity<MessageResponse<List<DoctorResponse>>> getOutstandingDoctors(){
+        List<DoctorResponse> response = doctorService.getOutstandingDoctors();
+        if(response == null || response.isEmpty()) {
+            return SuccessEntityResponse.ok("No outstanding doctors found", response);
+        }
+        return SuccessEntityResponse.ok("Get outstanding doctors success", response);
     }
 }

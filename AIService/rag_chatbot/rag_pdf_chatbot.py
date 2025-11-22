@@ -57,7 +57,7 @@ class RAGPDFChatbot:
             raise ValueError("Vui lòng cung cấp GEMINI_API_KEY trong file .env hoặc tham số")
         
         genai.configure(api_key=self.gemini_api_key)
-        self.model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        self.model = genai.GenerativeModel('gemini-2.0-flash')
         # self.model = genai.GenerativeModel('gemini-2.5-pro')
         # self.model = genai.GenerativeModel('gemini-2.5-flash')
         

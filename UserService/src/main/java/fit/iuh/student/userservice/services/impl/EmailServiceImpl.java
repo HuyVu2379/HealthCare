@@ -99,8 +99,18 @@ public class EmailServiceImpl implements EmailService {
             return true;
         }
 
-        logger.warn("OTP validation FAILED for {} - email={}, storedOtp={}, ttlSeconds={}, inputOtp={}",
-                   action, email, storedOtp, ttl, otp);
+        // Enhanced error logging with detailed comparison
+        if (storedOtp != null && !storedOtp.equals(otp)) {
+            logger.warn("OTP MISMATCH for {} - email={}, expected={}, received={}, ttlSeconds={}",
+                       action, email, storedOtp, otp, ttl);
+        } else if (storedOtp == null) {
+            logger.warn("OTP NOT FOUND for {} - email={}, key={} (may be expired or never sent)",
+                       action, email, usedKey);
+        } else if (ttl <= 0) {
+            logger.warn("OTP EXPIRED for {} - email={}, storedOtp={}, ttlSeconds={}",
+                       action, email, storedOtp, ttl);
+        }
+
         return false;
     }
 

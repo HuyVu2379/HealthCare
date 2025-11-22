@@ -26,6 +26,10 @@ public interface DoctorService {
     CertificationDto updateCertification(UpdateCertificationRequest request, String userId, String certificationId);
     void deleteCertification(String userId, String certificationId);
     List<CertificationDto> getCertificationsByUserId(String userId);
+
+    List<DoctorResponse> getOutstandingDoctors();
+
+    int updateDoctorRating(String doctorId, double rating);
 }
 
 

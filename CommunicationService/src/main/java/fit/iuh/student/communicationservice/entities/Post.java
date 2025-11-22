@@ -19,6 +19,8 @@ public class Post {
     @Id
     private String post_id;
     private String author_id;
+    private String author_name;
+    private String author_avatar;
     private String title;
     private String content;
     private List<String> image_urls;
