@@ -13,7 +13,6 @@ import fit.iuh.student.userservice.services.DoctorService;
 import fit.iuh.student.userservice.services.EmailService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.ws.rs.QueryParam;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,23 +91,43 @@ public class AuthController {
         }
     }
 
-//    @GetMapping("/send-otp-register/{email}")
-//    public ResponseEntity<MessageResponse<Boolean>> sendOtpRegister(
-//            @PathVariable String email
-//    ){
-//        UserEventPayload payload = new UserEventPayload(email,"Xác minh tài khoản");
-//        emailService.sendOTPEmail(payload);
-//        return SuccessEntityResponse.ok("OTP sent successfully", true);
-//    }
+    @GetMapping("/send-otp-register/{email}")
+    public ResponseEntity<MessageResponse<Boolean>> sendOtpRegister(
+            @PathVariable String email
+    ){
+        UserEventPayload payload = new UserEventPayload(email,"Xác minh tài khoản");
+        emailService.sendOTPEmail(payload);
+        return SuccessEntityResponse.ok("OTP sent successfully", true);
+    }
     /*
        Nếu là otp reset password thì email + "-reset-pwd"
      */
     // @PreAuthorize("hasAnyRole('PATIENT', 'DOCTOR')")
     @GetMapping("/validate-otp")
     public ResponseEntity<MessageResponse<Boolean>> validateOtp(
-            @QueryParam("email") String email,
-            @QueryParam("otp") String otp
+            @RequestParam("email") String email,
+            @RequestParam("otp") String otp
     ) {
+        // Validate input parameters
+        if (email == null || email.trim().isEmpty()) {
+            MessageResponse<Boolean> response = new MessageResponse<>(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Email parameter is required",
+                    false,
+                    false
+            );
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        if (otp == null || otp.trim().isEmpty()) {
+            MessageResponse<Boolean> response = new MessageResponse<>(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "OTP parameter is required",
+                    false,
+                    false
+            );
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
         boolean isValid = emailService.validateOTP(email, otp);
         if (isValid) {
             return SuccessEntityResponse.ok("OTP is valid", true);
@@ -123,12 +142,32 @@ public class AuthController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('PATIENT')")
-    @PostMapping("/verify-account")
+//    @PreAuthorize("hasAnyRole('PATIENT')")
+    @GetMapping("/verify-account")
     public ResponseEntity<MessageResponse<Boolean>> verifyAccount(
-            @QueryParam("email") String email,
-            @QueryParam("otp") String otp
+            @RequestParam("email") String email,
+            @RequestParam("otp") String otp
     ) {
+        // Validate input parameters
+        if (email == null || email.trim().isEmpty()) {
+            MessageResponse<Boolean> response = new MessageResponse<>(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Email parameter is required",
+                    false,
+                    false
+            );
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        if (otp == null || otp.trim().isEmpty()) {
+            MessageResponse<Boolean> response = new MessageResponse<>(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "OTP parameter is required",
+                    false,
+                    false
+            );
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
         boolean isVerified = authenticationService.verifyAccount(email, otp);
         if (isVerified) {
             return SuccessEntityResponse.ok("Account verified successfully", true);
@@ -167,7 +206,7 @@ public class AuthController {
         } else {
             MessageResponse<Boolean> response = new MessageResponse<>(
                     HttpStatus.BAD_REQUEST.value(),
-                    "Failed to reset password",
+                    "Invalid or expired OTP. Please request a new OTP and try again.",
                     false,
                     false
             );

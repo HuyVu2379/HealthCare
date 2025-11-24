@@ -23,10 +23,12 @@ public class PostServiceImpl implements PostService {
     public Post createPost(CreatePostRequest request) {
         try{
             Post post = Post.builder()
-                    .post_id(request.getPost_id())
                     .author_id(request.getAuthor_id())
                     .title(request.getTitle())
                     .content(request.getContent())
+                    .author_name(request.getAuthor_name())
+                    .author_avatar(request.getAuthor_avatar())
+                    .image_urls(request.getImage_urls())
                     .category(request.getCategory())
                     .build();
             return postRepository.save(post);
@@ -54,7 +56,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<Post> findPostsWithPagination(int page, int size, String sortBy, String sortDir) {
+    public List<Post> findPostsWithPagination(int page, int size, String sortBy, String sortDir) {
        try{
            if(sortBy == null || sortBy.isEmpty()){
                sortBy = "createdAt";
@@ -65,7 +67,7 @@ public class PostServiceImpl implements PostService {
            }
            Sort sort = Sort.by(direction, sortBy);
            Pageable pageable = PageRequest.of(page, size, sort);
-           return postRepository.findAllBy(pageable);
+           return postRepository.findAllBy(pageable).getContent();
        } catch (Exception e) {
            throw e;
        }

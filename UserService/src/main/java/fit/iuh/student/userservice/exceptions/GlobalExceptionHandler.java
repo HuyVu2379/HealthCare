@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse<String>> handleUserNotFound(UserNotFoundException ex, HttpServletRequest request) {
-       return ErrorEntityResponse.error("User not found: " + ex.getMessage(), HttpStatus.NOT_FOUND.value(), request.getRequestURI());
+        return ErrorEntityResponse.error("User not found: " + ex.getMessage(), HttpStatus.NOT_FOUND.value(), request.getRequestURI());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -66,5 +66,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorResponse<String>> handleAccessDeniedException(NotFoundException exc, HttpServletRequest request) {
         return ErrorEntityResponse.error("Not found: " + exc.getMessage(), HttpStatus.NOT_FOUND.value(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(DuplicateUserException.class)
+    public ResponseEntity<ErrorResponse<String>> handleDuplicateUserException(DuplicateUserException ex, HttpServletRequest request) {
+        return ErrorEntityResponse.error(ex.getMessage(), HttpStatus.CONFLICT.value(), request.getRequestURI());
     }
 }

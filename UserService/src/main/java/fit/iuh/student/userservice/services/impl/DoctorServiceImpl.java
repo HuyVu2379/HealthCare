@@ -181,4 +181,33 @@ public class DoctorServiceImpl implements DoctorService {
             throw e;
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DoctorResponse> getOutstandingDoctors() {
+        try {
+            List<Doctor> doctors = doctorRepository.findOutstandingDoctors();
+            return doctors.stream()
+                    .map(doctor -> {
+                        // Force load certifications to avoid LazyInitializationException
+                        if (doctor.getCertifications() != null) {
+                            doctor.getCertifications().size();
+                        }
+                        return userMapper.toDoctorResponse(doctor);
+                    })
+                    .toList();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional
+    public int updateDoctorRating(String doctorId, double rating) {
+        try {
+            return doctorRepository.updateRatingForDoctorId(doctorId, rating);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
 }

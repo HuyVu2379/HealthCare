@@ -10,5 +10,5 @@ public interface PostService {
     Post createPost(CreatePostRequest request);
     Post findPostById(String postId);
     List<Post> findPostsByUserId(String userId);
-    Page<Post> findPostsWithPagination(int page, int size, String sortBy, String sortDir);
+    List<Post> findPostsWithPagination(int page, int size, String sortBy, String sortDir);
 }

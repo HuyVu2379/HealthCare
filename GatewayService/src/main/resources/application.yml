@@ -56,8 +56,9 @@ spring:
         - id: communication-service
           uri: lb://CommunicationService
           predicates:
-                - Path=/api/v1/messages/**, /api/v1/chats/**, /api/v1/calls/**,/api/communication/**
-
+                - Path=/api/v1/messages/**, /api/v1/chats/**, /api/v1/calls/**,/api/communication/**, /api/v1/comments/**, /api/v1/posts/**
+          filters:
+            - AuthenticationFilter
         - id: communication-service-ws
           uri: lb://CommunicationService
           predicates:
