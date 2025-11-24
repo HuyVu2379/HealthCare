@@ -8,7 +8,7 @@ spring:
     gateway:
       globalcors:
         corsConfigurations:
-          '[/**]':
+          "[/**]":
             allowedOrigins:
               - "http://localhost:3000"
             allowedMethods:
@@ -62,18 +62,30 @@ spring:
         - id: communication-service-ws
           uri: lb://CommunicationService
           predicates:
-              - Path=/ws/**
-#          filters:
-#                - AuthenticationFilter
+            - Path=/ws/**
+        #          filters:
+        #                - AuthenticationFilter
+
+        - id: payment-service-webhook
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/v1/payments/webhook
+
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/v1/payments/**
+          filters:
+            - AuthenticationFilter
   profiles:
     active: docker
 jwt:
   secretKey: ${JWT_SECRET_KEY:defaultSecretKeyForDevelopment12345678901234567890}
-  expiration: ${JWT_EXPIRATION:86400000}  # 24 hours in milliseconds
+  expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
   header: Authorization
   prefix: Bearer
   refresh-token:
-    expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # 7 days in milliseconds
+    expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days in milliseconds
 # Eureka Client Configuration
 eureka:
   client:

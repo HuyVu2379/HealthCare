@@ -345,11 +345,27 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             // Trả lại time slot về doctor schedule nếu REJECTED hoặc CANCELED
             if (status == AppointmentStatus.REJECTED || status == AppointmentStatus.CANCELED) {
-                DoctorSchedule doctorSchedule = doctorScheduleRepository.findById(appointment.getDoctorSchedule().getScheduleId()).orElse(null);
+                DoctorSchedule doctorSchedule = doctorScheduleRepository
+                        .findWithSlotsById(appointment.getDoctorSchedule().getScheduleId())
+                        .orElse(null);
+
                 if (doctorSchedule != null) {
-                    // Trả lại time slot đã từ chối/hủy vào lịch làm việc của bác sĩ
-                    doctorSchedule.addTimeSlot(appointment.getTimeSlot());
-                    doctorScheduleRepository.save(doctorSchedule);
+                    // Kiểm tra xem timeslot đã tồn tại trong schedule chưa
+                    // (Đối với ONLINE payment PAYMENT_PENDING, timeslot chưa bao giờ bị xóa)
+                    boolean slotAlreadyExists = doctorSchedule.getTimeSlots().stream()
+                            .anyMatch(ts -> ts.getSlotId().equals(appointment.getSlotId()));
+
+                    if (!slotAlreadyExists) {
+                        // Chỉ trả lại time slot nếu nó đã bị xóa trước đó
+                        doctorSchedule.addTimeSlot(appointment.getTimeSlot());
+                        doctorScheduleRepository.save(doctorSchedule);
+                        log.info("Restored timeslot {} after canceling/rejecting appointment {}",
+                                appointment.getSlotId(), appointmentId);
+                    } else {
+                        // Timeslot vẫn còn trong schedule (trường hợp ONLINE payment chưa thanh toán)
+                        log.info("Timeslot {} already exists in schedule - no restore needed for appointment {}",
+                                appointment.getSlotId(), appointmentId);
+                    }
                 }
             }
 
