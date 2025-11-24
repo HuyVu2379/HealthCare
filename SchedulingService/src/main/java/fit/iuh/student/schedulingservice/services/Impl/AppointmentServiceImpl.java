@@ -359,12 +359,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                         // Chỉ trả lại time slot nếu nó đã bị xóa trước đó
                         doctorSchedule.addTimeSlot(appointment.getTimeSlot());
                         doctorScheduleRepository.save(doctorSchedule);
-                        log.info("Restored timeslot {} after canceling/rejecting appointment {}",
-                                appointment.getSlotId(), appointmentId);
-                    } else {
-                        // Timeslot vẫn còn trong schedule (trường hợp ONLINE payment chưa thanh toán)
-                        log.info("Timeslot {} already exists in schedule - no restore needed for appointment {}",
-                                appointment.getSlotId(), appointmentId);
                     }
                 }
             }

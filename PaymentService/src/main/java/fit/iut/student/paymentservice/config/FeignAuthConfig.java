@@ -28,16 +28,10 @@ public class FeignAuthConfig {
     @Bean
     public RequestInterceptor schedulingAuthInterceptor() {
         return template -> {
-            log.info("[Feign Auth] Adding authentication headers to SchedulingService request");
-            log.debug("[Feign Auth] Headers - User: {}, Role: {}, UserId: {}, Token: {}",
-                    authUser, authRole, authUserId, authToken);
-
             template.header("X-Auth-User", authUser);
             template.header("X-Auth-Role", authRole);
             template.header("X-Auth-UserId", authUserId);
             template.header("X-Auth-Token", authToken);
-
-            log.info("[Feign Auth] ✓ Authentication headers added successfully");
         };
     }
 }

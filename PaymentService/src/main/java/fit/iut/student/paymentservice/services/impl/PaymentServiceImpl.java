@@ -266,14 +266,9 @@ public class PaymentServiceImpl implements PaymentService {
                     ((Number) orderCodeObj).longValue() :
                     Long.parseLong(orderCodeObj.toString());
 
-            log.info("[PayOS Webhook] Processing webhook for orderCode: {}", orderCode);
-
             // Find payment by orderCode
             Payment payment = paymentRepository.findByOrderCode(orderCode)
                     .orElseThrow(() -> new RuntimeException("Payment not found for orderCode: " + orderCode));
-
-            log.info("[PayOS Webhook] Found payment: {} with current status: {}",
-                    payment.getPaymentId(), payment.getStatus());
 
             // Check if already processed
             if ("PAID".equals(payment.getStatus()) || "CANCELLED".equals(payment.getStatus())) {
@@ -286,16 +281,11 @@ public class PaymentServiceImpl implements PaymentService {
             String code = (String) webhookBody.get("code");
             String status = (String) data.get("status");
 
-            log.info("[PayOS Webhook] Webhook code: {}, status: {}", code, status);
-
             // Determine if payment is successful
             boolean isSuccess = "00".equals(code) || "PAID".equals(status);
 
             if (isSuccess) {
                 // Payment successful
-                log.info("[PayOS Webhook] Payment {} status changed: {} → PAID",
-                        payment.getPaymentId(), payment.getStatus());
-
                 payment.setStatus("PAID");
                 payment.setPaidAt(LocalDateTime.now());
                 payment.setPaymentMethod("BANK");
@@ -309,19 +299,10 @@ public class PaymentServiceImpl implements PaymentService {
                 paymentRepository.save(payment);
                 paymentRepository.flush();
 
-                log.info("[PayOS Webhook] ✓ Payment {} marked as PAID in database",
-                        payment.getPaymentId());
-
                 // Update appointment status
                 try {
                     schedulingClient.updatePaymentStatus(payment.getAppointmentId(), "PAID");
-                    log.info("[PayOS Webhook] Updated appointment {} payment status to PAID",
-                            payment.getAppointmentId());
-
                     schedulingClient.updateAppointmentStatus(payment.getAppointmentId(), "PENDING");
-                    log.info("[PayOS Webhook] Updated appointment {} status: PAYMENT_PENDING → PENDING",
-                            payment.getAppointmentId());
-
                 } catch (Exception e) {
                     log.error("[PayOS Webhook] Error updating appointment status: ", e);
                     // Don't throw - payment update should persist even if appointment update fails
