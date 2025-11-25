@@ -43,4 +43,10 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord,Str
     // Count total records of patient with doctor
     @Query("SELECT COUNT(m) FROM MedicalRecord m WHERE m.patientId = ?1 AND m.doctorId = ?2")
     Long countByPatientIdAndDoctorId(String patientId, String doctorId);
+
+    // ========== DASHBOARD QUERIES ==========
+
+    // Find recent medical records by doctor (for dashboard)
+    @Query("SELECT m FROM MedicalRecord m WHERE m.doctorId = ?1 ORDER BY m.createdAt DESC")
+    Page<MedicalRecord> findRecentByDoctorId(String doctorId, Pageable pageable);
 }

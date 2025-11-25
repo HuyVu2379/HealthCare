@@ -55,4 +55,59 @@ public interface AppointmentRepository extends JpaRepository<Appointment,String>
             @Param("slotId") Integer slotId,
             @Param("statuses") List<AppointmentStatus> statuses
     );
+
+    // ========== DASHBOARD QUERIES ==========
+
+    // Count appointments for today by doctor and statuses
+    @Query("SELECT COUNT(a) FROM Appointment a " +
+           "WHERE a.doctorId = :doctorId " +
+           "AND a.appointmentDate = :date " +
+           "AND a.status IN :statuses")
+    Long countTodayAppointmentsByDoctor(
+            @Param("doctorId") String doctorId,
+            @Param("date") Date date,
+            @Param("statuses") List<AppointmentStatus> statuses
+    );
+
+    // Count new patients today (first appointment with this doctor today)
+    @Query("SELECT COUNT(DISTINCT a.patientId) FROM Appointment a " +
+           "WHERE a.doctorId = :doctorId " +
+           "AND a.appointmentDate = :date " +
+           "AND NOT EXISTS (" +
+           "  SELECT 1 FROM Appointment a2 " +
+           "  WHERE a2.patientId = a.patientId " +
+           "  AND a2.doctorId = :doctorId " +
+           "  AND a2.appointmentDate < :date" +
+           ")")
+    Long countNewPatientsToday(
+            @Param("doctorId") String doctorId,
+            @Param("date") Date date
+    );
+
+    // Count completed consultations today
+    @Query("SELECT COUNT(a) FROM Appointment a " +
+           "WHERE a.doctorId = :doctorId " +
+           "AND a.appointmentDate = :date " +
+           "AND a.status = 'COMPLETED'")
+    Long countCompletedToday(
+            @Param("doctorId") String doctorId,
+            @Param("date") Date date
+    );
+
+    // Count total distinct patients of a doctor
+    @Query("SELECT COUNT(DISTINCT a.patientId) FROM Appointment a " +
+           "WHERE a.doctorId = :doctorId")
+    Long countTotalPatientsByDoctor(@Param("doctorId") String doctorId);
+
+    // Find upcoming appointments today (CONFIRMED or PENDING)
+    @Query("SELECT a FROM Appointment a " +
+           "LEFT JOIN FETCH a.timeSlot " +
+           "WHERE a.doctorId = :doctorId " +
+           "AND a.appointmentDate = :date " +
+           "AND a.status IN ('CONFIRMED', 'PENDING') " +
+           "ORDER BY a.timeSlot.startTime ASC")
+    List<Appointment> findUpcomingTodayAppointments(
+            @Param("doctorId") String doctorId,
+            @Param("date") Date date
+    );
 }

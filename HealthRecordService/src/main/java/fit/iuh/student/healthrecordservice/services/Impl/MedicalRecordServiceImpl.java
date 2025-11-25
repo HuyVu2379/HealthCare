@@ -532,4 +532,22 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .visits(visits)
                 .build();
     }
+
+    // ========== DASHBOARD METHOD ==========
+    @Override
+    public List<MedicalRecordDashboardResponse> getRecentMedicalRecordsByDoctor(String doctorId, int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        Page<MedicalRecord> records = medicalRecordRepository.findRecentByDoctorId(doctorId, pageable);
+
+        return records.getContent().stream()
+                .map(record -> MedicalRecordDashboardResponse.builder()
+                        .recordId(record.getRecordId())
+                        .patientId(record.getPatientId())
+                        .diagnosis(record.getDiagnosis())
+                        .createdAt(record.getCreatedAt() != null
+                                ? Date.valueOf(record.getCreatedAt().toLocalDate())
+                                : null)
+                        .build())
+                .collect(Collectors.toList());
+    }
 }

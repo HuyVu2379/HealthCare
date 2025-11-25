@@ -49,6 +49,12 @@ spring:
             - Path=/api/v1/schedules/**, /api/v1/time-slots/**, /api/v1/doctor-schedules/**, /api/v1/appointments/**, /api/v1/predicts/**
           filters:
             - AuthenticationFilter
+        - id: scheduling-service-doctor-dashboard
+          uri: lb://SchedulingService
+          predicates:
+            - Path=/api/v1/dashboard/doctor/**
+          filters:
+            - AuthenticationFilter
         - id: AI_Service
           uri: lb://AI-SERVICE
           predicates:

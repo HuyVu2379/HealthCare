@@ -134,4 +134,16 @@ public class MedicalRecordController {
             );
         }
     }
+
+    // ========== DASHBOARD ENDPOINT ==========
+
+    @GetMapping("/recent-by-doctor/{doctorId}")
+    public ResponseEntity<List<MedicalRecordDashboardResponse>> getRecentMedicalRecordsByDoctor(
+            @PathVariable String doctorId,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        List<MedicalRecordDashboardResponse> records =
+                medicalRecordService.getRecentMedicalRecordsByDoctor(doctorId, limit);
+        return ResponseEntity.ok(records);
+    }
 }
