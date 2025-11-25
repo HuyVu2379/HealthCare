@@ -1,9 +1,9 @@
 package fit.iuh.student.schedulingservice.publishers;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import fit.iuh.student.schedulingservice.dtos.responses.AppointmentResponse;
 import fit.iuh.student.schedulingservice.dtos.responses.RescheduleAppointmentResponse;
 import fit.iuh.student.schedulingservice.publishers.payload.AppointmentData;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -15,13 +15,30 @@ import org.springframework.stereotype.Component;
 public class AppointmentEventPublisher {
     private final RabbitTemplate rabbitTemplate;
     private static final String APPOINTMENT_NOTIFICATION_QUEUE = "APPOINTMENT_NOTIFICATION_QUEUE";
+    private static final String SCHEDULE_SOCKET_RESPONSE_QUEUE = "SCHEDULE_SOCKET_RESPONSE_QUEUE";
     
     public void publishBookingAppointmentEvent(AppointmentResponse payload) {
         try {
             log.info("Publishing booking appointment event for patient: {}", payload.getPatient().getFullName());
-            // Tạo message wrapper với eventType
-            AppointmentEventMessage message = new AppointmentEventMessage(payload, "BOOKING_APPOINTMENT");
-            rabbitTemplate.convertAndSend(APPOINTMENT_NOTIFICATION_QUEUE, message);
+
+            // Gửi email notification qua APPOINTMENT_NOTIFICATION_QUEUE
+            AppointmentEventMessage emailMessage = new AppointmentEventMessage(payload, "BOOKING_APPOINTMENT");
+            rabbitTemplate.convertAndSend(APPOINTMENT_NOTIFICATION_QUEUE, emailMessage);
+            log.info("Sent email notification to APPOINTMENT_NOTIFICATION_QUEUE");
+
+            // Gửi WebSocket notification qua SCHEDULE_SOCKET_RESPONSE_QUEUE
+            AppointmentData websocketData = AppointmentData.builder()
+                    .appointmentId(payload.getAppointmentId())
+                    .doctorId(payload.getDoctor().getDoctorId())
+                    .patientId(payload.getPatient().getUserId())
+                    .eventType("BOOKING_APPOINTMENT")
+                    .success(true)
+                    .build();
+            AppointmentEventMessage websocketMessage = new AppointmentEventMessage(websocketData, "BOOKING_APPOINTMENT");
+            rabbitTemplate.convertAndSend(SCHEDULE_SOCKET_RESPONSE_QUEUE, websocketMessage);
+            log.info("Sent WebSocket notification to SCHEDULE_SOCKET_RESPONSE_QUEUE for doctorId: {}, patientId: {}",
+                    payload.getDoctor().getDoctorId(), payload.getPatient().getUserId());
+
         } catch (Exception e) {
             log.error("Error in publishing booking appointment event", e);
         }
@@ -59,7 +76,7 @@ public class AppointmentEventPublisher {
             log.error("Error in publishing update status appointment event", e);
         }
     }
-    
+
 //    public void publishCompletedStatusAppointmentEvent(AppointmentResponse payload) {
 //        try {
 //            log.info("Publishing update status appointment event for patient: {}", payload.getPatient().getFullName());
@@ -70,7 +87,7 @@ public class AppointmentEventPublisher {
 //            log.error("Error in publishing update status appointment event", e);
 //        }
 //    }
-    
+
     public void publishNoShowStatusAppointmentEvent(AppointmentResponse payload) {
         try {
             log.info("Publishing update status appointment event for patient: {}", payload.getPatient().getFullName());
@@ -108,29 +125,28 @@ public class AppointmentEventPublisher {
         }
     }
     // Inner class để wrap message với eventType
+    @Data
     public static class AppointmentEventMessage {
         private AppointmentResponse payload;
         private RescheduleAppointmentResponse rescheduleAppointmentResponse;
         private String eventType;
         private AppointmentData data;
+
         public AppointmentEventMessage(AppointmentData data, String eventType) {
             this.data = data;
             this.eventType = eventType;
         }
+
         public AppointmentEventMessage() {}
+
         public AppointmentEventMessage(AppointmentResponse payload, String eventType) {
             this.payload = payload;
             this.eventType = eventType;
         }
+
         public AppointmentEventMessage(RescheduleAppointmentResponse rescheduleAppointmentResponse, String eventType) {
             this.rescheduleAppointmentResponse = rescheduleAppointmentResponse;
             this.eventType = eventType;
         }
-        public AppointmentData getData() { return data; }
-        public AppointmentResponse getPayload() { return payload; }
-        public RescheduleAppointmentResponse getReSchedulePayload() { return rescheduleAppointmentResponse; }
-        public void setPayload(AppointmentResponse payload) { this.payload = payload; }
-        public String getEventType() { return eventType; }
-        public void setEventType(String eventType) { this.eventType = eventType; }
     }
 }
