@@ -29,7 +29,7 @@ public class SummaryServiceImpl implements SummaryService {
     private final SummaryRepository summaryRepository;
     private final RestTemplate restTemplate;
     private final MessageRepository messageService;
-    @Value("${gemini.api-key}")
+    @Value("${gemini.apiKey}")
     private String gemini_api_key;
 //    public Summary createSummary(CreateSummaryRequest summary) {
 //        try{
