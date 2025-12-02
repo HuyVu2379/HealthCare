@@ -22,10 +22,11 @@ public class SecurityConfig {
     private final HeaderAuthenticationFilter headerAuthenticationFilter;
 
     private List<String> publicEndpoints = Arrays.asList(
-            "/ws/**" // Allow WebSocket connections without authentication
+            "/ws/**", // Allow WebSocket connections without authentication
 //            "/api/v1/health-metrics/getEGFRMetric/**",
 //            "/api/v1/health-metrics/get-health-metrics-latest/**",
-//            "/api/v1/health-metrics/get-health-metrics-with-batch/**"
+//            "/api/v1/health-metrics/get-health-metrics-with-batch/**",
+            "/api/v1/chats/get-summary/**"
     );
 
     @Bean
