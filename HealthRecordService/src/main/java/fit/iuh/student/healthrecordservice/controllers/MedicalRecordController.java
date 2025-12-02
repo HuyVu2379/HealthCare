@@ -4,6 +4,7 @@ import fit.iuh.student.healthrecordservice.dtos.requests.CreateMedicalRecordRequ
 import fit.iuh.student.healthrecordservice.dtos.responses.*;
 import fit.iuh.student.healthrecordservice.services.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -83,8 +84,6 @@ public class MedicalRecordController {
         }
     }
 
-    // ========== NEW ENDPOINTS FOR FOLLOW-UP SYSTEM ==========
-
     @GetMapping("/{recordId}/timeline")
     public ResponseEntity<MessageResponse<MedicalRecordTimelineResponse>> getMedicalRecordTimeline(
             @PathVariable String recordId
@@ -119,8 +118,6 @@ public class MedicalRecordController {
         }
     }
 
-    // ========== NEW ENDPOINT: FULL TIMELINE WITH EPISODES ==========
-
     @GetMapping("/{recordId}/full-timeline")
     public ResponseEntity<MessageResponse<MedicalRecordFullTimelineResponse>> getFullTimeline(
             @PathVariable String recordId
@@ -135,8 +132,6 @@ public class MedicalRecordController {
         }
     }
 
-    // ========== DASHBOARD ENDPOINT ==========
-
     @GetMapping("/recent-by-doctor/{doctorId}")
     public ResponseEntity<List<MedicalRecordDashboardResponse>> getRecentMedicalRecordsByDoctor(
             @PathVariable String doctorId,
@@ -145,5 +140,24 @@ public class MedicalRecordController {
         List<MedicalRecordDashboardResponse> records =
                 medicalRecordService.getRecentMedicalRecordsByDoctor(doctorId, limit);
         return ResponseEntity.ok(records);
+    }
+
+    @GetMapping("/doctor/{doctorId}/patient/{patientId}/history")
+    public ResponseEntity<MessageResponse<Page<MedicalRecordDetailResponse>>> getMedicalRecordHistory(
+            @PathVariable String doctorId,
+            @PathVariable String patientId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        try {
+            Page<MedicalRecordDetailResponse> response = medicalRecordService.getMedicalRecordHistory(
+                    doctorId, patientId, page, size
+            );
+            return SuccessEntityResponse.ok("Lấy lịch sử khám và điều trị thành công", response);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                    new MessageResponse<>(500, "Không thể tải lịch sử: " + e.getMessage(), false, null)
+            );
+        }
     }
 }

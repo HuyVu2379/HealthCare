@@ -7,6 +7,7 @@ import fit.iuh.student.healthrecordservice.dtos.responses.MedicalRecordListRespo
 import fit.iuh.student.healthrecordservice.dtos.responses.MedicalRecordTimelineResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.MedicalRecordFullTimelineResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.MedicalRecordDashboardResponse;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -25,4 +26,7 @@ public interface MedicalRecordService {
 
     // ========== DASHBOARD METHOD ==========
     List<MedicalRecordDashboardResponse> getRecentMedicalRecordsByDoctor(String doctorId, int limit);
+
+    // Combined: Consultation + Treatment History
+    Page<MedicalRecordDetailResponse> getMedicalRecordHistory(String doctorId, String patientId, int page, int size);
 }

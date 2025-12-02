@@ -20,8 +20,6 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord,Str
     @Query("SELECT m FROM MedicalRecord m WHERE m.patientId = ?1")
     Page<MedicalRecord> findByPatientId(String patientId, Pageable pageable);
 
-    // ========== NEW QUERIES FOR FOLLOW-UP SYSTEM ==========
-
     // Find all follow-up records of a parent record (sorted by created date)
     @Query("SELECT m FROM MedicalRecord m WHERE m.parentRecordId = ?1 ORDER BY m.createdAt ASC")
     List<MedicalRecord> findFollowUpRecords(String parentRecordId);
@@ -34,8 +32,6 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord,Str
     @Query("SELECT m FROM MedicalRecord m WHERE m.patientId = ?1 AND (m.episodeType = 'INITIAL' OR m.episodeType IS NULL)")
     Page<MedicalRecord> findInitialRecordsByPatientId(String patientId, Pageable pageable);
 
-    // ========== NEW QUERIES FOR FULL TIMELINE ==========
-
     // Lấy TẤT CẢ records của patient với doctor, sorted by created date DESC
     @Query("SELECT m FROM MedicalRecord m WHERE m.patientId = ?1 AND m.doctorId = ?2 ORDER BY m.createdAt DESC")
     List<MedicalRecord> findByPatientIdAndDoctorIdOrderByCreatedAtDesc(String patientId, String doctorId);
@@ -44,9 +40,11 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord,Str
     @Query("SELECT COUNT(m) FROM MedicalRecord m WHERE m.patientId = ?1 AND m.doctorId = ?2")
     Long countByPatientIdAndDoctorId(String patientId, String doctorId);
 
-    // ========== DASHBOARD QUERIES ==========
-
     // Find recent medical records by doctor (for dashboard)
     @Query("SELECT m FROM MedicalRecord m WHERE m.doctorId = ?1 ORDER BY m.createdAt DESC")
     Page<MedicalRecord> findRecentByDoctorId(String doctorId, Pageable pageable);
+
+    // Find paginated medical records by patient and doctor (for Tab 3+4 combined: Consultation + Treatment History)
+    @Query("SELECT m FROM MedicalRecord m WHERE m.patientId = ?1 AND m.doctorId = ?2 ORDER BY m.createdAt DESC")
+    Page<MedicalRecord> findByPatientIdAndDoctorId(String patientId, String doctorId, Pageable pageable);
 }

@@ -15,4 +15,6 @@ public interface PatientService {
     PatientClientResponse getPatientByIdForClient(String patientId);
     Page<PatientResponse> getPatientsByDoctorId(String doctorId, int page, int size, String sortBy, String sortDir, String namePatient,String statusHealth);
     GetPatientResponse getPatientById(String patientId);
+    Page<PatientListResponse> getPatientsListByDoctorId(String doctorId, int page, int size, String sortBy, String sortDir, String namePatient);
+    PatientProfileResponse getPatientProfileForDoctor(String doctorId, String patientId);
 }

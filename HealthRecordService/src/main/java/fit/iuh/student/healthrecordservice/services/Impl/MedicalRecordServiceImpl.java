@@ -550,4 +550,24 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public Page<MedicalRecordDetailResponse> getMedicalRecordHistory(String doctorId, String patientId, int page, int size) {
+        try {
+            // Validate that doctor has treated this patient
+            Long recordCount = medicalRecordRepository.countByPatientIdAndDoctorId(patientId, doctorId);
+            if (recordCount == 0) {
+                throw new NotFoundException("Doctor has not treated this patient");
+            }
+
+            // Get paginated medical records
+            Pageable pageable = PageRequest.of(page, size);
+            Page<MedicalRecord> records = medicalRecordRepository.findByPatientIdAndDoctorId(patientId, doctorId, pageable);
+
+            // Map to MedicalRecordDetailResponse (includes prescriptions)
+            return records.map(this::convertToDetailResponse);
+        } catch (Exception e) {
+            throw new RuntimeException("Error getting medical record history: " + e.getMessage(), e);
+        }
+    }
 }
