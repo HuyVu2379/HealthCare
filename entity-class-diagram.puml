@@ -1,0 +1,452 @@
+@startuml Entity Class Diagram
+
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+package "UserService" {
+
+    abstract class BaseEntity {
+        - createdAt: LocalDateTime
+        - updatedAt: LocalDateTime
+    }
+
+    class User {
+        - userId: String
+        - password: String
+        - email: String
+        - fullName: String
+        - gender: Gender
+        - dob: LocalDate
+        - phone: String
+        - address: String
+        - avatarUrl: String
+        - role: Role
+        - status: Status
+    }
+
+    class Patient {
+        - medicalHistories: List<MedicalHistory>
+        - height: int
+        - weight: double
+        - bloodType: String
+        - bmi: double
+        - insurances: List<Insurance>
+        - allergies: List<Allergy>
+    }
+
+    class Doctor {
+        - specialty: String
+        - experienceYears: Integer
+        - bio: String
+        - examinationFee: Integer
+        - clinicAddress: String
+        - rating: Double
+        - medicalHistories: List<MedicalHistory>
+        - certifications: List<Certification>
+    }
+
+    class MedicalHistory {
+        - medicalHistoryId: Integer
+        - patient: Patient
+        - doctor: Doctor
+        - serviceName: String
+        - diagnosisDate: LocalDate
+        - diagnosis: String
+        - notes: String
+        - stage: int
+        - statusHealth: StatusHealth
+    }
+
+    class Insurance {
+        - insuranceId: String
+        - insuranceName: String
+        - insuranceEndDate: Date
+        - insurancePatient: Patient
+    }
+
+    class Certification {
+        - id: String
+        - name: String
+        - issuingOrganization: String
+        - yearIssued: Integer
+        - doctor: Doctor
+    }
+
+    class Allergy {
+        - allergyId: String
+        - name: String
+        - description: String
+        - level: AllergyLevel
+        - patient: Patient
+    }
+
+    enum Gender {
+        MALE
+        FEMALE
+        OTHER
+    }
+
+    enum Role {
+        PATIENT
+        DOCTOR
+        ADMIN
+    }
+
+    enum Status {
+        ACTIVE
+        INACTIVE
+        BLOCKED
+    }
+
+    enum StatusHealth {
+        DESCREASING
+        INCREASING
+        STABLE
+        IMPROVING
+    }
+
+    enum AllergyLevel {
+        LOW
+        MEDIUM
+        HIGH
+    }
+}
+
+package "SchedulingService" {
+
+    abstract class BaseEntity_Scheduling {
+        - createdAt: LocalDateTime
+        - updatedAt: LocalDateTime
+    }
+
+    class Appointment {
+        - appointmentId: String
+        - patientId: String
+        - doctorId: String
+        - doctorSchedule: DoctorSchedule
+        - symptoms: String
+        - note: String
+        - slotId: Integer
+        - status: AppointmentStatus
+        - paymentStatus: PaymentStatus
+        - paymentMethod: String
+        - timeSlot: TimeSlot
+        - appointmentDate: Date
+        - consultationType: ConsultationType
+        - addressDetail: String
+        - hasPredict: boolean
+        - relatedRecordId: String
+    }
+
+    class DoctorSchedule {
+        - scheduleId: String
+        - doctorId: String
+        - weekDay: WeekDay
+        - workDate: Date
+        - isAvailable: boolean
+        - timeSlots: List<TimeSlot>
+        - appointments: List<Appointment>
+    }
+
+    class TimeSlot {
+        - slotId: Integer
+        - startTime: LocalTime
+        - endTime: LocalTime
+    }
+
+    class Predict {
+        - predictId: String
+        - patientId: String
+        - stage: int
+        - recommendations: List<String>
+        - confidence: double
+    }
+
+    enum AppointmentStatus {
+        PAYMENT_PENDING
+        PENDING
+        CONFIRMED
+        CANCELED
+        REJECTED
+        COMPLETED
+        NO_SHOW
+        RESCHEDULED
+    }
+
+    enum ConsultationType {
+        ALL
+        DIRECT_CONSULTATION
+        ONLINE_CONSULTATION
+        LAB_TEST
+        FOLLOW_UP
+    }
+
+    enum PaymentStatus {
+        UNPAID
+        PAID
+        REFUNDED
+    }
+
+    enum WeekDay {
+        MONDAY
+        TUESDAY
+        WEDNESDAY
+        THURSDAY
+        FRIDAY
+        SATURDAY
+        SUNDAY
+    }
+}
+
+package "HealthRecordService" {
+
+    abstract class BaseEntity_HealthRecord {
+        - createdAt: LocalDateTime
+        - updatedAt: LocalDateTime
+    }
+
+    class MedicalRecord {
+        - recordId: String
+        - patientId: String
+        - doctorId: String
+        - serviceName: String
+        - appointmentId: String
+        - diagnosis: String
+        - treatment: String
+        - symptoms: String
+        - followUpDate: Date
+        - imageAttachments: List<String>
+        - signatureUrl: String
+        - healthMetrics: List<HealthMetric>
+        - prescriptions: List<Prescription>
+        - doctorNote: String
+        - parentRecordId: String
+        - episodeType: EpisodeType
+    }
+
+    class Prescription {
+        - prescriptionId: String
+        - medicalRecord: MedicalRecord
+        - medicalName: String
+        - dosage: String
+        - frequency: List<Frequency>
+        - notes: String
+        - startDate: Date
+        - endDate: Date
+    }
+
+    class HealthMetric {
+        - metricId: String
+        - patientId: String
+        - metricName: String
+        - metricValue: double
+        - unit: String
+        - medicalRecord: MedicalRecord
+        - measuredAt: Date
+    }
+
+    enum EpisodeType {
+        INITIAL
+        FOLLOW_UP
+    }
+
+    enum Frequency {
+        MORNING
+        AFTERNOON
+        EVENING
+    }
+}
+
+package "NotificationService" {
+
+    abstract class BaseEntity_Notification {
+        - createdAt: LocalDateTime
+        - updatedAt: LocalDateTime
+    }
+
+    class Notification {
+        - notificationId: String
+        - recipient_id: String
+        - type: NotificationType
+        - message: String
+    }
+
+    enum NotificationType {
+        APPOINTMENT
+        REMINDER
+        ALERT
+        EMAIL
+    }
+}
+
+package "PaymentService" {
+
+    class Payment {
+        - paymentId: String
+        - appointmentId: String
+        - amount: Long
+        - orderCode: Long
+        - paymentUrl: String
+        - status: String
+        - paymentMethod: String
+        - createdAt: LocalDateTime
+        - paidAt: LocalDateTime
+        - expiresAt: LocalDateTime
+        - transactionId: String
+        - description: String
+    }
+}
+
+package "CommunicationService" {
+
+    class Comment {
+        - comment_id: String
+        - target_id: String
+        - target_type: CommentTargetType
+        - author_id: String
+        - author_name: String
+        - author_avatar: String
+        - content: String
+        - rating: int
+        - imageUrls: List<String>
+        - createdAt: LocalDateTime
+        - updatedAt: LocalDateTime
+    }
+
+    class Group {
+        - groupId: String
+        - groupName: String
+        - appointment_id: String
+        - hasMessage: Boolean
+        - members: List<MemberDTO>
+        - createdAt: LocalDateTime
+        - updatedAt: LocalDateTime
+    }
+
+    class Message {
+        - message_id: String
+        - group_id: String
+        - sender_id: String
+        - receiver_id: String
+        - content: String
+        - sendAt: LocalDateTime
+        - createdAt: LocalDateTime
+        - updatedAt: LocalDateTime
+    }
+
+    class Post {
+        - post_id: String
+        - author_id: String
+        - author_name: String
+        - author_avatar: String
+        - title: String
+        - content: String
+        - image_urls: List<String>
+        - category: Category
+        - createdAt: LocalDateTime
+        - updatedAt: LocalDateTime
+    }
+
+    class Room {
+        - room_id: String
+        - room_name: String
+        - appointmentId: String
+        - doctorId: String
+        - patientId: String
+        - status: RoomStatus
+        - createdAt: LocalDateTime
+        - updatedAt: LocalDateTime
+    }
+
+    class Summary {
+        - summaryId: String
+        - groupId: String
+        - contentSummary: String
+        - createdAt: LocalDateTime
+        - updatedAt: LocalDateTime
+    }
+
+    enum CommentTargetType {
+        POST
+        DOCTOR
+    }
+
+    enum Category {
+        BLOG
+        NEW
+    }
+
+    enum RoomStatus {
+        CREATED
+        ACTIVE
+        INACTIVE
+    }
+}
+
+' Inheritance relationships
+User <|-- Patient
+User <|-- Doctor
+User --|> BaseEntity
+Patient --|> BaseEntity
+Doctor --|> BaseEntity
+MedicalHistory --|> BaseEntity
+Allergy --|> BaseEntity
+
+Appointment --|> BaseEntity_Scheduling
+DoctorSchedule --|> BaseEntity_Scheduling
+TimeSlot --|> BaseEntity_Scheduling
+Predict --|> BaseEntity_Scheduling
+
+MedicalRecord --|> BaseEntity_HealthRecord
+Prescription --|> BaseEntity_HealthRecord
+HealthMetric --|> BaseEntity_HealthRecord
+
+Notification --|> BaseEntity_Notification
+
+' Entity relationships - UserService
+Patient "1" -- "*" MedicalHistory : has
+Doctor "1" -- "*" MedicalHistory : treats
+Patient "1" -- "*" Insurance : has
+Patient "1" -- "*" Allergy : has
+Doctor "1" -- "*" Certification : has
+
+' Entity to Enum relationships - UserService
+User -- Gender
+User -- Role
+User -- Status
+MedicalHistory -- StatusHealth
+Allergy -- AllergyLevel
+
+' Entity relationships - SchedulingService
+DoctorSchedule "1" -- "*" Appointment : contains
+Appointment "*" -- "1" TimeSlot : scheduled
+DoctorSchedule "*" -- "*" TimeSlot : available
+
+' Entity to Enum relationships - SchedulingService
+Appointment -- AppointmentStatus
+Appointment -- PaymentStatus
+Appointment -- ConsultationType
+DoctorSchedule -- WeekDay
+
+' Entity relationships - HealthRecordService
+MedicalRecord "1" -- "*" Prescription : contains
+MedicalRecord "1" -- "*" HealthMetric : tracks
+
+' Entity to Enum relationships - HealthRecordService
+MedicalRecord -- EpisodeType
+Prescription -- Frequency
+
+' Entity to Enum relationships - NotificationService
+Notification -- NotificationType
+
+' Entity relationships - CommunicationService
+Group "1" -- "*" Message : contains
+Group "1" -- "1" Summary : has
+
+' Entity to Enum relationships - CommunicationService
+Comment -- CommentTargetType
+Post -- Category
+Room -- RoomStatus
+
+@enduml
+

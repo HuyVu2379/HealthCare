@@ -28,24 +28,14 @@ class ChatService:
 
     async def get_ai_response(self, message: str, user_id: Optional[str] = None, group_id: Optional[str] = None) -> Dict[str, Any]:
         try:
-            context = ""
-            if group_id:
-                summary_resp = await self.fetch_summary(group_id)
-                if summary_resp.summary:
-                    context += f"Tóm tắt cuộc hội thoại trước: {summary_resp.summary}\n"
-                if summary_resp.messages:
-                    context += "Các tin nhắn gần đây:\n" + "\n".join(summary_resp.messages)  # lấy 5 tin gần nhất
-            
-            # Gửi context + message cho AI (Gemini hoặc simple AI)
-            final_prompt = f"{context}\nNgười dùng: {message}"
-            
             if self.use_rag and self.rag_service:
-                rag_response = await self.rag_service.get_rag_response(final_prompt, user_id)
+                rag_response = await self.rag_service.get_rag_response(message, user_id)
                 if rag_response.get("is_rag_response", False):
                     return rag_response
             
             # fallback
-            return await self._get_simple_ai_response(final_prompt, user_id)
+            return await self._get_simple_ai_response(message, user_id)
+        
         
         except Exception as e:
             print(f"⚠️ Lỗi trong get_ai_response: {e}")

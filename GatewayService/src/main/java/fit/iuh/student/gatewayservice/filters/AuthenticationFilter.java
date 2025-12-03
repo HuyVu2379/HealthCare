@@ -39,7 +39,8 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             "/api/v1/health-metrics/get-health-metrics-with-batch/**",
             "/api/v1/predicts/get-predict-history/**",
             "/api/v1/predicts/get-predict/**",
-            "/api/v1/doctors/updateRating/**");
+            "/api/v1/doctors/updateRating/**",
+            "/api/v1/chats/get-summary/**");
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
 
     @Autowired
