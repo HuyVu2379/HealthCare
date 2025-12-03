@@ -52,5 +52,6 @@ UserService/src/main/resources/application.yml
 GatewayService/src/main/resources/application.yml
 NotificationService/src/main/resources/application.yml
 AIService/.env
+AIService/rag_chatbot/.env
 CommunicationService/src/main/resources/application.yml
 PaymentService/src/main/resources/application.yml
