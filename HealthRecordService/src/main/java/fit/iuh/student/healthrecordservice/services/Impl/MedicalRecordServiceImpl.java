@@ -532,4 +532,42 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .visits(visits)
                 .build();
     }
+
+    // ========== DASHBOARD METHOD ==========
+    @Override
+    public List<MedicalRecordDashboardResponse> getRecentMedicalRecordsByDoctor(String doctorId, int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        Page<MedicalRecord> records = medicalRecordRepository.findRecentByDoctorId(doctorId, pageable);
+
+        return records.getContent().stream()
+                .map(record -> MedicalRecordDashboardResponse.builder()
+                        .recordId(record.getRecordId())
+                        .patientId(record.getPatientId())
+                        .diagnosis(record.getDiagnosis())
+                        .createdAt(record.getCreatedAt() != null
+                                ? Date.valueOf(record.getCreatedAt().toLocalDate())
+                                : null)
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<MedicalRecordDetailResponse> getMedicalRecordHistory(String doctorId, String patientId, int page, int size) {
+        try {
+            // Validate that doctor has treated this patient
+            Long recordCount = medicalRecordRepository.countByPatientIdAndDoctorId(patientId, doctorId);
+            if (recordCount == 0) {
+                throw new NotFoundException("Doctor has not treated this patient");
+            }
+
+            // Get paginated medical records
+            Pageable pageable = PageRequest.of(page, size);
+            Page<MedicalRecord> records = medicalRecordRepository.findByPatientIdAndDoctorId(patientId, doctorId, pageable);
+
+            // Map to MedicalRecordDetailResponse (includes prescriptions)
+            return records.map(this::convertToDetailResponse);
+        } catch (Exception e) {
+            throw new RuntimeException("Error getting medical record history: " + e.getMessage(), e);
+        }
+    }
 }

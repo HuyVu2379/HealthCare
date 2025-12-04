@@ -7,6 +7,7 @@ import fit.iuh.student.userservice.dtos.responses.*;
 import fit.iuh.student.userservice.entities.Doctor;
 import fit.iuh.student.userservice.entities.MedicalHistory;
 import fit.iuh.student.userservice.entities.Patient;
+import fit.iuh.student.userservice.exceptions.errors.UnauthorizedException;
 import fit.iuh.student.userservice.exceptions.errors.UserNotFoundException;
 import fit.iuh.student.userservice.mappers.UserMapper;
 import fit.iuh.student.userservice.repositories.DoctorRepository;
@@ -34,11 +35,19 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public Page<MedicalHistory> getMedicalHistoriesByPatientId(String patientId, int page, int size, String sortBy, String sortDir) {
         try{
-            if (sortBy == null || sortBy.isEmpty()) {
-                sortBy = "createdAt"; // default sort field
+            // Validate pagination parameters
+            if (page < 0) {
+                throw new IllegalArgumentException("Page index must not be less than zero");
+            }
+            if (size < 1) {
+                throw new IllegalArgumentException("Page size must be greater than zero");
             }
 
-            Sort.Direction direction = Sort.Direction.ASC; // default
+            if (sortBy == null || sortBy.isEmpty()) {
+                sortBy = "createdAt"; 
+            }
+
+            Sort.Direction direction = Sort.Direction.ASC; 
             if (sortDir != null && sortDir.equalsIgnoreCase("DESC")) {
                 direction = Sort.Direction.DESC;
             }
@@ -95,6 +104,14 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public Page<PatientResponse> getPatientsByDoctorId(String doctorId, int page, int size, String sortBy, String sortDir, String namePatient, String statusHealth) {
         try {
+            // Validate pagination parameters
+            if (page < 0) {
+                throw new IllegalArgumentException("Page index must not be less than zero");
+            }
+            if (size < 1) {
+                throw new IllegalArgumentException("Page size must be greater than zero");
+            }
+
             if (sortBy == null || sortBy.isEmpty()) {
                 sortBy = "createdAt"; // default sort field
             }
@@ -105,7 +122,7 @@ public class PatientServiceImpl implements PatientService {
             }
 
             Sort sort = Sort.by(direction, sortBy);
-            Pageable pageable = PageRequest.of(page-1, size, sort);
+            Pageable pageable = PageRequest.of(page, size, sort);
             
             Page<Patient> patients = patientRepository.findPatientsByDoctorId(doctorId, pageable, namePatient, statusHealth);
             return patients.map(patient -> {
@@ -166,6 +183,108 @@ public class PatientServiceImpl implements PatientService {
                     .height(patient.getHeight())
                     .weight(patient.getWeight())
                     .bloodType(patient.getBloodType())
+                    .bmi(patient.getBmi())
+                    .build();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @Override
+    public Page<PatientListResponse> getPatientsListByDoctorId(String doctorId, int page, int size, String sortBy, String sortDir, String namePatient) {
+        try {
+            // Validate pagination parameters
+            if (page < 0) {
+                throw new IllegalArgumentException("Page index must not be less than zero");
+            }
+            if (size < 1) {
+                throw new IllegalArgumentException("Page size must be greater than zero");
+            }
+
+            if (sortBy == null || sortBy.isEmpty()) {
+                sortBy = "createdAt"; 
+            }
+
+            // lastVisitDate is computed from MedicalHistory.diagnosisDate, not a Patient field
+            if ("lastVisitDate".equals(sortBy)) {
+                sortBy = "createdAt"; 
+            }
+
+            Sort.Direction direction = Sort.Direction.ASC; 
+            if (sortDir != null && sortDir.equalsIgnoreCase("DESC")) {
+                direction = Sort.Direction.DESC;
+            }
+
+            Sort sort = Sort.by(direction, sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+
+            // Reuse existing query but map to PatientListResponse
+            Page<Patient> patients = patientRepository.findPatientsByDoctorId(doctorId, pageable, namePatient, null);
+            return patients.map(patient -> {
+                PatientListResponse response = new PatientListResponse();
+                response.setPatientId(patient.getUserId());
+                response.setFullName(patient.getFullName());
+
+                // Calculate age from date of birth if available
+                if (patient.getDob() != null) {
+                    int age = Period.between(patient.getDob(), LocalDate.now()).getYears();
+                    response.setAge(age);
+                }
+                response.setGender(patient.getGender());
+
+                // Get the latest medical history for this patient and doctor to find last visit date
+                if (patient.getMedicalHistories() != null && !patient.getMedicalHistories().isEmpty()) {
+                    MedicalHistory latestHistory = patient.getMedicalHistories().stream()
+                        .filter(mh -> mh.getDoctor() != null && doctorId.equals(mh.getDoctor().getUserId()))
+                        .max(Comparator.comparing(MedicalHistory::getDiagnosisDate))
+                        .orElse(null);
+
+                    if (latestHistory != null && latestHistory.getDiagnosisDate() != null) {
+                        response.setLastVisitDate(latestHistory.getDiagnosisDate());
+                    }
+                }
+
+                return response;
+            });
+        } catch (RuntimeException e) {
+            throw e;
+        }
+    }
+
+    @Override
+    public PatientProfileResponse getPatientProfileForDoctor(String doctorId, String patientId) {
+        try {
+            // Validate that doctor has treated this patient
+            Patient patient = patientRepository.findById(patientId)
+                    .orElseThrow(() -> new UserNotFoundException("Patient not found with id: " + patientId));
+
+            // Check if doctor has medical history with this patient
+            boolean hasTreated = patient.getMedicalHistories() != null &&
+                    patient.getMedicalHistories().stream()
+                    .anyMatch(mh -> mh.getDoctor() != null && doctorId.equals(mh.getDoctor().getUserId()));
+
+            if (!hasTreated) {
+                throw new UnauthorizedException("Doctor has not treated this patient");
+            }
+
+            // Calculate age from dob
+            int age = 0;
+            if (patient.getDob() != null) {
+                age = Period.between(patient.getDob(), LocalDate.now()).getYears();
+            }
+
+            return PatientProfileResponse.builder()
+                    .patientId(patient.getUserId())
+                    .fullName(patient.getFullName())
+                    .age(age)
+                    .gender(patient.getGender())
+                    .dob(patient.getDob())
+                    .phone(patient.getPhone())
+                    .email(patient.getEmail())
+                    .address(patient.getAddress())
+                    .bloodType(patient.getBloodType())
+                    .height(patient.getHeight())
+                    .weight(patient.getWeight())
                     .bmi(patient.getBmi())
                     .build();
         } catch (Exception e) {

@@ -57,4 +57,26 @@ public class PatientController {
     ){
         return SuccessEntityResponse.ok("get patients by doctorId success!",patientService.getPatientsByDoctorId(doctorId, page, size, sortBy, sortDir,namePatient,statusHealth));
     }
+
+    // Lay danh sách các bệnh nhân đã được bác sĩ khám bệnh
+    @GetMapping("/getPatientsListByDoctorId")
+    public ResponseEntity<MessageResponse<Page<PatientListResponse>>> getPatientsListByDoctorId(
+            @RequestParam String doctorId,
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam String sortDir,
+            @RequestParam String sortBy,
+            @RequestParam(required = false) String namePatient
+    ){
+        return SuccessEntityResponse.ok("Get patients list by doctor ID successfully!",patientService.getPatientsListByDoctorId(doctorId, page, size, sortBy, sortDir, namePatient));
+    }
+
+    // Lay thông tin chi tiết bệnh nhân cho bác sĩ (Tab 1: Profile)
+    @GetMapping("/doctor/{doctorId}/patient/{patientId}/profile")
+    public ResponseEntity<MessageResponse<PatientProfileResponse>> getPatientProfile(
+            @PathVariable String doctorId,
+            @PathVariable String patientId
+    ){
+        return SuccessEntityResponse.ok("get patient profile success!",patientService.getPatientProfileForDoctor(doctorId, patientId));
+    }
 }
