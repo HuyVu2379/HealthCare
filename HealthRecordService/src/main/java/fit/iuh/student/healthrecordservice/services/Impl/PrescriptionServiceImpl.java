@@ -3,16 +3,23 @@ package fit.iuh.student.healthrecordservice.services.Impl;
 import fit.iuh.student.healthrecordservice.clients.UserClient;
 import fit.iuh.student.healthrecordservice.clients.dtos.DoctorClientResponse;
 import fit.iuh.student.healthrecordservice.dtos.requests.CreatePrescriptionRequest;
+import fit.iuh.student.healthrecordservice.dtos.responses.MedicalRecordDetailResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.PrescriptionGroupResponse;
 import fit.iuh.student.healthrecordservice.dtos.responses.PrescriptionResponse;
 import fit.iuh.student.healthrecordservice.entities.MedicalRecord;
 import fit.iuh.student.healthrecordservice.entities.Prescription;
 import fit.iuh.student.healthrecordservice.repositories.MedicalRecordRepository;
 import fit.iuh.student.healthrecordservice.repositories.PrescriptionRepository;
+import fit.iuh.student.healthrecordservice.services.MedicalRecordService;
+import fit.iuh.student.healthrecordservice.services.PdfService;
 import fit.iuh.student.healthrecordservice.services.PrescriptionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,6 +30,8 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     private final PrescriptionRepository prescriptionRepository;
     private final MedicalRecordRepository medicalRecordRepository;
     private final UserClient userClient;
+    private final PdfService pdfService;
+    private final MedicalRecordService medicalRecordService;
     @Override
     public PrescriptionResponse createPrescription(CreatePrescriptionRequest request) {
         try{
@@ -208,6 +217,70 @@ public class PrescriptionServiceImpl implements PrescriptionService {
             return groups;
         } catch (Exception e) {
             throw new RuntimeException("Error getting prescription groups: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public byte[] downloadPrescriptionPdf(String recordId) throws Exception {
+        try {
+            // Get current user from SecurityContext
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUserId = authentication != null ? authentication.getName() : null;
+
+            if (currentUserId == null) {
+                throw new AccessDeniedException("Không tìm thấy thông tin người dùng");
+            }
+
+            // Fetch medical record to validate access
+            MedicalRecordDetailResponse record = medicalRecordService.getMedicalRecordById(recordId);
+
+            if (record == null) {
+                throw new IllegalArgumentException("Không tìm thấy hồ sơ khám: " + recordId);
+            }
+
+            // Authorization check
+            if (authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_PATIENT"))) {
+                // PATIENT can only download their own prescriptions
+                if (!record.getPatientId().equals(currentUserId)) {
+                    throw new AccessDeniedException("Bạn không có quyền tải đơn thuốc này");
+                }
+            }
+
+            // Delegate PDF generation to PdfService
+            return pdfService.generatePrescriptionPdf(recordId);
+
+        } catch (AccessDeniedException | IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi tải đơn thuốc: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public String generatePrescriptionFilename(String recordId) {
+        try {
+            // Fetch medical record to get appointment date
+            MedicalRecordDetailResponse record = medicalRecordService.getMedicalRecordById(recordId);
+
+            if (record == null) {
+                // Fallback to current date if record not found
+                SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyyyy");
+                return String.format("don-thuoc-%s.pdf", dateFormat.format(new Date()));
+            }
+
+            // Use appointment date for filename
+            SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyyyy");
+            String appointmentDateStr = record.getAppointmentDate() != null
+                    ? dateFormat.format(record.getAppointmentDate())
+                    : dateFormat.format(new Date());
+
+            return String.format("don-thuoc-%s.pdf", appointmentDateStr);
+
+        } catch (Exception e) {
+            // Fallback to current date if any error occurs
+            SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyyyy");
+            return String.format("don-thuoc-%s.pdf", dateFormat.format(new Date()));
         }
     }
 }
