@@ -55,6 +55,12 @@ spring:
             - Path=/api/v1/dashboard/doctor/**
           filters:
             - AuthenticationFilter
+        - id: admin-service
+          uri: lb://AdminService
+          predicates:
+            - Path=/api/v1/admin/**
+          filters:
+            - AuthenticationFilter
         - id: AI_Service
           uri: lb://AI-SERVICE
           predicates:

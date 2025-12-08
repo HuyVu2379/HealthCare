@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="EurekaServer" />
+        <module name="AdminService" />
       </profile>
       <profile name="Annotation profile for UserService" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -66,6 +67,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="AI-Chat-Service" options="-parameters" />
+      <module name="AdminService" options="-parameters" />
       <module name="CommunicationService" options="-parameters" />
       <module name="EurekaServer" options="-parameters" />
       <module name="GatewayService" options="-parameters" />
