@@ -4,28 +4,6 @@ server:
 spring:
   application:
     name: AdminService
-  datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5438/adminservicedb}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 20000
-      idle-timeout: 300000
-      max-lifetime: 1200000
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        jdbc:
-          time_zone: UTC
-    generate-ddl: true
 
 # Eureka Client Configuration
 eureka:
@@ -63,10 +41,6 @@ spring:
   config:
     activate:
       on-profile: docker
-  datasource:
-    url: jdbc:postgresql://postgres-db:5432/adminservicedb
-    username: postgres
-    password: postgres
 
 eureka:
   client:

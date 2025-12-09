@@ -110,4 +110,55 @@ public interface AppointmentRepository extends JpaRepository<Appointment,String>
             @Param("doctorId") String doctorId,
             @Param("date") Date date
     );
+
+    // ========== ADMIN QUERIES FOR STATISTICS ==========
+
+    /**
+     * Count appointments by consultation type in date range (only COMPLETED)
+     */
+    @Query("SELECT a.consultationType, COUNT(a) FROM Appointment a " +
+           "WHERE a.status = 'COMPLETED' AND a.appointmentDate BETWEEN :startDate AND :endDate " +
+           "GROUP BY a.consultationType")
+    List<Object[]> countByConsultationType(
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate
+    );
+
+    /**
+     * Count appointments by status in date range
+     */
+    @Query("SELECT a.status, COUNT(a) FROM Appointment a " +
+           "WHERE a.appointmentDate BETWEEN :startDate AND :endDate " +
+           "GROUP BY a.status")
+    List<Object[]> countByStatus(
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate
+    );
+
+    /**
+     * Get appointments by IDs (for joining with payments)
+     */
+    @Query("SELECT a FROM Appointment a WHERE a.appointmentId IN :ids")
+    List<Appointment> findByAppointmentIdIn(@Param("ids") List<String> ids);
+
+    /**
+     * Count completed appointments by doctor in date range
+     */
+    @Query("SELECT a.doctorId, COUNT(a) FROM Appointment a " +
+           "WHERE a.status = 'COMPLETED' AND a.appointmentDate BETWEEN :startDate AND :endDate " +
+           "GROUP BY a.doctorId ORDER BY COUNT(a) DESC")
+    List<Object[]> countCompletedByDoctor(
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate
+    );
+
+    /**
+     * Count total appointments in date range
+     */
+    @Query("SELECT COUNT(a) FROM Appointment a " +
+           "WHERE a.appointmentDate BETWEEN :startDate AND :endDate")
+    Long countAppointmentsByDateRange(
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate
+    );
 }
