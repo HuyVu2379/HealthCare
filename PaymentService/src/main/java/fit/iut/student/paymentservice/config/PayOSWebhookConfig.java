@@ -1,9 +1,10 @@
 package fit.iut.student.paymentservice.config;
 
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 import vn.payos.PayOS;
 import vn.payos.model.webhooks.ConfirmWebhookResponse;
 
@@ -20,9 +21,12 @@ public class PayOSWebhookConfig {
         this.paymentConfig = paymentConfig;
     }
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void registerWebhook() {
         try {
+            // Đợi thêm 2 giây để chắc chắn service đã sẵn sàng
+            Thread.sleep(2000);
+
             String webhookUrl = paymentConfig.getWebhookUrl();
             log.info("[PayOS Webhook Config] Registering webhook URL: {}", webhookUrl);
 
@@ -34,6 +38,9 @@ public class PayOSWebhookConfig {
             } else {
                 log.warn("[PayOS Webhook Config] ⚠ Webhook registration returned null response");
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("[PayOS Webhook Config] ✗ Webhook registration interrupted", e);
         } catch (Exception e) {
             log.error("[PayOS Webhook Config] ✗ Failed to register webhook URL: {}", e.getMessage(), e);
             // Don't throw exception to prevent application startup failure
