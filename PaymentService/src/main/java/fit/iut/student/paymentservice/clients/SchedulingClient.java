@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(
-        name = "${scheduling.service.name}",
-        url = "${scheduling.service.url}",
+        name = "SchedulingService",
         configuration = FeignAuthConfig.class
 )
 public interface SchedulingClient {
