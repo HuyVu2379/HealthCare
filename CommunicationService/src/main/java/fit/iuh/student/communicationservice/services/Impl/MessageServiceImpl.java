@@ -25,7 +25,7 @@ public class MessageServiceImpl implements MessageService {
 
     private final MessageRepository messageRepository;
     private final MessageMapper messageMapper;
-    private final SummaryService summaryService;
+//    private final SummaryService summaryService;
     private final GroupRepository groupRepository;
 
     public MessageResponse sendMessage(SendMessageRequest request) {
@@ -44,12 +44,12 @@ public class MessageServiceImpl implements MessageService {
                 groupRepository.save(g);
             }
         });
-        if (request.getGroupId().contains("AI")) {
-            summaryService.updateSummary(UpdateSummaryRequest.builder()
-                    .groupId(request.getGroupId())
-                    .contentSummary(request.getContent()).build()
-            );
-        }
+//        if (request.getGroupId().contains("AI")) {
+//            summaryService.updateSummary(UpdateSummaryRequest.builder()
+//                    .groupId(request.getGroupId())
+//                    .contentSummary(request.getContent()).build()
+//            );
+//        }
         MessageResponse response = messageMapper.toMessageResponse(savedMessage);
         if (request.getTempMessageId() != null && !request.getTempMessageId().isEmpty()) {
             response.setTempMessageId(request.getTempMessageId());

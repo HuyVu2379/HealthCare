@@ -23,6 +23,11 @@ public class PayOSWebhookConfig {
 
     @EventListener(ApplicationReadyEvent.class)
     public void registerWebhook() {
+        // Skip auto-registration if disabled
+        if (!paymentConfig.isWebhookAutoRegister()) {
+            return;
+        }
+
         try {
             // Đợi thêm 2 giây để chắc chắn service đã sẵn sàng
             Thread.sleep(2000);
@@ -42,7 +47,9 @@ public class PayOSWebhookConfig {
             Thread.currentThread().interrupt();
             log.error("[PayOS Webhook Config] ✗ Webhook registration interrupted", e);
         } catch (Exception e) {
-            log.error("[PayOS Webhook Config] ✗ Failed to register webhook URL: {}", e.getMessage(), e);
+            log.error("[PayOS Webhook Config] ✗ Failed to register webhook URL: {}", e.getMessage());
+            log.error("[PayOS Webhook Config] Please configure the webhook manually at: https://my.payos.vn/");
+            log.error("[PayOS Webhook Config] Webhook URL to configure: {}", paymentConfig.getWebhookUrl());
             // Don't throw exception to prevent application startup failure
             // Webhook can be configured manually on PayOS dashboard if needed
         }
