@@ -1,6 +1,6 @@
 package fit.iuh.student.userservice.controllers;
 
-import fit.iuh.student.userservice.entities.Doctor;
+import fit.iuh.student.userservice.dtos.responses.DoctorAdminResponse;
 import fit.iuh.student.userservice.services.UserAdminService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +24,9 @@ public class DoctorAdminController {
      */
     @PostMapping("/by-ids")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<Doctor>> getDoctorsByIds(@RequestBody List<String> doctorIds) {
+    public ResponseEntity<List<DoctorAdminResponse>> getDoctorsByIds(@RequestBody List<String> doctorIds) {
         log.info("Admin request: Get doctors by IDs, count: {}", doctorIds.size());
-        List<Doctor> doctors = userAdminService.getDoctorsByIds(doctorIds);
+        List<DoctorAdminResponse> doctors = userAdminService.getDoctorsByIds(doctorIds);
         return ResponseEntity.ok(doctors);
     }
 }

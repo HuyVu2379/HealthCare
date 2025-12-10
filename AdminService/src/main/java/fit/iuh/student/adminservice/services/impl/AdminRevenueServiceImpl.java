@@ -31,6 +31,23 @@ public class AdminRevenueServiceImpl implements AdminRevenueService {
     private final UserClient userClient;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Helper method to safely convert Number to Long
+     * Handles both Integer and Long types from JSON deserialization
+     */
+    private Long toLong(Object value) {
+        if (value == null) {
+            return 0L;
+        }
+        if (value instanceof Long) {
+            return (Long) value;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        return 0L;
+    }
+
     @Override
     public RevenueOverviewResponse getRevenueOverview(LocalDateTime startDate, LocalDateTime endDate) {
         log.info("Getting revenue overview from {} to {}", startDate, endDate);
@@ -40,9 +57,10 @@ public class AdminRevenueServiceImpl implements AdminRevenueService {
             ResponseEntity<Object> revenueStatsResponse = paymentClient.getRevenueStatistics(startDate, endDate);
             Map<String, Object> revenueStats = objectMapper.convertValue(revenueStatsResponse.getBody(), Map.class);
 
-            Long totalRevenue = ((Number) revenueStats.getOrDefault("totalRevenue", 0)).longValue();
-            Long paymentCount = ((Number) revenueStats.getOrDefault("paymentCount", 0)).longValue();
-            Double avgAmount = ((Number) revenueStats.getOrDefault("averagePaymentAmount", 0.0)).doubleValue();
+            Long totalRevenue = toLong(revenueStats.getOrDefault("totalRevenue", 0));
+            Long paymentCount = toLong(revenueStats.getOrDefault("paymentCount", 0));
+            Double avgAmount = revenueStats.getOrDefault("averagePaymentAmount", 0.0) instanceof Number ?
+                    ((Number) revenueStats.getOrDefault("averagePaymentAmount", 0.0)).doubleValue() : 0.0;
 
             // Get appointment statistics from SchedulingService
             java.time.LocalDate startLocalDate = startDate.toLocalDate();
@@ -50,7 +68,7 @@ public class AdminRevenueServiceImpl implements AdminRevenueService {
             ResponseEntity<Object> appointmentStatsResponse = schedulingClient.getStatistics(startLocalDate, endLocalDate);
             Map<String, Object> appointmentStats = objectMapper.convertValue(appointmentStatsResponse.getBody(), Map.class);
 
-            Long totalAppointments = ((Number) appointmentStats.getOrDefault("totalAppointments", 0)).longValue();
+            Long totalAppointments = toLong(appointmentStats.getOrDefault("totalAppointments", 0));
 
             return RevenueOverviewResponse.builder()
                     .totalRevenue(totalRevenue)
@@ -109,7 +127,9 @@ public class AdminRevenueServiceImpl implements AdminRevenueService {
                     .collect(Collectors.toList());
 
             // Step 4: Build map appointmentId -> doctorId
+            // Filter out appointments with null appointmentId or doctorId to avoid NullPointerException
             Map<String, String> apptToDoctorMap = appointments.stream()
+                    .filter(a -> a.get("appointmentId") != null && a.get("doctorId") != null)
                     .collect(Collectors.toMap(
                             a -> (String) a.get("appointmentId"),
                             a -> (String) a.get("doctorId"),
@@ -125,7 +145,7 @@ public class AdminRevenueServiceImpl implements AdminRevenueService {
                 String doctorId = apptToDoctorMap.get(appointmentId);
 
                 if (doctorId != null) {
-                    Long amount = ((Number) payment.get("amount")).longValue();
+                    Long amount = toLong(payment.get("amount"));
                     revenueByDoctor.merge(doctorId, amount, Long::sum);
                     countByDoctor.merge(doctorId, 1L, Long::sum);
                 }
@@ -156,6 +176,11 @@ public class AdminRevenueServiceImpl implements AdminRevenueService {
                     .collect(Collectors.toList());
 
             // Step 8: Apply pagination
+            // Check if pageable is unpaged
+            if (pageable.isUnpaged()) {
+                return new PageImpl<>(responses, pageable, responses.size());
+            }
+
             int start = (int) pageable.getOffset();
             int end = Math.min((start + pageable.getPageSize()), responses.size());
 
@@ -240,7 +265,9 @@ public class AdminRevenueServiceImpl implements AdminRevenueService {
                     .collect(Collectors.toList());
 
             // Step 4: Build map appointmentId -> consultationType
+            // Filter out appointments with null consultationType to avoid NullPointerException
             Map<String, String> apptToTypeMap = appointments.stream()
+                    .filter(a -> a.get("appointmentId") != null && a.get("consultationType") != null)
                     .collect(Collectors.toMap(
                             a -> (String) a.get("appointmentId"),
                             a -> (String) a.get("consultationType"),
@@ -256,7 +283,7 @@ public class AdminRevenueServiceImpl implements AdminRevenueService {
                 String serviceType = apptToTypeMap.get(appointmentId);
 
                 if (serviceType != null) {
-                    Long amount = ((Number) payment.get("amount")).longValue();
+                    Long amount = toLong(payment.get("amount"));
                     revenueByType.merge(serviceType, amount, Long::sum);
                     countByType.merge(serviceType, 1L, Long::sum);
                 }

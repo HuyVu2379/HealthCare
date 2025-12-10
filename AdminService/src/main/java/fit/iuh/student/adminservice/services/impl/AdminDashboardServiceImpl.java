@@ -32,6 +32,23 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     private final AdminRevenueService revenueService;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Helper method to safely convert Number to Long
+     * Handles both Integer and Long types from JSON deserialization
+     */
+    private Long toLong(Object value) {
+        if (value == null) {
+            return 0L;
+        }
+        if (value instanceof Long) {
+            return (Long) value;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        return 0L;
+    }
+
     @Override
     public AdminDashboardResponse getDashboardData() {
         log.info("Getting admin dashboard data");
@@ -52,7 +69,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                     objectMapper.convertValue(thisMonthRevenueResponse.getBody(), Map.class)
             );
 
-            Long totalRevenueThisMonth = ((Number) thisMonthRevenue.getOrDefault("totalRevenue", 0)).longValue();
+            Long totalRevenueThisMonth = toLong(thisMonthRevenue.getOrDefault("totalRevenue", 0));
 
             // Get statistics for last month (for growth calculation)
             ResponseEntity<Object> lastMonthRevenueResponse = paymentClient.getRevenueStatistics(startOfLastMonth, endOfLastMonth);
@@ -60,7 +77,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
             Map<String, Object> lastMonthRevenue = Objects.requireNonNull(
                     objectMapper.convertValue(lastMonthRevenueResponse.getBody(), Map.class)
             );
-            Long totalRevenueLastMonth = ((Number) lastMonthRevenue.getOrDefault("totalRevenue", 0)).longValue();
+            Long totalRevenueLastMonth = toLong(lastMonthRevenue.getOrDefault("totalRevenue", 0));
 
             // Calculate growth rate
             double growthRate = 0.0;
@@ -77,9 +94,15 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                     objectMapper.convertValue(appointmentStatsResponse.getBody(), Map.class)
             );
 
-            Long totalAppointmentsThisMonth = ((Number) appointmentStats.getOrDefault("totalAppointments", 0)).longValue();
+            Long totalAppointmentsThisMonth = toLong(appointmentStats.getOrDefault("totalAppointments", 0));
             @SuppressWarnings("unchecked")
-            Map<String, Long> appointmentsByStatus = (Map<String, Long>) appointmentStats.get("appointmentsByStatus");
+            Map<String, Object> appointmentsByStatusRaw = (Map<String, Object>) appointmentStats.get("appointmentsByStatus");
+            Map<String, Long> appointmentsByStatus = appointmentsByStatusRaw != null ?
+                    appointmentsByStatusRaw.entrySet().stream()
+                            .collect(java.util.stream.Collectors.toMap(
+                                    Map.Entry::getKey,
+                                    e -> toLong(e.getValue())
+                            )) : Collections.emptyMap();
 
             // Get user statistics
             ResponseEntity<Object> userStatsResponse = userClient.getUserStatistics();
@@ -87,7 +110,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
             Map<String, Object> userStats = Objects.requireNonNull(
                     objectMapper.convertValue(userStatsResponse.getBody(), Map.class)
             );
-            Long activeUsers = ((Number) userStats.getOrDefault("activeUsers", 0)).longValue();
+            Long activeUsers = toLong(userStats.getOrDefault("activeUsers", 0));
 
             // Build statistics
             AdminDashboardResponse.DashboardStatistics statistics = AdminDashboardResponse.DashboardStatistics.builder()

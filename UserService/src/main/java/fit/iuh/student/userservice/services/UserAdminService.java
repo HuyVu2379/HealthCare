@@ -3,7 +3,7 @@ package fit.iuh.student.userservice.services;
 import fit.iuh.student.userservice.dtos.admin.UpdateUserStatusRequest;
 import fit.iuh.student.userservice.dtos.admin.UserAdminResponse;
 import fit.iuh.student.userservice.dtos.admin.UserStatisticsResponse;
-import fit.iuh.student.userservice.entities.Doctor;
+import fit.iuh.student.userservice.dtos.responses.DoctorAdminResponse;
 import fit.iuh.student.userservice.enums.Role;
 import fit.iuh.student.userservice.enums.Status;
 import org.springframework.data.domain.Page;
@@ -21,5 +21,5 @@ public interface UserAdminService {
     
     UserStatisticsResponse getUserStatistics();
     
-    List<Doctor> getDoctorsByIds(List<String> doctorIds);
+    List<DoctorAdminResponse> getDoctorsByIds(List<String> doctorIds);
 }

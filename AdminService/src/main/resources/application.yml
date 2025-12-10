@@ -35,6 +35,15 @@ logging:
     org.springframework.cloud.openfeign: DEBUG
     org.hibernate.SQL: DEBUG
 
+# Service-to-Service Authentication Configuration
+admin:
+  service:
+    auth:
+      user: admin-service
+      role: ADMIN
+      user-id: admin-service-system
+      token: internal-admin-service-token
+
 ---
 # Docker profile
 spring:

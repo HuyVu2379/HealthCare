@@ -1,6 +1,7 @@
 package fit.iuh.student.adminservice.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,7 +12,7 @@ import java.util.List;
  * Feign Client for PaymentService
  * Communicates with PaymentService to fetch payment and revenue information
  */
-@FeignClient(name = "PaymentService")
+@FeignClient(name = "payment-service")
 public interface PaymentClient {
 
     /**
@@ -19,8 +20,8 @@ public interface PaymentClient {
      */
     @GetMapping("/api/v1/payments/admin/revenue-statistics")
     ResponseEntity<Object> getRevenueStatistics(
-            @RequestParam LocalDateTime startDate,
-            @RequestParam LocalDateTime endDate
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
     );
 
     /**
@@ -28,8 +29,8 @@ public interface PaymentClient {
      */
     @GetMapping("/api/v1/payments/admin/by-date")
     ResponseEntity<List<Object>> getRevenueByDate(
-            @RequestParam LocalDateTime startDate,
-            @RequestParam LocalDateTime endDate
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
     );
 
     /**
@@ -43,7 +44,7 @@ public interface PaymentClient {
      */
     @GetMapping("/api/v1/payments/admin/paid")
     ResponseEntity<List<Object>> getPaidPaymentsByDateRange(
-            @RequestParam LocalDateTime startDate,
-            @RequestParam LocalDateTime endDate
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
     );
 }

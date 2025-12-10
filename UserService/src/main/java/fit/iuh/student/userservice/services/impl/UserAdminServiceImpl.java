@@ -3,6 +3,7 @@ package fit.iuh.student.userservice.services.Impl;
 import fit.iuh.student.userservice.dtos.admin.UpdateUserStatusRequest;
 import fit.iuh.student.userservice.dtos.admin.UserAdminResponse;
 import fit.iuh.student.userservice.dtos.admin.UserStatisticsResponse;
+import fit.iuh.student.userservice.dtos.responses.DoctorAdminResponse;
 import fit.iuh.student.userservice.entities.Doctor;
 import fit.iuh.student.userservice.entities.User;
 import fit.iuh.student.userservice.enums.Role;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -99,9 +101,27 @@ public class UserAdminServiceImpl implements UserAdminService {
     }
 
     @Override
-    public List<Doctor> getDoctorsByIds(List<String> doctorIds) {
+    public List<DoctorAdminResponse> getDoctorsByIds(List<String> doctorIds) {
         log.info("Getting doctors by IDs, count: {}", doctorIds.size());
-        return doctorRepository.findByUserIdIn(doctorIds);
+        List<Doctor> doctors = doctorRepository.findByUserIdIn(doctorIds);
+        
+        // Convert to DTO to avoid JSON circular reference
+        return doctors.stream()
+                .map(this::convertToDoctorAdminResponse)
+                .collect(Collectors.toList());
+    }
+
+    private DoctorAdminResponse convertToDoctorAdminResponse(Doctor doctor) {
+        return DoctorAdminResponse.builder()
+                .userId(doctor.getUserId())
+                .fullName(doctor.getFullName())
+                .email(doctor.getEmail())
+                .phone(doctor.getPhone())
+                .specialty(doctor.getSpecialty())
+                .experienceYears(doctor.getExperienceYears())
+                .rating(doctor.getRating())
+                .examinationFee(doctor.getExaminationFee())
+                .build();
     }
 
     private UserAdminResponse convertToAdminResponse(User user) {

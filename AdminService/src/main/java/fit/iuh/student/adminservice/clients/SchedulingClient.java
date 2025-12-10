@@ -1,6 +1,7 @@
 package fit.iuh.student.adminservice.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,8 +20,8 @@ public interface SchedulingClient {
      */
     @GetMapping("/api/v1/appointments/admin/statistics")
     ResponseEntity<Object> getStatistics(
-            @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     );
 
     /**
@@ -34,8 +35,8 @@ public interface SchedulingClient {
      */
     @GetMapping("/api/v1/appointments/admin/by-consultation-type")
     ResponseEntity<List<Object>> getStatsByConsultationType(
-            @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     );
 
     /**
@@ -43,7 +44,7 @@ public interface SchedulingClient {
      */
     @GetMapping("/api/v1/appointments/admin/by-doctor")
     ResponseEntity<List<Object>> getCompletedByDoctor(
-            @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     );
 }
