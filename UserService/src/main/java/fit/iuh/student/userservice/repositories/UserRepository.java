@@ -62,15 +62,28 @@ public interface UserRepository extends JpaRepository<User, String> {
     /**
      * Find users with filters and pagination
      */
-    @Query("SELECT u FROM User u WHERE " +
-           "(:role IS NULL OR u.role = :role) AND " +
-           "(:status IS NULL OR u.status = :status) AND " +
-           "(:search IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR u.phone LIKE CONCAT('%', :search, '%'))")
+    @Query(value = "SELECT u.* FROM users u " +
+           "LEFT JOIN doctors d ON u.user_id = d.user_id " +
+           "LEFT JOIN patients p ON u.user_id = p.user_id " +
+           "WHERE (:role IS NULL OR u.role = CAST(:role AS VARCHAR)) AND " +
+           "(:status IS NULL OR u.status = CAST(:status AS VARCHAR)) AND " +
+           "(:search IS NULL OR :search = '' OR " +
+           "(u.full_name IS NOT NULL AND LOWER(CAST(u.full_name AS VARCHAR)) LIKE LOWER(CONCAT('%', CAST(:search AS VARCHAR), '%'))) OR " +
+           "(u.email IS NOT NULL AND LOWER(CAST(u.email AS VARCHAR)) LIKE LOWER(CONCAT('%', CAST(:search AS VARCHAR), '%'))) OR " +
+           "(u.phone IS NOT NULL AND CAST(u.phone AS VARCHAR) LIKE CONCAT('%', CAST(:search AS VARCHAR), '%')))",
+           nativeQuery = true,
+           countQuery = "SELECT COUNT(*) FROM users u " +
+           "LEFT JOIN doctors d ON u.user_id = d.user_id " +
+           "LEFT JOIN patients p ON u.user_id = p.user_id " +
+           "WHERE (:role IS NULL OR u.role = CAST(:role AS VARCHAR)) AND " +
+           "(:status IS NULL OR u.status = CAST(:status AS VARCHAR)) AND " +
+           "(:search IS NULL OR :search = '' OR " +
+           "(u.full_name IS NOT NULL AND LOWER(CAST(u.full_name AS VARCHAR)) LIKE LOWER(CONCAT('%', CAST(:search AS VARCHAR), '%'))) OR " +
+           "(u.email IS NOT NULL AND LOWER(CAST(u.email AS VARCHAR)) LIKE LOWER(CONCAT('%', CAST(:search AS VARCHAR), '%'))) OR " +
+           "(u.phone IS NOT NULL AND CAST(u.phone AS VARCHAR) LIKE CONCAT('%', CAST(:search AS VARCHAR), '%')))")
     Page<User> findUsersWithFilters(
-            @Param("role") Role role,
-            @Param("status") Status status,
+            @Param("role") String role,
+            @Param("status") String status,
             @Param("search") String search,
             Pageable pageable
     );
