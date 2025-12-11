@@ -30,7 +30,7 @@ class MedicalTextSplitter(RecursiveCharacterTextSplitter):
     Giữ nguyên ngữ cảnh quan trọng và xử lý tốt các cấu trúc y khoa
     """
     
-    def __init__(self, chunk_size: int = 1500, chunk_overlap: int = 300, **kwargs):
+    def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200, **kwargs):
         """
         Khởi tạo Medical Text Splitter với cấu hình tối ưu cho văn bản y khoa
         
@@ -174,9 +174,10 @@ class RAGPDFChatbot:
             raise ValueError("Vui lòng cung cấp GEMINI_API_KEY trong file .env hoặc tham số")
         
         genai.configure(api_key=self.gemini_api_key)
-        self.model = genai.GenerativeModel('gemini-2.0-flash')
-        # self.model = genai.GenerativeModel('gemini-2.5-pro')
         # self.model = genai.GenerativeModel('gemini-2.5-flash')
+    
+        # self.model = genai.GenerativeModel('gemini-2.5-pro')
+        self.model = genai.GenerativeModel('gemini-2.5-flash')
         
         # Khởi tạo embeddings model (ưu tiên dùng GPU nếu có, fallback về CPU)
         import torch

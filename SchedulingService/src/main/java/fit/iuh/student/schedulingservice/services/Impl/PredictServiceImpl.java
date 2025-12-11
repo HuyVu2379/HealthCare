@@ -72,31 +72,26 @@ public class PredictServiceImpl implements PredictService {
     }
 
     @Override
-    public Boolean createPredictForPatient(CreatePredictRequest request) {
+    public PredictResponse createPredictForPatient(CreatePredictRequest request) {
         try{
-//            // Lấy Authorization header từ request
-//            String authorizationHeader = getAuthorizationHeader();
-//            log.debug("Retrieved authorization header for creating predict for patient ID: {}", request.getPatientId());
-//
-//            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-//                log.warn("No valid authorization header found in request for patient ID: {}", request.getPatientId());
-//                throw new RuntimeException("Authorization header is required");
-//            }
-
-//            List<HealthMetricResponse> healthMetrics = scheduleClient.createHealthMetrics(request.getHealthMetrics(), authorizationHeader);
-//            if(healthMetrics == null || healthMetrics.isEmpty()){
-//                log.error("Failed to create health metrics for patient ID: {}", request.getPatientId());
-//                throw new RuntimeException("Failed to create health metrics");
-//            }
             Predict predict = Predict.builder()
                     .patientId(request.getPatientId())
                     .stage(request.getStage())
                     .recommendations(request.getRecommendations())
                     .confidence(request.getConfidence())
                     .build();
-            predictRepository.save(predict);
+            Predict savedPredict = predictRepository.save(predict);
             log.info("Successfully created predict for patient ID: {}", request.getPatientId());
-            return true;
+
+            return PredictResponse.builder()
+                    .predictId(savedPredict.getPredictId())
+                    .patientId(savedPredict.getPatientId())
+                    .stage(savedPredict.getStage())
+                    .recommendations(savedPredict.getRecommendations())
+                    .confidence(savedPredict.getConfidence())
+                    .createdAt(savedPredict.getCreatedAt())
+                    .updatedAt(savedPredict.getUpdatedAt())
+                    .build();
         }catch (Exception e){
             log.error("Error creating predict for patient ID: {}", request.getPatientId(), e);
             throw e;
