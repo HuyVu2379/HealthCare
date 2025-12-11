@@ -11,8 +11,8 @@ import java.util.List;
 @Repository
 public interface PredictRepository extends JpaRepository<Predict, String> {
 
-    // Lấy record mới nhất theo patientId (sắp xếp theo createdAt giảm dần)
-    @Query("SELECT p FROM Predict p WHERE p.patientId = :patientId ORDER BY p.createdAt DESC LIMIT 1")
+    // Lấy record thứ 2 mới nhất theo patientId (để so sánh trend với prediction hiện tại)
+    @Query(value = "SELECT * FROM predict WHERE patient_id = :patientId ORDER BY created_at DESC LIMIT 1 OFFSET 1", nativeQuery = true)
     Predict findLatestPredictByPatientId(@Param("patientId") String patientId);
 
     @Query("SELECT p FROM Predict p WHERE p.patientId = :patientId ORDER BY p.createdAt DESC LIMIT 2")
