@@ -177,7 +177,16 @@ class RAGPDFChatbot:
         # self.model = genai.GenerativeModel('gemini-2.5-flash')
     
         # self.model = genai.GenerativeModel('gemini-2.5-pro')
-        self.model = genai.GenerativeModel('gemini-2.5-flash')
+        # Sử dụng gemini-2.5-flash với generation config tối ưu
+        self.model = genai.GenerativeModel(
+            'gemini-2.5-flash',
+            generation_config=genai.GenerationConfig(
+                temperature=0.1,  # Giảm temperature để responses nhanh và ổn định hơn
+                top_p=0.95,
+                top_k=40,
+                max_output_tokens=2048,
+            )
+        )
         
         # Khởi tạo embeddings model (ưu tiên dùng GPU nếu có, fallback về CPU)
         import torch
@@ -386,22 +395,21 @@ class RAGPDFChatbot:
         except Exception as e:
             return False
     
-    def setup_retriever(self, k: int = 8):
+    def setup_retriever(self, k: int = 5):
         """
         Thiết lập retriever từ vector store
         
         Args:
-            k: Số lượng chunks liên quan nhất để retrieve
+            k: Số lượng chunks liên quan nhất để retrieve (giảm từ 8 xuống 5 để tăng tốc)
         """
         if self.vector_store is None:
             raise ValueError("Vector store chưa được tạo hoặc tải")
         
+        # Chuyển sang similarity search (nhanh hơn MMR 2-3 lần mà vẫn chính xác)
         self.retriever = self.vector_store.as_retriever(
-            search_type="mmr",
+            search_type="similarity",
             search_kwargs={
-                "k": k,
-                "fetch_k": k * 3,
-                "lambda_mult": 0.7
+                "k": k  # 5 documents vẫn đủ context cho câu trả lời chính xác
             }
         )
     
