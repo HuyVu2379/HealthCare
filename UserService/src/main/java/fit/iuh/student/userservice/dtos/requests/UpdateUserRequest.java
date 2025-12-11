@@ -27,4 +27,12 @@ public class UpdateUserRequest {
     private String address;
 
     private Role role;
+
+    private Integer height;
+
+    private Double weight; 
+
+    private String bloodType;
+
+    private Double bmi;
 }
