@@ -62,25 +62,29 @@ public interface UserRepository extends JpaRepository<User, String> {
     /**
      * Find users with filters and pagination
      */
-    @Query(value = "SELECT u.* FROM users u " +
+    @Query(value = "SELECT DISTINCT u.*, " +
+           "CASE WHEN d.user_id IS NOT NULL THEN 1 " +
+           "WHEN p.user_id IS NOT NULL THEN 2 " +
+           "ELSE 0 END AS clazz_ " +
+           "FROM users u " +
            "LEFT JOIN doctors d ON u.user_id = d.user_id " +
            "LEFT JOIN patients p ON u.user_id = p.user_id " +
-           "WHERE (:role IS NULL OR u.role = CAST(:role AS VARCHAR)) AND " +
-           "(:status IS NULL OR u.status = CAST(:status AS VARCHAR)) AND " +
+           "WHERE (:role IS NULL OR u.role = :role) AND " +
+           "(:status IS NULL OR u.status = :status) AND " +
            "(:search IS NULL OR :search = '' OR " +
-           "(u.full_name IS NOT NULL AND LOWER(CAST(u.full_name AS VARCHAR)) LIKE LOWER(CONCAT('%', CAST(:search AS VARCHAR), '%'))) OR " +
-           "(u.email IS NOT NULL AND LOWER(CAST(u.email AS VARCHAR)) LIKE LOWER(CONCAT('%', CAST(:search AS VARCHAR), '%'))) OR " +
-           "(u.phone IS NOT NULL AND CAST(u.phone AS VARCHAR) LIKE CONCAT('%', CAST(:search AS VARCHAR), '%')))",
+           "(u.full_name IS NOT NULL AND LOWER(u.full_name::text) LIKE LOWER('%' || :search || '%')) OR " +
+           "(u.email IS NOT NULL AND LOWER(u.email::text) LIKE LOWER('%' || :search || '%')) OR " +
+           "(u.phone IS NOT NULL AND u.phone::text LIKE '%' || :search || '%'))",
            nativeQuery = true,
-           countQuery = "SELECT COUNT(*) FROM users u " +
+           countQuery = "SELECT COUNT(DISTINCT u.user_id) FROM users u " +
            "LEFT JOIN doctors d ON u.user_id = d.user_id " +
            "LEFT JOIN patients p ON u.user_id = p.user_id " +
-           "WHERE (:role IS NULL OR u.role = CAST(:role AS VARCHAR)) AND " +
-           "(:status IS NULL OR u.status = CAST(:status AS VARCHAR)) AND " +
+           "WHERE (:role IS NULL OR u.role = :role) AND " +
+           "(:status IS NULL OR u.status = :status) AND " +
            "(:search IS NULL OR :search = '' OR " +
-           "(u.full_name IS NOT NULL AND LOWER(CAST(u.full_name AS VARCHAR)) LIKE LOWER(CONCAT('%', CAST(:search AS VARCHAR), '%'))) OR " +
-           "(u.email IS NOT NULL AND LOWER(CAST(u.email AS VARCHAR)) LIKE LOWER(CONCAT('%', CAST(:search AS VARCHAR), '%'))) OR " +
-           "(u.phone IS NOT NULL AND CAST(u.phone AS VARCHAR) LIKE CONCAT('%', CAST(:search AS VARCHAR), '%')))")
+           "(u.full_name IS NOT NULL AND LOWER(u.full_name::text) LIKE LOWER('%' || :search || '%')) OR " +
+           "(u.email IS NOT NULL AND LOWER(u.email::text) LIKE LOWER('%' || :search || '%')) OR " +
+           "(u.phone IS NOT NULL AND u.phone::text LIKE '%' || :search || '%'))")
     Page<User> findUsersWithFilters(
             @Param("role") String role,
             @Param("status") String status,

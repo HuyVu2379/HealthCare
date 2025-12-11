@@ -35,7 +35,10 @@ public class UserAdminServiceImpl implements UserAdminService {
     public Page<UserAdminResponse> getUsersWithFilters(Role role, Status status, String search, Pageable pageable) {
         log.info("Getting users with filters - role: {}, status: {}, search: {}", role, status, search);
         
-        Page<User> users = userRepository.findUsersWithFilters(role, status, search, pageable);
+        String roleStr = role != null ? role.name() : null;
+        String statusStr = status != null ? status.name() : null;
+        
+        Page<User> users = userRepository.findUsersWithFilters(roleStr, statusStr, search, pageable);
         
         return users.map(this::convertToAdminResponse);
     }
