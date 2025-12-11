@@ -118,7 +118,7 @@ public class PdfServiceImpl implements PdfService {
     }
 
     /**
-     * Add header with clinic/hospital name and address
+     * Add header with clinic/hospital name
      */
     private void addHeader(Document document, MedicalRecordDetailResponse record) {
         String serviceName = record.getServiceName() != null ? record.getServiceName() : "PHÒNG KHÁM";
@@ -127,18 +127,9 @@ public class PdfServiceImpl implements PdfService {
                 .setFontSize(PdfConstants.FONT_SIZE_HEADER)
                 .setBold()
                 .setTextAlignment(TextAlignment.CENTER)
-                .setMarginBottom(5);
+                .setMarginBottom(10);
 
         document.add(header);
-
-        // Add clinic address if available
-        if (record.getClinicAddress() != null && !record.getClinicAddress().trim().isEmpty()) {
-            Paragraph address = createParagraph(record.getClinicAddress())
-                    .setFontSize(PdfConstants.FONT_SIZE_NORMAL)
-                    .setTextAlignment(TextAlignment.CENTER)
-                    .setMarginBottom(10);
-            document.add(address);
-        }
     }
 
     /**
@@ -223,6 +214,11 @@ public class PdfServiceImpl implements PdfService {
                 record.getDoctorName() != null ? record.getDoctorName() : "N/A"));
         leftCell.add(createInfoParagraph("Chẩn đoán:",
                 record.getDiagnosis() != null ? record.getDiagnosis() : "N/A"));
+        // Add clinic address if available
+        if (record.getClinicAddress() != null && !record.getClinicAddress().trim().isEmpty()) {
+            leftCell.add(createInfoParagraph("Địa chỉ phòng khám:",
+                    record.getClinicAddress()));
+        }
 
         // RIGHT COLUMN: Patient Info
         Cell rightCell = new Cell()
@@ -413,12 +409,20 @@ public class PdfServiceImpl implements PdfService {
         rightSignatureCell.add(signatureLabel);
 
         // Signature text (centered within right cell)
+        // Use signature if available, otherwise use doctor name
+        String signatureText = null;
         if (record.getSignature() != null && !record.getSignature().trim().isEmpty()) {
-            Paragraph signatureText = createParagraph(record.getSignature())
+            signatureText = record.getSignature();
+        } else if (record.getDoctorName() != null && !record.getDoctorName().trim().isEmpty()) {
+            signatureText = record.getDoctorName();
+        }
+        
+        if (signatureText != null) {
+            Paragraph signatureParagraph = createParagraph(signatureText)
                     .setFontSize(PdfConstants.FONT_SIZE_HEADER)
                     .setItalic()
                     .setTextAlignment(TextAlignment.CENTER);  // Căn giữa trong cột phải
-            rightSignatureCell.add(signatureText);
+            rightSignatureCell.add(signatureParagraph);
         }
 
         // Add cells to table
