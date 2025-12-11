@@ -24,5 +24,5 @@ public class CreateMedicalRecordResponse {
     private Date followUpDate;
     private List<String> imageAttachments;
     private String doctorNote;
-    private String signatureUrl;
+    private String signature;
 }

@@ -9,4 +9,5 @@ public class DoctorClientResponse {
     private String fullName;
     private String phone;
     private String avatarUrl;
+    private String clinicAddress;
 }

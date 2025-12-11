@@ -21,7 +21,7 @@ public class CreateMedicalRecordRequest {
     private String followUpDate;
     private String doctorNote;
     private List<String> imageAttachments;
-    private String signatureUrl;
+    private String signature;
     private int stage;
     private String statusHealth;
 }

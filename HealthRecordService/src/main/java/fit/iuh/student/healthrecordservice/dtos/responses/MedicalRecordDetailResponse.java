@@ -19,6 +19,7 @@ public class MedicalRecordDetailResponse {
     private String patientId;
     private String doctorId;
     private String doctorName;
+    private String clinicAddress;  // Địa chỉ phòng khám của bác sĩ
     private PatientClientResponse patient;  // Thông tin bệnh nhân (fullName, email, phone, avatarUrl)
     private String serviceName;
     private String diagnosis;
@@ -27,7 +28,7 @@ public class MedicalRecordDetailResponse {
     private String doctorNote;
     private Date followUpDate;
     private List<String> imageAttachments;
-    private String signatureUrl;
+    private String signature;
     private Integer stage;
     private String statusHealth;
     private Date createdAt;

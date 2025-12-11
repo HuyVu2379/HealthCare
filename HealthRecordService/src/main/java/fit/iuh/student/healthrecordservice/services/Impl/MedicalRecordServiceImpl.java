@@ -73,7 +73,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 medicalRecord.setSymptoms(request.getSymptoms());
                 medicalRecord.setTreatment(request.getTreatment());
                 medicalRecord.setServiceName(request.getServiceName());
-                medicalRecord.setSignatureUrl(request.getSignatureUrl());
+                medicalRecord.setSignature(request.getSignature());
             } else {
                 // Tạo record mới
                 medicalRecord = MedicalRecord.builder()
@@ -93,7 +93,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                         .symptoms(request.getSymptoms())
                         .treatment(request.getTreatment())
                         .serviceName(request.getServiceName())
-                        .signatureUrl(request.getSignatureUrl())
+                        .signature(request.getSignature())
                         .build();
 
                 // ========== AUTO-DETECT EPISODE TYPE ==========
@@ -115,7 +115,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                                 .serviceName(medicalRecord.getServiceName())
                                 .diagnosis(medicalRecord.getDiagnosis())
                                 .doctorNote(medicalRecord.getDoctorNote())
-                                .signatureUrl(medicalRecord.getSignatureUrl())
+                                .signature(medicalRecord.getSignature())
                                 .dateDiagnosis(Date.valueOf(medicalRecord.getCreatedAt().toLocalDate()))
                                 .stage(request.getStage())
                                 .symptoms(medicalRecord.getSymptoms())
@@ -142,7 +142,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                     .symptoms(medicalRecord.getSymptoms())
                     .treatment(medicalRecord.getTreatment())
                     .serviceName(medicalRecord.getServiceName())
-                    .signatureUrl(medicalRecord.getSignatureUrl())
+                    .signature(medicalRecord.getSignature())
                     .build();
         } catch (Exception e) {
             throw e;
@@ -169,7 +169,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                     .symptoms(medicalRecord.getSymptoms())
                     .treatment(medicalRecord.getTreatment())
                     .serviceName(medicalRecord.getServiceName())
-                    .signatureUrl(medicalRecord.getSignatureUrl())
+                    .signature(medicalRecord.getSignature())
                     .build();
         } catch (Exception e) {
             System.err.println("Error finding medical record by appointmentId: " + e.getMessage());
@@ -222,11 +222,15 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     }
 
     private MedicalRecordDetailResponse convertToDetailResponse(MedicalRecord medicalRecord) {
-        // Get doctor name from UserClient
+        // Get doctor info from UserClient
         String doctorName = null;
+        String clinicAddress = null;
         try {
             DoctorClientResponse doctor = userClient.getDoctorForClient(medicalRecord.getDoctorId());
-            doctorName = doctor != null ? doctor.getFullName() : null;
+            if (doctor != null) {
+                doctorName = doctor.getFullName();
+                clinicAddress = doctor.getClinicAddress();
+            }
         } catch (Exception e) {
             System.err.println("Error fetching doctor info: " + e.getMessage());
         }
@@ -258,6 +262,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .patientId(medicalRecord.getPatientId())
                 .doctorId(medicalRecord.getDoctorId())
                 .doctorName(doctorName)
+                .clinicAddress(clinicAddress)
                 .patient(patient)
                 .serviceName(medicalRecord.getServiceName())
                 .diagnosis(medicalRecord.getDiagnosis())
@@ -266,7 +271,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .doctorNote(medicalRecord.getDoctorNote())
                 .followUpDate(medicalRecord.getFollowUpDate())
                 .imageAttachments(medicalRecord.getImageAttachments())
-                .signatureUrl(medicalRecord.getSignatureUrl())
+                .signature(medicalRecord.getSignature())
                 .stage(null)
                 .statusHealth(null)
                 .createdAt(medicalRecord.getCreatedAt() != null ?

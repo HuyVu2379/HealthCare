@@ -118,7 +118,7 @@ public class PdfServiceImpl implements PdfService {
     }
 
     /**
-     * Add header with clinic/hospital name
+     * Add header with clinic/hospital name and address
      */
     private void addHeader(Document document, MedicalRecordDetailResponse record) {
         String serviceName = record.getServiceName() != null ? record.getServiceName() : "PHÒNG KHÁM";
@@ -130,6 +130,15 @@ public class PdfServiceImpl implements PdfService {
                 .setMarginBottom(5);
 
         document.add(header);
+
+        // Add clinic address if available
+        if (record.getClinicAddress() != null && !record.getClinicAddress().trim().isEmpty()) {
+            Paragraph address = createParagraph(record.getClinicAddress())
+                    .setFontSize(PdfConstants.FONT_SIZE_NORMAL)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginBottom(10);
+            document.add(address);
+        }
     }
 
     /**
@@ -404,8 +413,8 @@ public class PdfServiceImpl implements PdfService {
         rightSignatureCell.add(signatureLabel);
 
         // Signature text (centered within right cell)
-        if (record.getSignatureUrl() != null && !record.getSignatureUrl().trim().isEmpty()) {
-            Paragraph signatureText = createParagraph(record.getSignatureUrl())
+        if (record.getSignature() != null && !record.getSignature().trim().isEmpty()) {
+            Paragraph signatureText = createParagraph(record.getSignature())
                     .setFontSize(PdfConstants.FONT_SIZE_HEADER)
                     .setItalic()
                     .setTextAlignment(TextAlignment.CENTER);  // Căn giữa trong cột phải

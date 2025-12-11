@@ -216,7 +216,7 @@ package "HealthRecordService" {
         - symptoms: String
         - followUpDate: Date
         - imageAttachments: List<String>
-        - signatureUrl: String
+        - signature: String
         - healthMetrics: List<HealthMetric>
         - prescriptions: List<Prescription>
         - doctorNote: String

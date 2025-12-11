@@ -46,8 +46,8 @@ public class MedicalRecord extends BaseEntity {
     @Column(name = "image_path")
     private List<String> imageAttachments = new ArrayList<>();
 
-    @Column(name = "signature_url", columnDefinition = "TEXT")
-    private String signatureUrl; // URL chữ ký bác sĩ
+    @Column(name = "signature", length = 255)
+    private String signature; // Tên đầy đủ bác sĩ ký
 
     @OneToMany(mappedBy = "medicalRecord", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
