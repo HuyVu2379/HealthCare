@@ -5,7 +5,7 @@ spring:
   application:
     name: SchedulingService
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5433/schedulingservicedb}
+    url: ${DB_URL:jdbc:postgresql://localhost:5434/schedulingservicedb}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -22,6 +22,14 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
+
+# Service-to-service authentication (for PaymentClient, HealthRecordClient, etc.)
+service:
+  auth:
+    user: scheduling-service
+    role: SYSTEM
+    user-id: scheduling-service
+    token: internal-service-token
 
 # Eureka Client Configuration
 eureka:
