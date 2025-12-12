@@ -1,5 +1,6 @@
 package fit.iuh.student.adminservice.clients;
 
+import fit.iuh.student.adminservice.dtos.revenue.RevenueByDateResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public interface PaymentClient {
      * Get revenue by date (daily breakdown) (will be implemented in PaymentService)
      */
     @GetMapping("/api/v1/payments/admin/by-date")
-    ResponseEntity<List<Object>> getRevenueByDate(
+    ResponseEntity<List<RevenueByDateResponse>> getRevenueByDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
     );

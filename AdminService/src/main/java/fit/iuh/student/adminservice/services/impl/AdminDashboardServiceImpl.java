@@ -6,6 +6,7 @@ import fit.iuh.student.adminservice.clients.SchedulingClient;
 import fit.iuh.student.adminservice.clients.UserClient;
 import fit.iuh.student.adminservice.dtos.dashboard.AdminDashboardResponse;
 import fit.iuh.student.adminservice.dtos.revenue.DoctorRevenueResponse;
+import fit.iuh.student.adminservice.dtos.revenue.RevenueByDateResponse;
 import fit.iuh.student.adminservice.services.AdminDashboardService;
 import fit.iuh.student.adminservice.services.AdminRevenueService;
 import lombok.RequiredArgsConstructor;
@@ -122,7 +123,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 
             // Get chart data
             // Revenue trend for last 30 days
-            List<Object> revenueTrend = revenueService.getRevenueByTime(last30Days, now);
+            List<RevenueByDateResponse> revenueTrend = revenueService.getRevenueByTime(last30Days, now);
 
             // Top 5 doctors by revenue this month
             List<DoctorRevenueResponse> topDoctors = revenueService.getTopPerformers(startOfThisMonth, endOfThisMonth, 5);
