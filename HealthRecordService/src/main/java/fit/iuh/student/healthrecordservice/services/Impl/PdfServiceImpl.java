@@ -259,7 +259,7 @@ public class PdfServiceImpl implements PdfService {
                 .setMarginBottom(10);
         document.add(sectionTitle);
 
-        // Create table with 5 columns
+        // Create table with 6 columns
         Table table = new Table(UnitValue.createPercentArray(PdfConstants.PRESCRIPTION_TABLE_WIDTHS))
                 .useAllAvailableWidth();
 
@@ -269,6 +269,7 @@ public class PdfServiceImpl implements PdfService {
         addTableHeader(table, "Liều lượng");
         addTableHeader(table, "Cách dùng");
         addTableHeader(table, "Thời gian dùng");
+        addTableHeader(table, "Ghi chú");
 
         // Add prescription rows
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", new Locale("vi", "VN"));
@@ -298,6 +299,9 @@ public class PdfServiceImpl implements PdfService {
                         dateFormat.format(prescription.getEndDate());
             }
             table.addCell(createCell(duration));
+
+            // Notes
+            table.addCell(createCell(prescription.getNotes() != null ? prescription.getNotes() : ""));
         }
 
         document.add(table);
@@ -314,12 +318,6 @@ public class PdfServiceImpl implements PdfService {
             hasNotes = true;
         }
 
-        // Check if any prescription has notes
-        if (!hasNotes && record.getPrescriptions() != null) {
-            hasNotes = record.getPrescriptions().stream()
-                    .anyMatch(p -> p.getNotes() != null && !p.getNotes().trim().isEmpty());
-        }
-
         if (hasNotes) {
             Paragraph sectionTitle = createParagraph("GHI CHÚ VÀ LỜI DẶN:")
                     .setFontSize(PdfConstants.FONT_SIZE_NORMAL)
@@ -327,24 +325,12 @@ public class PdfServiceImpl implements PdfService {
                     .setMarginBottom(10);
             document.add(sectionTitle);
 
-            // Doctor notes
+            // Doctor notes only (prescription notes are now in the table)
             if (record.getDoctorNote() != null && !record.getDoctorNote().trim().isEmpty()) {
                 Paragraph doctorNote = createParagraph(record.getDoctorNote())
                         .setFontSize(PdfConstants.FONT_SIZE_NORMAL)
                         .setMarginBottom(10);
                 document.add(doctorNote);
-            }
-
-            // Prescription-specific notes
-            if (record.getPrescriptions() != null) {
-                for (PrescriptionResponse prescription : record.getPrescriptions()) {
-                    if (prescription.getNotes() != null && !prescription.getNotes().trim().isEmpty()) {
-                        Paragraph prescriptionNote = createParagraph("- " + prescription.getMedicalName() + ": " + prescription.getNotes())
-                                .setFontSize(PdfConstants.FONT_SIZE_SMALL)
-                                .setMarginBottom(5);
-                        document.add(prescriptionNote);
-                    }
-                }
             }
 
             document.add(createParagraph("").setMarginBottom(15));

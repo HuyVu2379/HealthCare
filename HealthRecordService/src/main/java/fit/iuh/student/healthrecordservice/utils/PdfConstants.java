@@ -36,7 +36,7 @@ public class PdfConstants {
     public static final String FREQUENCY_EVENING = "Tối";
 
     // Table column widths (relative)
-    public static final float[] PRESCRIPTION_TABLE_WIDTHS = {0.8f, 3f, 1.5f, 2f, 2f};
+    public static final float[] PRESCRIPTION_TABLE_WIDTHS = {0.8f, 3f, 1.5f, 2f, 2f, 2.5f};
 
     /**
      * Convert Frequency enum to Vietnamese text
