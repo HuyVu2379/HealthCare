@@ -1,9 +1,6 @@
 package fit.iuh.student.adminservice.controllers;
 
-import fit.iuh.student.adminservice.dtos.revenue.DoctorRevenueResponse;
-import fit.iuh.student.adminservice.dtos.revenue.RevenueOverviewResponse;
-import fit.iuh.student.adminservice.dtos.revenue.ServiceTypeRevenueResponse;
-import fit.iuh.student.adminservice.dtos.revenue.SpecialtyRevenueResponse;
+import fit.iuh.student.adminservice.dtos.revenue.*;
 import fit.iuh.student.adminservice.services.AdminRevenueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,12 +40,12 @@ public class AdminRevenueController {
      * Get revenue by time (daily breakdown)
      */
     @GetMapping("/by-time")
-    public ResponseEntity<List<Object>> getRevenueByTime(
+    public ResponseEntity<List<RevenueByDateResponse>> getRevenueByTime(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
     ) {
         log.info("Admin - Get revenue by time from {} to {}", startDate, endDate);
-        List<Object> response = revenueService.getRevenueByTime(startDate, endDate);
+        List<RevenueByDateResponse> response = revenueService.getRevenueByTime(startDate, endDate);
         return ResponseEntity.ok(response);
     }
 

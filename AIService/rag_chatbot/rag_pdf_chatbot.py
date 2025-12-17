@@ -178,15 +178,7 @@ class RAGPDFChatbot:
     
         # self.model = genai.GenerativeModel('gemini-2.5-pro')
         # Sử dụng gemini-2.5-flash với generation config tối ưu
-        self.model = genai.GenerativeModel(
-            'gemini-2.5-flash',
-            generation_config=genai.GenerationConfig(
-                temperature=0.1,  # Giảm temperature để responses nhanh và ổn định hơn
-                top_p=0.95,
-                top_k=40,
-                max_output_tokens=2048,
-            )
-        )
+        self.model = genai.GenerativeModel('gemini-2.5-flash')
         
         # Khởi tạo embeddings model (ưu tiên dùng GPU nếu có, fallback về CPU)
         import torch

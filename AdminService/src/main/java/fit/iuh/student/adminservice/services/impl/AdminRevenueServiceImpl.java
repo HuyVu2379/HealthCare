@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fit.iuh.student.adminservice.clients.PaymentClient;
 import fit.iuh.student.adminservice.clients.SchedulingClient;
 import fit.iuh.student.adminservice.clients.UserClient;
-import fit.iuh.student.adminservice.dtos.revenue.DoctorRevenueResponse;
-import fit.iuh.student.adminservice.dtos.revenue.RevenueOverviewResponse;
-import fit.iuh.student.adminservice.dtos.revenue.ServiceTypeRevenueResponse;
-import fit.iuh.student.adminservice.dtos.revenue.SpecialtyRevenueResponse;
+import fit.iuh.student.adminservice.dtos.revenue.*;
 import fit.iuh.student.adminservice.services.AdminRevenueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -84,11 +81,11 @@ public class AdminRevenueServiceImpl implements AdminRevenueService {
     }
 
     @Override
-    public List<Object> getRevenueByTime(LocalDateTime startDate, LocalDateTime endDate) {
+    public List<RevenueByDateResponse> getRevenueByTime(LocalDateTime startDate, LocalDateTime endDate) {
         log.info("Getting revenue by time from {} to {}", startDate, endDate);
 
         try {
-            ResponseEntity<List<Object>> response = paymentClient.getRevenueByDate(startDate, endDate);
+            ResponseEntity<List<RevenueByDateResponse>> response = paymentClient.getRevenueByDate(startDate, endDate);
             return response.getBody();
         } catch (Exception e) {
             log.error("Error getting revenue by time", e);

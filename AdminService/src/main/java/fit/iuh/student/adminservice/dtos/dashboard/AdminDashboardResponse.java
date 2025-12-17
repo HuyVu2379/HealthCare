@@ -1,6 +1,7 @@
 package fit.iuh.student.adminservice.dtos.dashboard;
 
 import fit.iuh.student.adminservice.dtos.revenue.DoctorRevenueResponse;
+import fit.iuh.student.adminservice.dtos.revenue.RevenueByDateResponse;
 import lombok.*;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class AdminDashboardResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class DashboardCharts {
-        private List<Object> revenueTrend; // Last 30 days
+        private List<RevenueByDateResponse> revenueTrend; // Last 30 days
         private Map<String, Long> appointmentsByStatus;
         private List<DoctorRevenueResponse> topDoctors; // Top 5
         private Map<String, Long> revenueByServiceType;

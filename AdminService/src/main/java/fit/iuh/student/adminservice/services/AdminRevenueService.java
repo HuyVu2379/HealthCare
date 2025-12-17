@@ -1,9 +1,6 @@
 package fit.iuh.student.adminservice.services;
 
-import fit.iuh.student.adminservice.dtos.revenue.DoctorRevenueResponse;
-import fit.iuh.student.adminservice.dtos.revenue.RevenueOverviewResponse;
-import fit.iuh.student.adminservice.dtos.revenue.ServiceTypeRevenueResponse;
-import fit.iuh.student.adminservice.dtos.revenue.SpecialtyRevenueResponse;
+import fit.iuh.student.adminservice.dtos.revenue.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,7 +11,7 @@ public interface AdminRevenueService {
 
     RevenueOverviewResponse getRevenueOverview(LocalDateTime startDate, LocalDateTime endDate);
 
-    List<Object> getRevenueByTime(LocalDateTime startDate, LocalDateTime endDate);
+    List<RevenueByDateResponse> getRevenueByTime(LocalDateTime startDate, LocalDateTime endDate);
 
     Page<DoctorRevenueResponse> getRevenueByDoctor(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
