@@ -641,6 +641,8 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .appointmentDate(Date.valueOf(request.getAppointmentDate()))
                     .consultationType(ConsultationType.FOLLOW_UP)
                     .status(AppointmentStatus.CONFIRMED)
+                    .paymentStatus(PaymentStatus.UNPAID)
+                    .paymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : "CASH")
                     .relatedRecordId(request.getMedicalRecordId())
                     .note(request.getNote() != null ? request.getNote() : "Tái khám theo chỉ định của bác sĩ")
                     .doctorSchedule(doctorSchedule)
