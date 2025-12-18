@@ -1,39 +1,61 @@
 server:
-  port: 8082
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
 
 spring:
   application:
     name: HealthRecordService
+
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5433/healthrecordservicedb}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:10}
+      minimum-idle: ${DB_POOL_MIN:2}
+      connection-timeout: ${DB_CONN_TIMEOUT:20000}
+      idle-timeout: ${DB_IDLE_TIMEOUT:300000}
+      max-lifetime: ${DB_MAX_LIFETIME:1200000}
+
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      # production: tránh tự update schema
+      ddl-auto: ${JPA_DDL_AUTO:validate}
+    open-in-view: false
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
-  rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USERNAME:guest}
-    password: ${RABBITMQ_PASSWORD:guest}
+        jdbc:
+          time_zone: UTC
 
-# JWT Configuration
+  rabbitmq:
+    enabled: ${RABBITMQ_ENABLED:false}
+    host: ${RABBITMQ_HOST:}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:}
+    password: ${RABBITMQ_PASSWORD:}
+    ssl:
+      enabled: ${RABBITMQ_SSL:false}
+
+# JWT Configuration (KHÔNG để default secret trong production)
 jwt:
-  secret: ${JWT_SECRET:secretKeyForJwtTokenGeneration12345678901234567890}
+  secret: ${JWT_SECRET}
 
 # Eureka Client Configuration
 eureka:
   client:
+    enabled: ${EUREKA_ENABLED:false}
     service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICE_URL:http://localhost:8761/eureka}
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL:}
+    fetch-registry: ${EUREKA_FETCH:true}
+    register-with-eureka: ${EUREKA_REGISTER:true}
   instance:
     prefer-ip-address: true
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:}
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 
 # Actuator Configuration
 management:
@@ -43,12 +65,52 @@ management:
         include: health,info
   endpoint:
     health:
-      show-details: always
+      show-details: ${HEALTH_SHOW_DETAILS:never}
 
 # Logging Configuration
 logging:
   level:
+    root: INFO
     org.springframework.web: INFO
+    org.hibernate: WARN
+    fit.iuh.student.healthrecordservice: INFO
+
+---
+# Local profile (chạy máy bạn)
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:postgresql://localhost:5433/healthrecordservicedb
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+  rabbitmq:
+    enabled: true
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+eureka:
+  client:
+    enabled: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+jwt:
+  secret: ${JWT_SECRET:dev-secret-only}
+
+management:
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
     fit.iuh.student.healthrecordservice: DEBUG
     org.hibernate.SQL: DEBUG
 
@@ -63,6 +125,7 @@ spring:
     username: postgres
     password: postgres
   rabbitmq:
+    enabled: true
     host: rabbitmq
     port: 5672
     username: guest
@@ -70,10 +133,11 @@ spring:
 
 eureka:
   client:
+    enabled: true
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
   instance:
     hostname: health-record-service
 
 jwt:
-  secret: ${JWT_SECRET:secretKeyForJwtTokenGeneration12345678901234567890}
+  secret: ${JWT_SECRET}

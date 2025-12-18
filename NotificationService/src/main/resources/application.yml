@@ -1,49 +1,67 @@
 server:
-  port: 8083
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
 
 spring:
   application:
     name: NotificationService
+
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5433/notificationservicedb}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:10}
+      minimum-idle: ${DB_POOL_MIN:2}
+      connection-timeout: ${DB_CONN_TIMEOUT:20000}
+      idle-timeout: ${DB_IDLE_TIMEOUT:300000}
+      max-lifetime: ${DB_MAX_LIFETIME:1200000}
+
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      # production: tránh tự update schema
+      ddl-auto: ${JPA_DDL_AUTO:validate}
+    open-in-view: false
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: UTC
+
   rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
+    enabled: ${RABBITMQ_ENABLED:false}
+    host: ${RABBITMQ_HOST:}
     port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USERNAME:guest}
-    password: ${RABBITMQ_PASSWORD:guest}
+    username: ${RABBITMQ_USERNAME:}
+    password: ${RABBITMQ_PASSWORD:}
+    ssl:
+      enabled: ${RABBITMQ_SSL:false}
+
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: vuquochuy.01012003@gmail.com
-    password: hmfb jzuh zfil dhsa
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail.smtp:
         auth: true
         starttls.enable: true
-        ssl.trust: smtp.gmail.com
-
+        ssl.trust: ${MAIL_SSL_TRUST:smtp.gmail.com}
 
 # Eureka Client Configuration
 eureka:
   client:
-    register-with-eureka: true
-    fetch-registry: true
+    enabled: ${EUREKA_ENABLED:false}
+    register-with-eureka: ${EUREKA_REGISTER:true}
+    fetch-registry: ${EUREKA_FETCH:true}
     service-url:
-      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka/}
+      defaultZone: ${EUREKA_DEFAULT_ZONE:}
   instance:
     prefer-ip-address: true
-    hostname: localhost
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:}
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 
 # Actuator Configuration
@@ -54,12 +72,59 @@ management:
         include: health,info
   endpoint:
     health:
-      show-details: always
+      show-details: ${HEALTH_SHOW_DETAILS:never}
 
 # Logging Configuration
 logging:
   level:
+    root: INFO
     org.springframework.web: INFO
+    org.hibernate: WARN
+    fit.iuh.student.notificationservice: INFO
+
+---
+# Local profile (chạy máy bạn)
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:postgresql://localhost:5433/notificationservicedb
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+  rabbitmq:
+    enabled: true
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp:
+        auth: true
+        starttls.enable: true
+        ssl.trust: smtp.gmail.com
+
+eureka:
+  client:
+    enabled: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
     fit.iuh.student.notificationservice: DEBUG
     org.hibernate.SQL: DEBUG
 
@@ -74,6 +139,7 @@ spring:
     username: postgres
     password: postgres
   rabbitmq:
+    enabled: true
     host: rabbitmq
     port: 5672
     username: guest
@@ -81,6 +147,7 @@ spring:
 
 eureka:
   client:
+    enabled: true
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
   instance:
