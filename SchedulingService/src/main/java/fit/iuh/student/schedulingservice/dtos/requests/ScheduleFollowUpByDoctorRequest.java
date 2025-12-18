@@ -1,5 +1,6 @@
 package fit.iuh.student.schedulingservice.dtos.requests;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,4 +31,7 @@ public class ScheduleFollowUpByDoctorRequest {
     private String appointmentDate;
 
     private String note;
+
+    @JsonProperty("payment_method")
+    private String paymentMethod;
 }
