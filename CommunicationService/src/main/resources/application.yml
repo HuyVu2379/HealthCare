@@ -1,0 +1,65 @@
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: CommunicationService
+
+  data:
+    mongodb:
+      # production: lấy từ ENV
+      uri: ${MONGODB_URI}
+
+gemini:
+  # production: không có default key
+  apiKey: ${GEMINI_API_KEY}
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:false}
+    register-with-eureka: ${EUREKA_REGISTER:true}
+    fetch-registry: ${EUREKA_FETCH:true}
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:}
+  instance:
+    prefer-ip-address: true
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:}
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: ${HEALTH_SHOW_DETAILS:never}
+
+logging:
+  level:
+    root: INFO
+    org.springframework.data.mongodb: INFO
+    fit.iuh.student.communicationservice: INFO
+
+---
+# Local profile (chạy máy bạn)
+spring:
+  config:
+    activate:
+      on-profile: local
+  data:
+    mongodb:
+      # local: có thể set ENV hoặc fallback chuỗi dev (khuyến nghị vẫn dùng ENV)
+      uri: ${MONGODB_URI:mongodb://localhost:27017/CommunicationDB}
+
+eureka:
+  client:
+    enabled: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+logging:
+  level:
+    org.springframework.data.mongodb: DEBUG
+    fit.iuh.student.communicationservice: DEBUG
