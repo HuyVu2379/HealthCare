@@ -4,7 +4,7 @@ server:
 
 spring:
   application:
-    name: HealthRecordService
+    name: UserService
 
   datasource:
     url: ${DB_URL}
@@ -20,7 +20,7 @@ spring:
 
   jpa:
     hibernate:
-      # production: tránh tự update schema
+      # production: ưu tiên validate/none để tránh tự ý đổi schema
       ddl-auto: ${JPA_DDL_AUTO:validate}
     open-in-view: false
     show-sql: false
@@ -31,6 +31,15 @@ spring:
         jdbc:
           time_zone: UTC
 
+  data:
+    redis:
+      enabled: ${REDIS_ENABLED:false}
+      host: ${REDIS_HOST:}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      ssl:
+        enabled: ${REDIS_SSL:false}
+
   rabbitmq:
     enabled: ${RABBITMQ_ENABLED:false}
     host: ${RABBITMQ_HOST:}
@@ -40,24 +49,34 @@ spring:
     ssl:
       enabled: ${RABBITMQ_SSL:false}
 
-# JWT Configuration (KHÔNG để default secret trong production)
-jwt:
-  secret: ${JWT_SECRET}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+      enabled: true
 
-# Eureka Client Configuration
+jwt:
+  secretKey: ${JWT_SECRET_KEY}
+  expiration: ${JWT_EXPIRATION:86400000}
+  header: Authorization
+  prefix: Bearer
+  refresh-token:
+    expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+
 eureka:
   client:
     enabled: ${EUREKA_ENABLED:false}
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICE_URL:}
-    fetch-registry: ${EUREKA_FETCH:true}
-    register-with-eureka: ${EUREKA_REGISTER:true}
   instance:
     prefer-ip-address: true
     hostname: ${EUREKA_INSTANCE_HOSTNAME:}
-    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 
-# Actuator Configuration
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:}
+  api-key: ${CLOUDINARY_API_KEY:}
+  api-secret: ${CLOUDINARY_API_SECRET:}
+
 management:
   endpoints:
     web:
@@ -67,13 +86,13 @@ management:
     health:
       show-details: ${HEALTH_SHOW_DETAILS:never}
 
-# Logging Configuration
 logging:
   level:
     root: INFO
-    org.springframework.web: INFO
+    org.springframework: INFO
+    org.springframework.security: INFO
     org.hibernate: WARN
-    fit.iuh.student.healthrecordservice: INFO
+    fit.iuh.student.userservice: INFO
 
 ---
 # Local profile (chạy máy bạn)
@@ -82,62 +101,14 @@ spring:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:postgresql://localhost:5433/healthrecordservicedb
+    url: jdbc:postgresql://localhost:5433/userservicedb
     username: postgres
     password: postgres
   jpa:
     hibernate:
       ddl-auto: update
-  rabbitmq:
-    enabled: true
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
-
 eureka:
   client:
     enabled: true
     service-url:
       defaultZone: http://localhost:8761/eureka
-
-jwt:
-  secret: ${JWT_SECRET:dev-secret-only}
-
-management:
-  endpoint:
-    health:
-      show-details: always
-
-logging:
-  level:
-    fit.iuh.student.healthrecordservice: DEBUG
-    org.hibernate.SQL: DEBUG
-
----
-# Docker profile - CHỈ dùng khi HealthRecordService chạy TRONG Docker
-spring:
-  config:
-    activate:
-      on-profile: docker
-  datasource:
-    url: jdbc:postgresql://postgres-db:5432/healthrecordservicedb
-    username: postgres
-    password: postgres
-  rabbitmq:
-    enabled: true
-    host: rabbitmq
-    port: 5672
-    username: guest
-    password: guest
-
-eureka:
-  client:
-    enabled: true
-    service-url:
-      defaultZone: http://eureka-server:8761/eureka/
-  instance:
-    hostname: health-record-service
-
-jwt:
-  secret: ${JWT_SECRET}

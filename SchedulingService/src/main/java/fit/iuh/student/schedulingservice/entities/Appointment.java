@@ -46,6 +46,7 @@ public class Appointment extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", length = 20, nullable = false)
+    @Builder.Default
     private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
 
     @Column(name = "payment_method", length = 20)
