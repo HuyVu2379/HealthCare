@@ -8,7 +8,7 @@ import fit.iuh.student.communicationservice.mappers.MessageMapper;
 import fit.iuh.student.communicationservice.repositories.GroupRepository;
 import fit.iuh.student.communicationservice.repositories.MessageRepository;
 import fit.iuh.student.communicationservice.services.MessageService;
-import fit.iuh.student.communicationservice.services.SummaryService;
+//import fit.iuh.student.communicationservice.services.SummaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

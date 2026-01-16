@@ -1,0 +1,127 @@
+
+# ===============================
+# Server Configuration
+# ===============================
+server:
+  port: ${SERVER_PORT:8081}
+
+# ===============================
+# Spring Configuration
+# ===============================
+spring:
+  application:
+    name: UserService
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/userservicedb}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:5}
+      connection-timeout: ${DB_CONNECTION_TIMEOUT:20000}
+      idle-timeout: ${DB_IDLE_TIMEOUT:300000}
+      max-lifetime: ${DB_MAX_LIFETIME:1200000}
+
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    show-sql: ${JPA_SHOW_SQL:true}
+    generate-ddl: true
+    properties:
+      hibernate:
+        format_sql: ${HIBERNATE_FORMAT_SQL:true}
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: UTC
+
+  data:
+    jpa:
+      repositories:
+        enabled: true
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6380}
+      password: ${REDIS_PASSWORD:change-me}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: ${MULTIPART_MAX_FILE_SIZE:10MB}
+      max-request-size: ${MULTIPART_MAX_REQUEST_SIZE:50MB}
+
+# ===============================
+# JWT Configuration
+# ===============================
+jwt:
+  secretKey: ${JWT_SECRET_KEY:change-me}
+  expiration: ${JWT_EXPIRATION:86400000} # 24h (ms)
+  header: Authorization
+  prefix: Bearer
+  refresh-token:
+    expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days (ms)
+
+# ===============================
+# Eureka Client Configuration
+# ===============================
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+# ===============================
+# Cloudinary Configuration
+# ===============================
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:change-me}
+  api-key: ${CLOUDINARY_API_KEY:change-me}
+  api-secret: ${CLOUDINARY_API_SECRET:change-me}
+
+# ===============================
+# Logging Configuration
+# ===============================
+logging:
+  level:
+    org.springframework.security: DEBUG
+    fit.iuh.student.userservice: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+---
+# ===============================
+# Docker Profile
+# (Dùng khi UserService chạy TRONG Docker)
+# ===============================
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://postgres-db:5432/userservicedb}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://eureka-server:8761/eureka/}
+  instance:
+    hostname: user-service

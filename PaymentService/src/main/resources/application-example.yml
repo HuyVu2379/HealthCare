@@ -1,0 +1,77 @@
+
+# ===============================
+# Server Configuration
+# ===============================
+server:
+  port: ${SERVER_PORT:8087}
+
+# ===============================
+# Spring Configuration
+# ===============================
+spring:
+  application:
+    name: payment-service
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/paymentservicedb}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    show-sql: ${JPA_SHOW_SQL:true}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: ${HIBERNATE_FORMAT_SQL:true}
+
+# ===============================
+# Eureka Client Configuration
+# ===============================
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka}
+
+# ===============================
+# PayOS Configuration
+# ===============================
+payos:
+  client-id: ${PAYOS_CLIENT_ID:change-me}
+  api-key: ${PAYOS_API_KEY:change-me}
+  checksum-key: ${PAYOS_CHECKSUM_KEY:change-me}
+
+# ===============================
+# Payment Configuration
+# ===============================
+payment:
+  expiry-minutes: ${PAYMENT_EXPIRY_MINUTES:15}
+  webhook-url: ${WEBHOOK_URL:http://localhost:8087/api/v1/payments/webhook}
+  return-url: ${FRONTEND_URL:http://localhost:3000}/payment/success
+  cancel-url: ${FRONTEND_URL:http://localhost:3000}/payment/cancel
+
+# ===============================
+# Scheduling Service (Internal Call)
+# ===============================
+scheduling:
+  service:
+    name: ${SCHEDULING_SERVICE_NAME:scheduling-service}
+    url: ${SCHEDULING_SERVICE_URL:http://localhost:8084}
+    auth:
+      user: ${SCHEDULING_SERVICE_AUTH_USER:payment-service}
+      role: ${SCHEDULING_SERVICE_AUTH_ROLE:SYSTEM}
+      user-id: ${SCHEDULING_SERVICE_AUTH_USER_ID:payment-service}
+      token: ${SCHEDULING_SERVICE_AUTH_TOKEN:change-me}
+
+# ===============================
+# Logging Configuration
+# ===============================
+logging:
+  level:
+    fit.iut.student.paymentservice: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+    org.springframework.retry: DEBUG

@@ -54,3 +54,4 @@ Thumbs.db
 #AIService/rag_chatbot/.env
 #CommunicationService/src/main/resources/application.yml
 #PaymentService/src/main/resources/application.yml
+CommunicationService/src/main/resources/application.yml

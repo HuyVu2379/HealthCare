@@ -1,0 +1,104 @@
+# ===============================
+# Server Configuration
+# ===============================
+server:
+  port: ${SERVER_PORT:8082}
+
+# ===============================
+# Spring Configuration
+# ===============================
+spring:
+  application:
+    name: HealthRecordService
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/healthrecordservicedb}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    show-sql: ${JPA_SHOW_SQL:true}
+    properties:
+      hibernate:
+        format_sql: ${HIBERNATE_FORMAT_SQL:true}
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+# ===============================
+# JWT Configuration
+# ===============================
+jwt:
+  secret: ${JWT_SECRET:change-me}
+
+# ===============================
+# Eureka Client Configuration
+# ===============================
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+# ===============================
+# Actuator Configuration
+# ===============================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: ${HEALTH_SHOW_DETAILS:always}
+
+# ===============================
+# Logging Configuration
+# ===============================
+logging:
+  level:
+    org.springframework.web: INFO
+    fit.iuh.student.healthrecordservice: DEBUG
+    org.hibernate.SQL: DEBUG
+
+---
+# ===============================
+# Docker Profile
+# (Dùng khi HealthRecordService chạy TRONG Docker)
+# ===============================
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://postgres-db:5432/healthrecordservicedb}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://eureka-server:8761/eureka/}
+  instance:
+    hostname: health-record-service
+
+jwt:
+  secret: ${JWT_SECRET:change-me}
+

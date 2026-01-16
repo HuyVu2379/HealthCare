@@ -1,0 +1,56 @@
+# ===============================
+# Server Configuration
+# ===============================
+server:
+  port: ${SERVER_PORT:8085}
+
+# ===============================
+# Spring Configuration
+# ===============================
+spring:
+  application:
+    name: CommunicationService
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+
+# ===============================
+# Gemini AI Configuration
+# ===============================
+gemini:
+  apiKey: ${GEMINI_API_KEY}
+
+# ===============================
+# Eureka Client Configuration
+# ===============================
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+# ===============================
+# Actuator / Health Check
+# ===============================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: ${HEALTH_SHOW_DETAILS:never}
+
+# ===============================
+# Logging Configuration
+# ===============================
+logging:
+  level:
+    root: INFO
+    org.springframework.data.mongodb: INFO
+    fit.iuh.student.communicationservice: INFO

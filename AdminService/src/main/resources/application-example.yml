@@ -1,0 +1,70 @@
+
+server:
+  port: ${SERVER_PORT:8088}
+
+spring:
+  application:
+    name: AdminService
+
+# ===============================
+# Eureka Client Configuration
+# ===============================
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+    hostname: ${EUREKA_HOSTNAME:localhost}
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+# ===============================
+# Actuator Configuration
+# ===============================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+# ===============================
+# Logging Configuration
+# ===============================
+logging:
+  level:
+    org.springframework.web: INFO
+    fit.iuh.student.adminservice: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+    org.hibernate.SQL: DEBUG
+
+# ===============================
+# Service-to-Service Authentication
+# ===============================
+admin:
+  service:
+    auth:
+      user: ${ADMIN_SERVICE_USER:admin-service}
+      role: ${ADMIN_SERVICE_ROLE:ADMIN}
+      user-id: ${ADMIN_SERVICE_USER_ID:admin-service-system}
+      token: ${ADMIN_SERVICE_TOKEN:change-me}
+
+---
+# ===============================
+# Docker Profile
+# ===============================
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://eureka-server:8761/eureka/}
+  instance:
+    hostname: admin-service
